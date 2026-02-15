@@ -44,6 +44,7 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
     } finally {
       localStorage.clear();
       Cookies.remove("access_token");
+      Cookies.remove("user_role");
       toast.success("Deconectare reușită!");
 
       setTimeout(() => {

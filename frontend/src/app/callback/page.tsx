@@ -19,6 +19,7 @@ function AuthCallbackContent() {
     if (token && role) {
       // 1. Salvare în Cookies (pentru API)
       Cookies.set("access_token", token, { expires: 7 });
+      Cookies.set("user_role", role, { expires: 7 });
 
       localStorage.setItem("access_token", token);
       localStorage.setItem("userRole", role);

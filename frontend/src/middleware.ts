@@ -1,32 +1,37 @@
-// src/middleware.ts
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server'; 
+import type { NextRequest } from 'next/server';
+
 export function middleware(request: NextRequest) {
-  // Extragem token-ul din Cookies
   const token = request.cookies.get('access_token')?.value;
+  const role = request.cookies.get('user_role')?.value; // Preluăm rolul din cookie
   const { pathname } = request.nextUrl;
 
-  // Definim rutele care necesită autentificare
+  // 1. Verificăm existența token-ului pentru orice rută protejată
   const protectedRoutes = ['/admin', '/profesor', '/student'];
-  
-  // Verificăm dacă ruta curentă începe cu una din rutele protejate
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
 
   if (isProtectedRoute && !token) {
-    // Dacă vrea să acceseze o rută protejată dar nu are token, trimite-l la Home
-    const url = request.nextUrl.clone();
-    url.pathname = '/';
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(new URL('/', request.url));
+  }
+
+  // 2. Protecție bazată pe ROL (Logica de autorizare)
+  if (pathname.startsWith('/admin') && role !== 'ADMIN') {
+    return NextResponse.redirect(new URL('/profesor', request.url)); // Sau unde are voie
+  }
+
+  if (pathname.startsWith('/profesor') && role !== 'PROFESOR') {
+    const fallback = role === 'ADMIN' ? '/admin' : '/student';
+    return NextResponse.redirect(new URL(fallback, request.url));
+  }
+
+  if (pathname.startsWith('/student') && role !== 'STUDENT') {
+    const fallback = role === 'ADMIN' ? '/admin' : '/profesor';
+    return NextResponse.redirect(new URL(fallback, request.url));
   }
 
   return NextResponse.next();
 }
 
-// Configurăm pe ce rute să ruleze middleware-ul
 export const config = {
-  matcher: [
-    '/admin/:path*',
-    '/profesor/:path*',
-    '/student/:path*',
-  ],
+  matcher: ['/admin/:path*', '/profesor/:path*', '/student/:path*'],
 };
