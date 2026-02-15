@@ -5,6 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --color-brand-red: var(--error-input-red);
   --color-brand-blue: var(--brand-blue);
   --color-brand-blue-dark: var(--brand-blue-dark);
   --color-background: var(--background);
@@ -50,6 +51,7 @@
 }
 
 :root {
+  --error-input-red: #FF2C2C;
   --primary: oklch(0.395 0.138 255.62);
   --brand-blue: #134686;
   --brand-blue-dark: hsl(213, 75%, 26%);

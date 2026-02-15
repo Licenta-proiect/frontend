@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar, Clock, Users, Bell, LogIn } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 export default function Home() {
   const [professorEmail, setProfessorEmail] = useState("");
@@ -15,32 +16,57 @@ export default function Home() {
   const [professorLastName, setProfessorLastName] = useState("");
   const [professorDialogOpen, setProfessorDialogOpen] = useState(false);
 
+  // Stare pentru erori
+  const [errors, setErrors] = useState<{
+    email?: boolean;
+    firstName?: boolean;
+    lastName?: boolean;
+  }>({});
+
   const handleGoogleLogin = () => {
     const backendUrl = process.env.NEXT_PUBLIC_API_URL;
     window.location.href = `${backendUrl}/login`;
   };
 
   const handleProfessorRequest = async () => {
-    if (!professorEmail || !professorFirstName || !professorLastName) {
-      toast.error("Vă rugăm să completați toate câmpurile");
+    const newErrors: typeof errors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!professorFirstName.trim()) newErrors.firstName = true;
+    if (!professorLastName.trim()) newErrors.lastName = true;
+    if (!professorEmail.trim() || !emailRegex.test(professorEmail)) {
+      newErrors.email = true;
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast.error("Vă rugăm să corectați câmpurile marcate");
       return;
     }
+
+    setErrors({});
     toast.success("Cererea a fost trimisă către administrator!");
     setProfessorDialogOpen(false);
+
+    setProfessorEmail("");
+    setProfessorFirstName("");
+    setProfessorLastName("");
   };
 
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 to-white flex flex-col font-sans">
-      {/* Header Responsive */}
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-3 md:py-4 flex justify-between items-center">
           <div className="flex items-center gap-2 shrink-0">
             <Calendar className="h-7 w-7 md:h-9 md:w-9 text-brand-blue" />
-            <span className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">RecuperApp</span>
+            <span className="text-xl md:text-2xl font-bold text-black tracking-tight leading-none">RecuperApp</span>
           </div>
           
-          <div className="flex gap-2 md:gap-4">
-            <Dialog open={professorDialogOpen} onOpenChange={setProfessorDialogOpen}>
+          <div className="flex gap-2 md:gap-4 items-center">
+            <Dialog open={professorDialogOpen} onOpenChange={(open) => {
+              setProfessorDialogOpen(open);
+              if (!open) setErrors({});
+            }}>
               <DialogTrigger asChild>
                 <Button 
                   variant="outline" 
@@ -54,7 +80,6 @@ export default function Home() {
               </DialogTrigger>
               <DialogContent className="max-w-[95vw] sm:max-w-md rounded-lg">
                 <DialogHeader>
-                  {/* Titlu standard (negru), nu albastru */}
                   <DialogTitle className="text-gray-900 font-bold text-xl">Solicitare Acces Profesor</DialogTitle>
                   <DialogDescription> Administratorul va fi notificat pentru a vă adăuga în sistem. </DialogDescription>
                 </DialogHeader>
@@ -65,8 +90,14 @@ export default function Home() {
                       <Input 
                         id="first-name" 
                         value={professorFirstName} 
-                        onChange={(e) => setProfessorFirstName(e.target.value)} 
-                        className="focus-visible:ring-1 focus-visible:ring-brand-blue/30 border-gray-200"
+                        onChange={(e) => {
+                          setProfessorFirstName(e.target.value);
+                          if (errors.firstName) setErrors(prev => ({ ...prev, firstName: false }));
+                        }} 
+                        className={cn(
+                          "focus-visible:ring-1 border-gray-200 transition-colors",
+                          errors.firstName ? "border-brand-red focus-visible:ring-brand-red" : "focus-visible:ring-brand-blue/30"
+                        )}
                       />
                     </div>
                     <div className="space-y-2">
@@ -74,8 +105,14 @@ export default function Home() {
                       <Input 
                         id="last-name" 
                         value={professorLastName} 
-                        onChange={(e) => setProfessorLastName(e.target.value)} 
-                        className="focus-visible:ring-1 focus-visible:ring-brand-blue/30 border-gray-200"
+                        onChange={(e) => {
+                          setProfessorLastName(e.target.value);
+                          if (errors.lastName) setErrors(prev => ({ ...prev, lastName: false }));
+                        }} 
+                        className={cn(
+                          "focus-visible:ring-1 border-gray-200 transition-colors",
+                          errors.lastName ? "border-brand-red focus-visible:ring-brand-red" : "focus-visible:ring-brand-blue/30"
+                        )}
                       />
                     </div>
                   </div>
@@ -86,18 +123,20 @@ export default function Home() {
                       type="email" 
                       placeholder="nume.prenume@usv.ro" 
                       value={professorEmail} 
-                      onChange={(e) => setProfessorEmail(e.target.value)} 
-                      className="focus-visible:ring-1 focus-visible:ring-brand-blue/30 border-gray-200"
+                      onChange={(e) => {
+                        setProfessorEmail(e.target.value);
+                        if (errors.email) setErrors(prev => ({ ...prev, email: false }));
+                      }} 
+                      className={cn(
+                        "focus-visible:ring-1 border-gray-200 transition-colors",
+                        errors.email ? "border-brand-red focus-visible:ring-brand-red" : "focus-visible:ring-brand-blue/30"
+                      )}
                     />
                   </div>
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button variant="ghost" onClick={() => setProfessorDialogOpen(false)}>Anulează</Button>
-                  {/* Culoarea de brand aplicata doar butonului de actiune */}
-                  <Button 
-                    className="bg-brand-blue hover:bg-brand-blue-dark active:bg-brand-blue-dark active:scale-95 text-white transition-all shadow-md" 
-                    onClick={handleProfessorRequest}
-                  >
+                  <Button className="bg-brand-blue hover:bg-brand-blue-dark active:bg-brand-blue-dark active:scale-95 text-white transition-all shadow-md" onClick={handleProfessorRequest}>
                     Trimite Cererea
                   </Button>
                 </div>

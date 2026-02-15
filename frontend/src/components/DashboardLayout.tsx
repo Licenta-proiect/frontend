@@ -1,13 +1,12 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Calendar, LogOut, Menu } from "lucide-react";
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import Cookies from "js-cookie";
 import api from "@/services/api";
@@ -28,8 +27,6 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
   useEffect(() => {
     const token = Cookies.get("access_token");
     const userFirstName = localStorage.getItem("userFirstName");
-
-    // Dacă lipsesc elemente critice, forțăm logout-ul local și redirecționarea
     if (!token || !userFirstName) {
       localStorage.clear();
       Cookies.remove("access_token");
@@ -48,7 +45,10 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
       localStorage.clear();
       Cookies.remove("access_token");
       toast.success("Deconectare reușită!");
-      window.location.href = "/";
+
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1500);
     }
   };
 
@@ -71,11 +71,11 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 to-white font-sans">
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-20">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+        <div className="container mx-auto px-4 py-3 md:py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
             <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="hover:text-brand-blue hover:border-brand-blue text-black">
+                <Button variant="outline" size="icon" className="h-9 w-9 md:h-11 md:w-11 hover:text-brand-blue hover:border-brand-blue text-black border-gray-200">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
@@ -84,9 +84,6 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
                   <SheetTitle className="flex items-center gap-2 text-brand-blue font-bold">
                     <Calendar className="h-6 w-6" /> RecuperApp
                   </SheetTitle>
-                  <SheetDescription className="font-medium text-gray-500">
-                    {getRoleName(userRole)} - Navigare
-                  </SheetDescription>
                 </SheetHeader>
                 <nav className="space-y-2 mt-6">
                   {tabs.map((tab) => (
@@ -102,7 +99,6 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
                       {tab.icon} <span>{tab.label}</span>
                     </button>
                   ))}
-                  
                   <div className="pt-4 mt-4 border-t">
                     <button 
                       onClick={handleLogout} 
@@ -115,11 +111,13 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
               </SheetContent>
             </Sheet>
             
-            <div className="flex items-center gap-2">
-              <Calendar className="h-8 w-8 text-brand-blue" />
-              <div className="flex flex-col">
-                <span className="text-xl font-bold text-black tracking-tight">RecuperApp</span>
-                <span className="text-xs font-bold text-brand-blue uppercase tracking-widest">{activeTabLabel}</span>
+            <div className="flex items-center gap-2 shrink-0">
+              <Calendar className="h-7 w-7 md:h-9 md:w-9 text-brand-blue" />
+              <div className="flex flex-col justify-center">
+                <span className="text-xl md:text-2xl font-bold text-black tracking-tight leading-none">RecuperApp</span>
+                <span className="text-[10px] md:text-xs font-bold text-brand-blue uppercase tracking-widest leading-none mt-1">
+                  {activeTabLabel}
+                </span>
               </div>
             </div>
           </div>
@@ -127,15 +125,15 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
           <div className="flex items-center gap-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative gap-3 hover:bg-gray-100 active:scale-95 transition-all px-4 py-2 group">
+                <Button variant="ghost" className="relative gap-3 hover:bg-gray-100 active:scale-95 transition-all px-2 md:px-4 md:h-11 group">
                   <Avatar className="h-8 w-8 border border-blue-200 shadow-sm group-hover:border-brand-blue">
                     <AvatarFallback className="bg-brand-blue text-white font-bold text-xs">
                       {getInitials(userName || "U")}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="text-left hidden md:block">
-                    <div className="text-sm font-bold text-black leading-none mb-1 group-hover:text-brand-blue">{userName}</div>
-                    <div className="text-xs text-gray-500 font-bold">{getRoleName(userRole)}</div>
+                  <div className="text-left hidden md:block leading-tight">
+                    <div className="text-sm font-bold text-black group-hover:text-brand-blue">{userName}</div>
+                    <div className="text-[10px] text-gray-500 font-bold uppercase">{getRoleName(userRole)}</div>
                   </div>
                 </Button>
               </DropdownMenuTrigger>
