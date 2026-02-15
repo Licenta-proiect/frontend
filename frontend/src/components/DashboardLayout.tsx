@@ -1,0 +1,167 @@
+"use client";
+
+import { ReactNode, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Calendar, LogOut, Menu } from "lucide-react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { toast } from "sonner";
+import Cookies from "js-cookie";
+import api from "@/services/api";
+
+interface DashboardLayoutProps {
+  children: ReactNode;
+  userRole: "student" | "professor" | "admin";
+  userName: string;
+  userEmail: string;
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
+  tabs: { id: string; label: string; icon: ReactNode }[];
+}
+
+export default function DashboardLayout({ children, userRole, userName, userEmail, activeTab, onTabChange, tabs }: DashboardLayoutProps) {
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = Cookies.get("access_token");
+    const userFirstName = localStorage.getItem("userFirstName");
+
+    // Dacă lipsesc elemente critice, forțăm logout-ul local și redirecționarea
+    if (!token || !userFirstName) {
+      localStorage.clear();
+      Cookies.remove("access_token");
+      router.push("/");
+    }
+  }, [router]);
+
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await api.get("/logout");
+    } catch (error) {
+      console.error("Backend logout failed:", error);
+    } finally {
+      localStorage.clear();
+      Cookies.remove("access_token");
+      toast.success("Deconectare reușită!");
+      window.location.href = "/";
+    }
+  };
+
+  const handleTabChange = (tabId: string) => {
+    onTabChange?.(tabId);
+    setSheetOpen(false);
+  };
+
+  const getRoleName = (role: string) => {
+    const roles = { student: "Student", professor: "Profesor", admin: "Administrator" };
+    return roles[role as keyof typeof roles] || role;
+  };
+
+  const getInitials = (name: string) => {
+    return name.split(" ").filter(Boolean).map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+  };
+
+  const activeTabLabel = tabs.find(tab => tab.id === activeTab)?.label || "";
+
+  return (
+    <div className="min-h-screen bg-linear-to-br from-blue-50 to-white font-sans">
+      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-20">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon" className="hover:text-brand-blue hover:border-brand-blue text-black">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-80 font-sans">
+                <SheetHeader>
+                  <SheetTitle className="flex items-center gap-2 text-brand-blue font-bold">
+                    <Calendar className="h-6 w-6" /> RecuperApp
+                  </SheetTitle>
+                  <SheetDescription className="font-medium text-gray-500">
+                    {getRoleName(userRole)} - Navigare
+                  </SheetDescription>
+                </SheetHeader>
+                <nav className="space-y-2 mt-6">
+                  {tabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => handleTabChange(tab.id)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all font-semibold ${
+                        activeTab === tab.id 
+                          ? "bg-brand-blue text-white shadow-md" 
+                          : "text-black hover:bg-gray-100 hover:text-brand-blue"
+                      }`}
+                    >
+                      {tab.icon} <span>{tab.label}</span>
+                    </button>
+                  ))}
+                  
+                  <div className="pt-4 mt-4 border-t">
+                    <button 
+                      onClick={handleLogout} 
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-black hover:bg-gray-100 hover:text-brand-blue active:scale-95 font-bold transition-colors"
+                    >
+                      <LogOut className="h-5 w-5" /> <span>Deconectare</span>
+                    </button>
+                  </div>
+                </nav>
+              </SheetContent>
+            </Sheet>
+            
+            <div className="flex items-center gap-2">
+              <Calendar className="h-8 w-8 text-brand-blue" />
+              <div className="flex flex-col">
+                <span className="text-xl font-bold text-black tracking-tight">RecuperApp</span>
+                <span className="text-xs font-bold text-brand-blue uppercase tracking-widest">{activeTabLabel}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative gap-3 hover:bg-gray-100 active:scale-95 transition-all px-4 py-2 group">
+                  <Avatar className="h-8 w-8 border border-blue-200 shadow-sm group-hover:border-brand-blue">
+                    <AvatarFallback className="bg-brand-blue text-white font-bold text-xs">
+                      {getInitials(userName || "U")}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="text-left hidden md:block">
+                    <div className="text-sm font-bold text-black leading-none mb-1 group-hover:text-brand-blue">{userName}</div>
+                    <div className="text-xs text-gray-500 font-bold">{getRoleName(userRole)}</div>
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64 p-2 shadow-2xl border-gray-100 font-sans">
+                <DropdownMenuLabel className="font-normal p-2">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-bold text-black">{userName}</p>
+                    <p className="text-xs text-gray-500 font-medium truncate">{userEmail}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="my-2" />
+                <DropdownMenuItem 
+                  onClick={handleLogout} 
+                  className="text-black focus:bg-gray-100 focus:text-brand-blue cursor-pointer p-3 rounded-md transition-colors font-bold"
+                >
+                  <LogOut className="mr-3 h-4 w-4" /> Deconectare
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </header>
+
+      <div className="container mx-auto px-4 py-8">
+        <main className="max-w-7xl mx-auto">{children}</main>
+      </div>
+    </div>
+  );
+}
