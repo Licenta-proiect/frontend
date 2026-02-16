@@ -6,7 +6,17 @@ export function middleware(request: NextRequest) {
   const role = request.cookies.get('user_role')?.value; // Preluăm rolul din cookie
   const { pathname } = request.nextUrl;
 
-  // 1. Verificăm existența token-ului pentru orice rută protejată
+  // Redirecționare automată de pe "/" dacă ești logat
+  if (pathname === '/' && token && role) {
+    const dashboardRoute = 
+      role === 'ADMIN' ? '/admin' : 
+      role === 'PROFESOR' ? '/profesor' : 
+      '/student';
+    return NextResponse.redirect(new URL(dashboardRoute, request.url));
+  }
+
+  // Verificarea rutei protejate 
+  // Verificăm existența token-ului pentru orice rută protejată
   const protectedRoutes = ['/admin', '/profesor', '/student'];
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
 
@@ -14,7 +24,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  // 2. Protecție bazată pe ROL (Logica de autorizare)
+  // Protecție bazată pe ROL (Logica de autorizare)
   if (pathname.startsWith('/admin') && role !== 'ADMIN') {
     return NextResponse.redirect(new URL('/profesor', request.url)); // Sau unde are voie
   }
@@ -33,5 +43,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/profesor/:path*', '/student/:path*'],
+  matcher: ['/', '/admin/:path*', '/profesor/:path*', '/student/:path*'],
 };
