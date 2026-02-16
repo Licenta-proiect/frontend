@@ -34,8 +34,8 @@ function ProfessorDashboardContent() {
   }, [isClient]);
 
   const tabs = useMemo(() => [
-    { id: "schedule", label: "Programare Recuperare", icon: <ClipboardList className="h-5 w-5" /> },
-    { id: "reservations", label: "Rezervările Mele", icon: <FileText className="h-5 w-5" /> },
+    { id: "schedule", label: "Programare recuperare", icon: <ClipboardList className="h-5 w-5" /> },
+    { id: "reservations", label: "Rezervările mele", icon: <FileText className="h-5 w-5" /> },
   ], []);
 
   if (!isClient) return null;

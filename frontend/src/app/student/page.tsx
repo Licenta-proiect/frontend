@@ -34,8 +34,8 @@ function StudentDashboardContent() {
   }, [isClient]);
 
   const tabs = useMemo(() => [
-    { id: "calendar", label: "Calendar Recuperări", icon: <Calendar className="h-5 w-5" /> },
-    { id: "search", label: "Căutare Sloturi", icon: <Search className="h-5 w-5" /> },
+    { id: "calendar", label: "Calendar recuperări", icon: <Calendar className="h-5 w-5" /> },
+    { id: "search", label: "Căutare sloturi alternative", icon: <Search className="h-5 w-5" /> },
   ], []);
 
   if (!isClient) return null;

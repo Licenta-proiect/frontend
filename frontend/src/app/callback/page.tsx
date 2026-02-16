@@ -17,7 +17,7 @@ function AuthCallbackContent() {
     const email = searchParams.get("email");
 
     if (token && role) {
-      // 1. Salvare în Cookies (pentru API)
+      // Salvare în Cookies (pentru API)
       Cookies.set("access_token", token, { expires: 7 });
       Cookies.set("user_role", role, { expires: 7 });
 
@@ -29,7 +29,7 @@ function AuthCallbackContent() {
 
       toast.success(`Bine ai venit, ${firstName || "Utilizator"}!`);
       
-      // 3. Redirecționare
+      // Redirecționare
       const route = role === "ADMIN" ? "/admin" : role === "PROFESOR" ? "/profesor" : "/student";
       router.push(route);
     } else {
@@ -39,7 +39,7 @@ function AuthCallbackContent() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue"></div>
       <p className="mt-4 text-gray-600 font-medium">Se finalizează autentificarea...</p>
     </div>
   );

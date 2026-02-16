@@ -39,7 +39,7 @@ export default function Home() {
 
       <main className="container mx-auto px-4 py-8 md:py-16 grow flex flex-col justify-center">
         <div className="text-center mb-10 md:mb-16">
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 mb-4 tracking-tight">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 tracking-tight">
             Gestionare recuperări FIESC
           </h1>
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">

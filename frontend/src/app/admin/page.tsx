@@ -38,9 +38,9 @@ function AdminDashboardContent() {
   }, [isClient]);
 
   const tabs = useMemo(() => [
-    { id: "sync", label: "Sincronizare Orar", icon: <Database className="h-5 w-5" /> },
-    { id: "history", label: "Istoric Rezervări", icon: <FileText className="h-5 w-5" /> },
-    { id: "users", label: "Gestionare Utilizatori", icon: <UserCog className="h-5 w-5" /> },
+    { id: "sync", label: "Sincronizare orar", icon: <Database className="h-5 w-5" /> },
+    { id: "history", label: "Istoric rezervări", icon: <FileText className="h-5 w-5" /> },
+    { id: "users", label: "Gestionare utilizatori", icon: <UserCog className="h-5 w-5" /> },
   ], []);
 
   if (!isClient) return null;
