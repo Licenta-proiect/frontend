@@ -6,9 +6,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Search, RotateCcw, Loader2 } from "lucide-react";
+import { Search, RotateCcw, Loader2, Check, ChevronsUpDown } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
 import api from "@/services/api";
+import { cn } from "@/lib/utils";
 
 interface Grupa {
   id: number;
@@ -23,10 +26,11 @@ export function StudentSearch() {
   const [materii, setMaterii] = useState<string[]>([]);
   
   const [selectedGroupId, setSelectedGroupId] = useState<string>("");
+  
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string>("");
   const [attendsCourse, setAttendsCourse] = useState(false);
-  
+  const [openGroups, setOpenGroups] = useState(false);
   const [isLoadingGrupe, setIsLoadingGrupe] = useState(false);
   const [isLoadingMaterii, setIsLoadingMaterii] = useState(false);
 
@@ -98,23 +102,58 @@ export function StudentSearch() {
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
-          {/* Select Grupă */}
-          <div className="space-y-2">
+          {/* Select Grupă cu SEARCH (Combobox) */}
+          <div className="space-y-2 flex flex-col">
             <Label htmlFor="search-group" className="text-sm font-semibold text-gray-900">
               Grupa <span className="text-brand-red">*</span>
             </Label>
-            <Select value={selectedGroupId} onValueChange={setSelectedGroupId} disabled={isLoadingGrupe}>
-              <SelectTrigger id="search-group" className="w-full focus:ring-brand-blue/30 border-gray-200">
-                <SelectValue placeholder={isLoadingGrupe ? "Se încarcă..." : "Selectează grupa"} />
-              </SelectTrigger>
-              <SelectContent>
-                {grupe.map((g) => (
-                <SelectItem key={g.id} value={g.id.toString()}>
-                    {g.specializationShortName} • an {g.studyYear} • {g.nume}{g.subgroupIndex ? `${g.subgroupIndex}` : ""}
-                </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover open={openGroups} onOpenChange={setOpenGroups}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={openGroups}
+                  disabled={isLoadingGrupe}
+                  className="w-full justify-between font-normal border-gray-200 hover:bg-transparent active:scale-100"
+                >
+                  {selectedGroupId
+                    ? (() => {
+                        const g = grupe.find((g) => g.id.toString() === selectedGroupId);
+                        return g ? `${g.specializationShortName} • an ${g.studyYear} • ${g.nume}${g.subgroupIndex}` : "Selectează grupa";
+                      })()
+                    : isLoadingGrupe ? "Se încarcă..." : "Selectează grupa"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Caută" />
+                  <CommandList className="max-h-64">
+                    <CommandEmpty>Nu am găsit nicio grupă.</CommandEmpty>
+                    <CommandGroup>
+                      {grupe.map((g) => (
+                        <CommandItem
+                          key={g.id}
+                          value={`${g.specializationShortName} ${g.studyYear} ${g.nume}${g.subgroupIndex}`}
+                          onSelect={() => {
+                            setSelectedGroupId(g.id.toString());
+                            setOpenGroups(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              selectedGroupId === g.id.toString() ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {g.specializationShortName} • an {g.studyYear} • {g.nume}{g.subgroupIndex}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
 
           {/* Select Materie (Dependent de Grupă) */}
