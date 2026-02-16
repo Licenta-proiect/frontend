@@ -34,6 +34,7 @@ export function ProfessorAccessRequest() {
     const newErrors: typeof errors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+    // Validare locală în frontend
     if (!professorFirstName.trim()) newErrors.firstName = true;
     if (!professorLastName.trim()) newErrors.lastName = true;
     if (!professorEmail.trim() || !emailRegex.test(professorEmail)) {
@@ -46,15 +47,45 @@ export function ProfessorAccessRequest() {
       return;
     }
 
-    setErrors({});
+    try {
+      // Apel API către backend folosind instanța configurată
+      const response = await api.post("/request-access", {
+        firstName: professorFirstName.trim(),
+        lastName: professorLastName.trim(),
+        email: professorEmail.trim(),
+      }, {
+        // Acceptăm statusurile de business (ex: 400) fără a polua consola
+        validateStatus: (status) => status >= 200 && status < 500 
+      });
 
-    toast.success("Cererea a fost trimisă către administrator!");
-    setProfessorDialogOpen(false);
+      // Extragerea statusului și a datelor din răspuns
+      const { status, data } = response;
 
-    // Resetare câmpuri
-    setProfessorEmail("");
-    setProfessorFirstName("");
-    setProfessorLastName("");
+      // Gestionare caz de eroare (Bad Request - Cerere duplicat/invalidă)
+      if (status === 400) {
+        toast.error(data?.detail || "Există deja o cerere pentru acest email.");
+        
+        setProfessorEmail("");
+        setProfessorFirstName("");
+        setProfessorLastName("");
+        return;
+      }
+
+      // Succes
+      setErrors({});
+      toast.success(data?.message || "Cererea a fost trimisă către administrator!");
+      setProfessorDialogOpen(false);
+
+      // Resetare câmpuri după succes
+      setProfessorEmail("");
+      setProfessorFirstName("");
+      setProfessorLastName("");
+
+    } catch (error: unknown) {
+      // Gestionarea erorilor critice (500+, erori de rețea, etc.)
+      toast.error("Eroare critică de conexiune la server.");
+      console.error("Eroare neprevăzută:", error);
+    }
   };
 
   return (
