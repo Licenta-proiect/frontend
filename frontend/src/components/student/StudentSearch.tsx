@@ -103,7 +103,7 @@ export function StudentSearch() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
           {/* Select Grupă cu SEARCH (Combobox) */}
-          <div className="space-y-2 flex flex-col">
+          <div className="space-y-2 flex flex-col w-full">
             <Label htmlFor="search-group" className="text-sm font-semibold text-gray-900">
               Grupa <span className="text-brand-red">*</span>
             </Label>
@@ -125,7 +125,7 @@ export function StudentSearch() {
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+              <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
                 <Command>
                   <CommandInput placeholder="Caută" />
                   <CommandList className="max-h-64">

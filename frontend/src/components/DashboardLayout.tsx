@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Calendar, LogOut, Menu } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import Cookies from "js-cookie";
 import api from "@/services/api";
@@ -85,6 +85,9 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
                   <SheetTitle className="flex items-center gap-2 text-brand-blue font-bold">
                     <Calendar className="h-6 w-6" /> Sistem de gestionare a recuperărilor
                   </SheetTitle>
+                  <SheetDescription className="sr-only">
+                    Meniu de navigare pentru Sistemul de gestionare a recuperărilor.
+                  </SheetDescription>
                 </SheetHeader>
                 <nav className="space-y-2 mt-6">
                   {tabs.map((tab) => (
