@@ -1,56 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Calendar, Clock, Users, Bell, LogIn } from "lucide-react";
-import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { Calendar, Clock, Users, LogIn } from "lucide-react";
+import { ProfessorAccessRequest } from "@/components/ProfessorAccessRequest";
 
 export default function Home() {
-  const [professorEmail, setProfessorEmail] = useState("");
-  const [professorFirstName, setProfessorFirstName] = useState("");
-  const [professorLastName, setProfessorLastName] = useState("");
-  const [professorDialogOpen, setProfessorDialogOpen] = useState(false);
-
-  // Stare pentru erori
-  const [errors, setErrors] = useState<{
-    email?: boolean;
-    firstName?: boolean;
-    lastName?: boolean;
-  }>({});
-
   const handleGoogleLogin = () => {
     const backendUrl = process.env.NEXT_PUBLIC_API_URL;
     window.location.href = `${backendUrl}/login`;
-  };
-
-  const handleProfessorRequest = async () => {
-    const newErrors: typeof errors = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!professorFirstName.trim()) newErrors.firstName = true;
-    if (!professorLastName.trim()) newErrors.lastName = true;
-    if (!professorEmail.trim() || !emailRegex.test(professorEmail)) {
-      newErrors.email = true;
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      toast.error("Vă rugăm să corectați câmpurile marcate");
-      return;
-    }
-
-    setErrors({});
-    toast.success("Cererea a fost trimisă către administrator!");
-    setProfessorDialogOpen(false);
-
-    setProfessorEmail("");
-    setProfessorFirstName("");
-    setProfessorLastName("");
   };
 
   return (
@@ -59,89 +17,12 @@ export default function Home() {
         <div className="container mx-auto px-4 py-3 md:py-4 flex justify-between items-center">
           <div className="flex items-center gap-2 shrink-0">
             <Calendar className="h-7 w-7 md:h-9 md:w-9 text-brand-blue" />
-            <span className="text-xl md:text-2xl font-bold text-black tracking-tight leading-none">RecuperApp</span>
+            <span className="text-xl md:text-2xl font-bold text-black tracking-tight leading-none">SGR</span>
           </div>
           
           <div className="flex gap-2 md:gap-4 items-center">
-            <Dialog open={professorDialogOpen} onOpenChange={(open) => {
-              setProfessorDialogOpen(open);
-              if (!open) setErrors({});
-            }}>
-              <DialogTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="md:h-11 md:px-6 gap-2 text-xs md:text-base px-3 border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white active:scale-95 transition-all duration-200"
-                >
-                  <Bell className="h-4 w-4 md:h-5 md:w-5" />
-                  <span className="hidden sm:inline">Solicitare Acces</span>
-                  <span className="sm:hidden">Acces</span>
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-[95vw] sm:max-w-md rounded-lg">
-                <DialogHeader>
-                  <DialogTitle className="text-gray-900 font-bold text-xl">Solicitare Acces Profesor</DialogTitle>
-                  <DialogDescription> Administratorul va fi notificat pentru a vă adăuga în sistem. </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="first-name">Prenume</Label>
-                      <Input 
-                        id="first-name" 
-                        value={professorFirstName} 
-                        onChange={(e) => {
-                          setProfessorFirstName(e.target.value);
-                          if (errors.firstName) setErrors(prev => ({ ...prev, firstName: false }));
-                        }} 
-                        className={cn(
-                          "focus-visible:ring-1 border-gray-200 transition-colors",
-                          errors.firstName ? "border-brand-red focus-visible:ring-brand-red" : "focus-visible:ring-brand-blue/30"
-                        )}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="last-name">Nume</Label>
-                      <Input 
-                        id="last-name" 
-                        value={professorLastName} 
-                        onChange={(e) => {
-                          setProfessorLastName(e.target.value);
-                          if (errors.lastName) setErrors(prev => ({ ...prev, lastName: false }));
-                        }} 
-                        className={cn(
-                          "focus-visible:ring-1 border-gray-200 transition-colors",
-                          errors.lastName ? "border-brand-red focus-visible:ring-brand-red" : "focus-visible:ring-brand-blue/30"
-                        )}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email instituțional</Label>
-                    <Input 
-                      id="email" 
-                      type="email" 
-                      placeholder="nume.prenume@usv.ro" 
-                      value={professorEmail} 
-                      onChange={(e) => {
-                        setProfessorEmail(e.target.value);
-                        if (errors.email) setErrors(prev => ({ ...prev, email: false }));
-                      }} 
-                      className={cn(
-                        "focus-visible:ring-1 border-gray-200 transition-colors",
-                        errors.email ? "border-brand-red focus-visible:ring-brand-red" : "focus-visible:ring-brand-blue/30"
-                      )}
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button variant="ghost" onClick={() => setProfessorDialogOpen(false)}>Anulează</Button>
-                  <Button className="bg-brand-blue hover:bg-brand-blue-dark active:bg-brand-blue-dark active:scale-95 text-white transition-all shadow-md" onClick={handleProfessorRequest}>
-                    Trimite Cererea
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+            {/* Componenta separată pentru solicitare acces */}
+            <ProfessorAccessRequest />
             
             <Button 
               onClick={handleGoogleLogin} 
@@ -149,8 +30,8 @@ export default function Home() {
               className="bg-brand-blue hover:bg-brand-blue-dark active:bg-brand-blue-dark active:scale-95 md:h-11 md:px-6 gap-2 text-xs md:text-base px-3 shadow-md text-white font-medium transition-all"
             >
               <LogIn className="h-4 w-4 md:h-5 md:w-5" />
-              <span className="hidden xs:inline">Login Google</span>
-              <span className="xs:hidden">Login</span>
+              <span className="hidden xs:inline">Autentificare Google</span>
+              <span className="xs:hidden">Autentificare</span>
             </Button>
           </div>
         </div>
@@ -159,7 +40,7 @@ export default function Home() {
       <main className="container mx-auto px-4 py-8 md:py-16 grow flex flex-col justify-center">
         <div className="text-center mb-10 md:mb-16">
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 mb-4 tracking-tight">
-            Gestionare Recuperări FIESC
+            Gestionare recuperări FIESC
           </h1>
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
             Sistem modern integrat cu orarul oficial USV pentru planificarea eficientă a recuperărilor.
@@ -203,7 +84,7 @@ export default function Home() {
       <footer className="border-t bg-white/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-6 md:py-8">
           <div className="text-center text-sm md:text-base text-gray-600 font-medium">
-            <p>© 2026 RecuperApp - Sistem de Gestionare a Recuperărilor</p>
+            <p>© 2026 SGR - Sistem de gestionare a recuperărilor</p>
           </div>
         </div>
       </footer>
