@@ -91,7 +91,7 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
                     <button
                       key={tab.id}
                       onClick={() => handleTabChange(tab.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all font-semibold ${
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all font-medium ${
                         activeTab === tab.id 
                           ? "bg-brand-blue text-white shadow-md" 
                           : "text-black hover:bg-gray-100 hover:text-brand-blue"
@@ -103,7 +103,7 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
                   <div className="pt-4 mt-4 border-t">
                     <button 
                       onClick={handleLogout} 
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-black hover:bg-gray-100 hover:text-brand-blue active:scale-95 font-semibold transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-black hover:bg-gray-100 hover:text-brand-blue active:scale-95 font-medium transition-colors"
                     >
                       <LogOut className="h-5 w-5" /> <span>Deconectare</span>
                     </button>

@@ -4,9 +4,9 @@ import { useMemo, useSyncExternalStore, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Calendar, Search } from "lucide-react";
+import { StudentSearch } from "@/components/student/StudentSearch";
 
 const StudentCalendar = () => <div className="p-6 bg-white rounded-lg shadow">Calendar Interactiv Recuperări</div>;
-const StudentSearch = () => <div className="p-6 bg-white rounded-lg shadow">Căutare Sloturi Libere</div>;
 
 const emptySubscribe = () => () => {};
 function useIsClient() {
