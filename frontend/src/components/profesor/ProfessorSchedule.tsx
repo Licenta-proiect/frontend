@@ -40,6 +40,7 @@ interface ApiProfessor {
   id: number;
   lastName: string;
   firstName: string;
+  emailAddress: string;
 }
 
 export function ProfessorSchedule() {
@@ -76,35 +77,40 @@ export function ProfessorSchedule() {
   // 1. Încărcare inițială date de bază
   useEffect(() => {
     const fetchInitialData = async () => {
-      const email = localStorage.getItem("userEmail");
-      if (!email) return;
+        const email = localStorage.getItem("userEmail");
+        if (!email) return;
 
-      try {
+        try {
         const [subResp, groupsResp, roomsResp, profsResp] = await Promise.all([
-          api.get(`/profesor/materii?email=${email}`),
-          api.get("/data/grupe"),
-          api.get("/data/sali"),
-          api.get("/data/profesori")
+            api.get(`/profesor/materii?email=${email}`),
+            api.get("/data/grupe"),
+            api.get("/data/sali"),
+            api.get("/data/profesori")
         ]);
 
         setSubjects(subResp.data.materii);
         setAllGroups(groupsResp.data.map((g: ApiGroup) => ({ 
-          label: `${g.nume}${g.subgroupIndex ? `/${g.subgroupIndex}` : ""}`, 
-          value: g.id.toString() 
+            label: `${g.nume}${g.subgroupIndex ? `/${g.subgroupIndex}` : ""}`, 
+            value: g.id.toString() 
         })));
         setAllRooms(roomsResp.data.map((s: ApiRoom) => ({ label: s.nume, value: s.id.toString() })));
-        setAllProfessors(profsResp.data.map((p: ApiProfessor) => ({ 
-          label: `${p.lastName} ${p.firstName}`, 
-          value: p.id.toString() 
-        })));
-      } catch {
+        
+        setAllProfessors(
+            profsResp.data
+            .filter((p: ApiProfessor) => p.emailAddress !== email)
+            .map((p: ApiProfessor) => ({ 
+                label: `${p.lastName} ${p.firstName}`, 
+                value: p.id.toString() 
+            }))
+        );
+        } catch {
         toast.error("Eroare la încărcarea datelor inițiale");
-      } finally {
+        } finally {
         setIsLoading(false);
-      }
+        }
     };
     fetchInitialData();
-  }, []);
+   }, []);
 
   // 2. Sincronizare Grupe și Săli când se alege materia
   useEffect(() => {
@@ -258,15 +264,28 @@ export function ProfessorSchedule() {
 
             {/* 5. Număr persoane */}
             <div className="space-y-2">
-              <Label htmlFor="student-count" className="text-sm font-semibold text-gray-900">Număr persoane</Label>
-              <Input
+            <Label htmlFor="student-count" className="text-sm font-semibold text-gray-900">Număr persoane</Label>
+            <Input
                 id="student-count"
                 type="number"
+                step="1" // Sugerează browserului pas de număr întreg
+                onKeyDown={(e) => {
+                // Previne introducerea punctului, virgulei sau a semnului minus
+                if (["e", "E", ".", ",", "-"].includes(e.key)) {
+                    e.preventDefault();
+                }
+                }}
                 placeholder="Exemplu: 15"
                 value={studentCount}
-                onChange={(e) => setStudentCount(e.target.value)}
+                onChange={(e) => {
+                const val = e.target.value;
+                // Permite string gol (pentru ștergere) sau doar cifre pozitive
+                if (val === "" || /^\d+$/.test(val)) {
+                    setStudentCount(val);
+                }
+                }}
                 className={cn(inputClasses, "px-3")}
-              />
+            />
             </div>
 
             {/* 6. Profesor asistent */}
