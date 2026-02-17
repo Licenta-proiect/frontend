@@ -6,8 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { MultiSelect } from "@/components/ui/multi-select"; 
-import { Search, RotateCcw, Filter } from "lucide-react";
+import { Search, RotateCcw, Calendar, Clock, MapPin, Users, CheckCircle2, Filter } from "lucide-react";
 import { toast } from "sonner";
 
 interface AvailableSlot {
@@ -25,11 +26,12 @@ export function ProfessorSchedule() {
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
-  const [selectedProfessor, setSelectedProfessor] = useState<string>("");
-  const [startTime, setStartTime] = useState<string>("");
   const [duration, setDuration] = useState<string>("");
   const [studentCount, setStudentCount] = useState<string>("");
-  const [preferences, setPreferences] = useState<string>("");
+  const [selectedProfessors, setSelectedProfessors] = useState<string[]>([]);
+  const [selectedDay, setSelectedDay] = useState<string>("");
+  const [startTime, setStartTime] = useState<string>("");
+  
   const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [sortBy, setSortBy] = useState<string>("week");
@@ -37,27 +39,29 @@ export function ProfessorSchedule() {
   // Mock data
   const subjects = ["Programare Orientată pe Obiecte", "Structuri de Date", "Baze de Date", "Algoritmi Fundamentali"];
   const groupOptions = [
-    { label: "Grupa 1101A", value: "1101A" },
-    { label: "Grupa 1101B", value: "1101B" },
-    { label: "Grupa 1102A", value: "1102A" },
-    { label: "Grupa 1102B", value: "1102B" },
+    { label: "1101A", value: "1101A" },
+    { label: "1101B", value: "1101B" },
+    { label: "1102A", value: "1102A" },
+    { label: "1102B", value: "1102B" },
   ];
   const roomOptions = [
     { label: "Sala I015", value: "I015" },
     { label: "Sala I017", value: "I017" },
     { label: "Sala I110", value: "I110" },
   ];
-  const professors = ["Prof. Maria Ionescu", "Prof. Andrei Popescu", "Prof. Elena Dumitrescu"];
+  const professorOptions = [
+    { label: "Prof. Maria Ionescu", value: "maria_ionescu" },
+    { label: "Prof. Andrei Popescu", value: "andrei_popescu" },
+    { label: "Prof. Elena Dumitrescu", value: "elena_dumitrescu" },
+  ];
   const durations = ["1 oră", "2 ore", "3 ore", "4 ore"];
+  const days = ["Luni", "Marți", "Miercuri", "Joi", "Vineri", "Sâmbătă", "Duminică"];
 
   const handleSearch = () => {
-    if (!selectedSubject || selectedGroups.length === 0 || !duration) {
+    if (!selectedSubject || selectedGroups.length === 0 || selectedRooms.length === 0 || !duration) {
       toast.error("Vă rugăm să completați toate câmpurile obligatorii");
       return;
     }
-    
-    // Logăm preferințele pentru a folosi variabila și a elimina eroarea ESLint
-    if (preferences) console.log("Căutare cu preferințele:", preferences);
 
     const mockSlots: AvailableSlot[] = [
       {
@@ -80,11 +84,11 @@ export function ProfessorSchedule() {
     setSelectedSubject("");
     setSelectedGroups([]);
     setSelectedRooms([]);
-    setSelectedProfessor("");
-    setStartTime("");
     setDuration("");
     setStudentCount("");
-    setPreferences("");
+    setSelectedProfessors([]);
+    setSelectedDay("");
+    setStartTime("");
     setAvailableSlots([]);
     setHasSearched(false);
   };
@@ -103,6 +107,8 @@ export function ProfessorSchedule() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            {/* 1. Materie (Obligatorie - Select) */}
             <div className="space-y-2">
               <Label htmlFor="subject" className="text-sm font-semibold text-gray-900">
                 Materia <span className="text-brand-red">*</span>
@@ -119,6 +125,33 @@ export function ProfessorSchedule() {
               </Select>
             </div>
 
+            {/* 2. Grupe (Obligatorie - MultiSelect cu search) */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-gray-900">
+                Grupe <span className="text-brand-red">*</span>
+              </Label>
+              <MultiSelect
+                options={groupOptions}
+                selected={selectedGroups}
+                onChange={setSelectedGroups}
+                placeholder="Caută și selectează grupele"
+              />
+            </div>
+
+            {/* 3. Săli (Obligatorie - MultiSelect cu search) */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-gray-900">
+                Săli <span className="text-brand-red">*</span>
+              </Label>
+              <MultiSelect
+                options={roomOptions}
+                selected={selectedRooms}
+                onChange={setSelectedRooms}
+                placeholder="Caută și selectează sălile"
+              />
+            </div>
+
+            {/* 4. Durata (Obligatorie - Select) */}
             <div className="space-y-2">
               <Label htmlFor="duration" className="text-sm font-semibold text-gray-900">
                 Durata <span className="text-brand-red">*</span>
@@ -135,8 +168,48 @@ export function ProfessorSchedule() {
               </Select>
             </div>
 
+            {/* 5. Număr persoane (Optional - Input) */}
             <div className="space-y-2">
-              <Label htmlFor="start-time" className="text-sm font-semibold text-gray-900">Ora de Start (opțional)</Label>
+              <Label htmlFor="student-count" className="text-sm font-semibold text-gray-900">Număr persoane</Label>
+              <Input
+                id="student-count"
+                type="number"
+                placeholder="Exemplu: 15"
+                value={studentCount}
+                onChange={(e) => setStudentCount(e.target.value)}
+                className="focus:ring-brand-blue/30 border-gray-200"
+              />
+            </div>
+
+            {/* 6. Profesor asistent (Optional - MultiSelect cu search) */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-gray-900">Profesor asistent</Label>
+              <MultiSelect
+                options={professorOptions}
+                selected={selectedProfessors}
+                onChange={setSelectedProfessors}
+                placeholder="Caută asistenți"
+              />
+            </div>
+
+            {/* 7. Ziua (Optional - Select) */}
+            <div className="space-y-2">
+              <Label htmlFor="day" className="text-sm font-semibold text-gray-900">Ziua</Label>
+              <Select value={selectedDay} onValueChange={setSelectedDay}>
+                <SelectTrigger id="day" className="w-full focus:ring-brand-blue/30 border-gray-200">
+                  <SelectValue placeholder="Selectează ziua" />
+                </SelectTrigger>
+                <SelectContent position="popper" className="max-h-64">
+                  {days.map((day) => (
+                    <SelectItem key={day} value={day}>{day}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* 8. Ora de start (Optional - Input) */}
+            <div className="space-y-2">
+              <Label htmlFor="start-time" className="text-sm font-semibold text-gray-900">Ora de start</Label>
               <Input
                 id="start-time"
                 type="time"
@@ -146,65 +219,6 @@ export function ProfessorSchedule() {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="student-count" className="text-sm font-semibold text-gray-900">Număr Estimat Studenți</Label>
-              <Input
-                id="student-count"
-                type="number"
-                placeholder="Ex: 15"
-                value={studentCount}
-                onChange={(e) => setStudentCount(e.target.value)}
-                className="focus:ring-brand-blue/30 border-gray-200"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="professor" className="text-sm font-semibold text-gray-900">Profesor Asistent (opțional)</Label>
-              <Select value={selectedProfessor} onValueChange={setSelectedProfessor}>
-                <SelectTrigger id="professor" className="w-full focus:ring-brand-blue/30 border-gray-200">
-                  <SelectValue placeholder="Selectează profesor" />
-                </SelectTrigger>
-                <SelectContent position="popper" className="max-h-64">
-                  <SelectItem value="none">Fără asistent</SelectItem>
-                  {professors.map((prof) => (
-                    <SelectItem key={prof} value={prof}>{prof}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="room" className="text-sm font-semibold text-gray-900">Săli preferate (opțional)</Label>
-              <MultiSelect
-                options={roomOptions}
-                selected={selectedRooms}
-                onChange={setSelectedRooms}
-                placeholder="Selectează săli"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="preferences" className="text-sm font-semibold text-gray-900">Preferințe Orar</Label>
-            <Input
-              id="preferences"
-              placeholder="Ex: Miercuri după ora 14:00, dimineața"
-              value={preferences}
-              onChange={(e) => setPreferences(e.target.value)}
-              className="focus:ring-brand-blue/30 border-gray-200"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold text-gray-900">
-              Grupe <span className="text-brand-red">*</span>
-            </Label>
-            <MultiSelect
-              options={groupOptions}
-              selected={selectedGroups}
-              onChange={setSelectedGroups}
-              placeholder="Selectează grupele vizate"
-            />
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
@@ -227,6 +241,7 @@ export function ProfessorSchedule() {
         </CardContent>
       </Card>
 
+      {/* Rezultate Sloturi */}
       {hasSearched && (
         <Card className="border-gray-200 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
@@ -251,7 +266,56 @@ export function ProfessorSchedule() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-             {/* ... restul randării sloturilor din codul tău anterior */}
+            {availableSlots.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                <Search className="h-10 w-10 mx-auto mb-4 opacity-20" />
+                <p className="font-medium">Nu s-au găsit sloturi disponibile</p>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {availableSlots.map((slot) => (
+                  <Card key={slot.id} className="border-l-4 border-l-brand-blue shadow-sm hover:bg-gray-50/50 transition-colors">
+                    <CardContent className="pt-6">
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Badge className="bg-blue-50 text-brand-blue border-blue-100 font-bold">
+                              Săptămâna {slot.week}
+                            </Badge>
+                            <Badge variant="outline" className="gap-1 border-green-200 text-green-700 bg-green-50 font-bold text-[10px] uppercase tracking-wider">
+                              <CheckCircle2 className="h-3 w-3" />
+                              Disponibil
+                            </Badge>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-sm font-medium">
+                            <div className="flex items-center gap-2 text-gray-700">
+                              <Calendar className="h-4 w-4 text-brand-blue" />
+                              <span>{slot.date.toLocaleDateString("ro-RO", { weekday: "long", day: "numeric", month: "long" })}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-700">
+                              <Clock className="h-4 w-4 text-brand-blue" />
+                              <span>{slot.startTime} - {slot.endTime}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-700">
+                              <MapPin className="h-4 w-4 text-brand-blue" />
+                              <span>Sala {slot.room}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-700">
+                              <Users className="h-4 w-4 text-brand-blue" />
+                              <span>Max: {slot.capacity}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <Button className="bg-brand-blue hover:bg-brand-blue-dark text-white font-bold shadow-sm active:scale-95">
+                          Rezervă Slot
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
