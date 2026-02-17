@@ -4,8 +4,8 @@ import { useMemo, useSyncExternalStore, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Database, FileText, UserCog } from "lucide-react";
+import { AdminSync } from "@/components/admin/AdminSync";
 
-const AdminSync = () => <div className="p-6 bg-white rounded-lg shadow">Interfață Sincronizare Orar</div>;
 const AdminHistory = () => <div className="p-6 bg-white rounded-lg shadow">Istoric Rezervări Sistem</div>;
 const AdminUsers = () => <div className="p-6 bg-white rounded-lg shadow">Gestionare Utilizatori și Roluri</div>;
 
