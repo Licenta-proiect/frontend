@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -54,11 +54,14 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
   const [startTime, setStartTime] = useState<string>("");
   
   const [isLoading, setIsLoading] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false); 
+  const lastSyncedSubject = useRef<string>("");
 
   const durations = ["1 oră", "2 ore", "3 ore", "4 ore"];
   const days = ["Luni", "Marți", "Miercuri", "Joi", "Vineri", "Sâmbătă", "Duminică"];
   const timeSlots = Array.from({ length: 13 }, (_, i) => `${(i + 8).toString().padStart(2, "0")}:00`);
 
+  // date inițiale
   useEffect(() => {
     const fetchInitialData = async () => {
       const email = localStorage.getItem("userEmail");
@@ -84,21 +87,33 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     fetchInitialData();
   }, []);
 
+  // Sincronizare Grupe și Săli
   useEffect(() => {
     const syncOptions = async () => {
-      if (!selectedSubject) return;
+      // Nu sincronizăm dacă nu avem materie sau dacă este aceeași materie ca ultima dată
+      if (!selectedSubject || selectedSubject === lastSyncedSubject.current) return;
+
       const email = localStorage.getItem("userEmail");
+      setIsSyncing(true); // Activăm starea de încărcare locală
+
       try {
         const [gResp, sResp] = await Promise.all([
           api.get(`/profesor/grupe-materie?email=${email}&materie=${selectedSubject}`),
           api.get(`/profesor/sali-materie?email=${email}&materie=${selectedSubject}`)
         ]);
+
         setSelectedGroups(gResp.data.grupe.map((g: ApiGroup) => g.id.toString()));
         setSelectedRooms(sResp.data.sali.map((s: ApiRoom) => s.id.toString()));
+        
+        lastSyncedSubject.current = selectedSubject; // Memorăm ultima materie sincronizată
       } catch {
         console.error("Eroare la sincronizarea opțiunilor");
+        toast.error("Nu s-au putut prelua grupele specifice materiei");
+      } finally {
+        setIsSyncing(false); // Dezactivăm starea de încărcare
       }
     };
+
     syncOptions();
   }, [selectedSubject]);
 
@@ -137,7 +152,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     onSearch(null, []);
   };
 
-  const inputClasses = "h-10 w-full border-gray-200 text-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-brand-blue/30 focus-visible:border-brand-blue/50 transition-all duration-200 shadow-xs";
+  const inputClasses = "min-h-10 w-full border-gray-200 text-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-brand-blue/30 focus-visible:border-brand-blue/50 transition-all duration-200 shadow-xs";
   const placeholderClasses = "text-muted-foreground font-normal";
 
   if (isLoading) return <div className="flex justify-center p-12"><Loader2 className="h-8 w-8 animate-spin text-brand-blue" /></div>;
@@ -155,6 +170,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/*Materia*/}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Materia <span className="text-brand-red">*</span></Label>
             <Select value={selectedSubject} onValueChange={setSelectedSubject}>
@@ -167,16 +183,37 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
             </Select>
           </div>
 
+            {/*Grupe*/}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Grupe <span className="text-brand-red">*</span></Label>
-            <MultiSelect options={allGroups} selected={selectedGroups} onChange={setSelectedGroups} placeholder="Selectează grupele" className={inputClasses} />
+            <div className="relative">
+              <MultiSelect 
+                options={allGroups} 
+                selected={selectedGroups} 
+                onChange={setSelectedGroups} 
+                placeholder={isSyncing ? "Se încarcă grupele..." : "Selectează grupele"} 
+                className={cn(inputClasses, isSyncing && "opacity-50 cursor-not-allowed")} 
+              />
+              {isSyncing && <Loader2 className="absolute right-8 top-3 h-4 w-4 animate-spin text-brand-blue" />}
+            </div>
           </div>
 
+            {/*Săli*/}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Săli <span className="text-brand-red">*</span></Label>
-            <MultiSelect options={allRooms} selected={selectedRooms} onChange={setSelectedRooms} placeholder="Selectează sălile" className={inputClasses} />
+            <div className="relative">
+              <MultiSelect 
+                options={allRooms} 
+                selected={selectedRooms} 
+                onChange={setSelectedRooms} 
+                placeholder={isSyncing ? "Se încarcă sălile..." : "Selectează sălile"} 
+                className={cn(inputClasses, isSyncing && "opacity-50 cursor-not-allowed")} 
+              />
+              {isSyncing && <Loader2 className="absolute right-8 top-3 h-4 w-4 animate-spin text-brand-blue" />}
+            </div>
           </div>
 
+            {/*Durata*/}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Durata <span className="text-brand-red">*</span></Label>
             <Select value={duration} onValueChange={setDuration}>
@@ -189,6 +226,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
             </Select>
           </div>
 
+            {/*Număr persoane*/}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Număr persoane</Label>
             <Input type="number" step="1" onKeyDown={(e) => ["e", "E", ".", ",", "-"].includes(e.key) && e.preventDefault()} placeholder="Exemplu: 15" value={studentCount} onChange={(e) => (e.target.value === "" || /^\d+$/.test(e.target.value)) && setStudentCount(e.target.value)} className={cn(inputClasses, "px-3")} />
@@ -199,6 +237,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
             <MultiSelect options={allProfessors} selected={selectedProfessors} onChange={setSelectedProfessors} placeholder="Selectează asistenții" className={inputClasses} />
           </div>
 
+            {/*Ziua*/}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Ziua</Label>
             <Select value={selectedDay} onValueChange={setSelectedDay}>
@@ -211,6 +250,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
             </Select>
           </div>
 
+            {/*Ora de start*/}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Ora de start</Label>
             <Select value={startTime} onValueChange={setStartTime}>

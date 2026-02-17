@@ -53,6 +53,12 @@ export function MultiSelect({
     }
   };
 
+  const handleClear = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onChange([]);
+  };
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -61,11 +67,12 @@ export function MultiSelect({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "w-full justify-between h-10 min-h-10 border-gray-200 hover:bg-transparent active:scale-100 px-3 py-2 shadow-xs font-normal",
-            className
+            "w-full justify-between min-h-10 h-auto border-gray-200 hover:bg-transparent active:scale-100 px-3 py-2 shadow-xs font-normal",
+            className 
           )}
         >
-          <div className="flex gap-1 flex-wrap py-1">
+          {/* gap-y-2 adauga spatiu intre randurile de badge-uri cand se face wrap */}
+          <div className="flex gap-x-1 gap-y-2 flex-wrap items-center flex-1 overflow-hidden">
             {selected.length > 0 ? (
               selected.map((value) => {
                 const option = options.find((opt) => opt.value === value);
@@ -73,23 +80,18 @@ export function MultiSelect({
                   <Badge
                     variant="secondary"
                     key={value}
-                    className="pr-1 font-medium bg-blue-50 text-brand-blue border-blue-100"
+                    // h-auto pe badge ca să nu forțeze înălțimea rândului
+                    className="pr-1 font-medium bg-blue-50 text-brand-blue border-blue-100 shrink-0 h-auto py-0.5"
                   >
                     {option?.label || value}
                     <span
                       role="button" 
                       tabIndex={0}  
-                      className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer inline-flex items-center justify-center"
+                      className="ml-1 rounded-full outline-none cursor-pointer inline-flex items-center justify-center hover:bg-blue-100"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation(); 
                         handleUnselect(value);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          handleUnselect(value);
-                        }
                       }}
                     >
                       <X className="h-3 w-3 text-brand-blue/60 hover:text-brand-blue" />
@@ -101,7 +103,19 @@ export function MultiSelect({
               <span className="text-muted-foreground text-sm">{placeholder}</span>
             )}
           </div>
-          <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+          
+          <div className="flex items-center gap-1 opacity-50 shrink-0 ml-2 self-start mt-1">
+            {selected.length > 0 && (
+              <div
+                role="button"
+                className="p-0.5 hover:bg-gray-100 rounded-md cursor-pointer pointer-events-auto"
+                onClick={handleClear}
+              >
+                <X className="h-4 w-4 hover:text-red-500 transition-colors" />
+              </div>
+            )}
+            <ChevronsUpDown className="h-4 w-4" />
+          </div>
         </Button>
       </PopoverTrigger>
       <PopoverContent 
