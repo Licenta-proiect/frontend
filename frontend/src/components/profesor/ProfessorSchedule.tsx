@@ -57,23 +57,63 @@ export function ProfessorSchedule() {
   const durations = ["1 oră", "2 ore", "3 ore", "4 ore"];
   const days = ["Luni", "Marți", "Miercuri", "Joi", "Vineri", "Sâmbătă", "Duminică"];
 
+  const timeSlots = Array.from({ length: 13 }, (_, i) => {
+    const hour = i + 8; // Începe de la 8 și merge până la 20
+    return `${hour.toString().padStart(2, "0")}:00`;
+  });
+
   const handleSearch = () => {
+    // 1. Validare câmpuri obligatorii (cele cu *)
     if (!selectedSubject || selectedGroups.length === 0 || selectedRooms.length === 0 || !duration) {
-      toast.error("Vă rugăm să completați toate câmpurile obligatorii");
-      return;
+        toast.error("Vă rugăm să completați toate câmpurile obligatorii");
+        return;
     }
+
+    // 2. Validare specială pentru ora de sfârșit (dacă ora de start este selectată)
+    if (startTime) {
+        const startHour = parseInt(startTime.split(":")[0]); // Extrage ora (ex: "14" din "14:00")
+        const durationHours = parseInt(duration.split(" ")[0]); // Extrage cifra (ex: 2 din "2 ore")
+        const endHour = startHour + durationHours;
+
+        if (endHour > 22) {
+        toast.error(
+            `Ora de sfârșit (${endHour}:00) depășește limita sistemului (22:00). 
+            Vă rugăm să alegeți o oră de start mai timpurie.`
+        );
+        return;
+        }
+    }
+
+    // Dacă trecem de validări, executăm căutarea
     const mockSlots: AvailableSlot[] = [
-      { id: "1", week: 3, date: new Date(2026, 1, 17, 14, 0), startTime: "14:00", endTime: "16:00", room: "I015", capacity: 20, availableGroups: selectedGroups }
+        { 
+        id: "1", 
+        week: 3, 
+        date: new Date(2026, 1, 17, 14, 0), 
+        startTime: startTime || "08:00", 
+        endTime: startTime ? `${parseInt(startTime.split(":")[0]) + parseInt(duration.split(" ")[0])}:00` : "10:00",
+        room: selectedRooms[0], 
+        capacity: parseInt(studentCount) || 20, 
+        availableGroups: selectedGroups 
+        }
     ];
+
     setAvailableSlots(mockSlots);
     setHasSearched(true);
     toast.success(`Am găsit ${mockSlots.length} sloturi disponibile`);
   };
 
   const handleReset = () => {
-    setSelectedSubject(""); setSelectedGroups([]); setSelectedRooms([]); setDuration("");
-    setStudentCount(""); setSelectedProfessors([]); setSelectedDay(""); setStartTime("");
-    setAvailableSlots([]); setHasSearched(false);
+    setSelectedSubject(""); 
+    setSelectedGroups([]); 
+    setSelectedRooms([]); 
+    setDuration("");
+    setStudentCount(""); 
+    setSelectedProfessors([]); 
+    setSelectedDay(""); 
+    setStartTime("");
+    setAvailableSlots([]); 
+    setHasSearched(false);
   };
 
   const inputClasses = "h-10 w-full border-gray-200 text-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-brand-blue/30 focus-visible:border-brand-blue/50 transition-all duration-200 shadow-xs";
@@ -190,16 +230,26 @@ export function ProfessorSchedule() {
               </Select>
             </div>
 
-            {/* 8. Ora de start */}
+            {/* 8. Ora de start (Select din oră în oră) */}
             <div className="space-y-2">
-              <Label htmlFor="start-time" className="text-sm font-semibold text-gray-900">Ora de start</Label>
-              <Input
-                id="start-time"
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                className={cn(inputClasses, "px-3")}
-              />
+            <Label htmlFor="start-time" className="text-sm font-semibold text-gray-900">
+                Ora de start
+            </Label>
+            <Select value={startTime} onValueChange={setStartTime}>
+                <SelectTrigger 
+                id="start-time" 
+                className={cn(inputClasses, !startTime && placeholderClasses)}
+                >
+                <SelectValue placeholder="Selectează ora" />
+                </SelectTrigger>
+                <SelectContent position="popper" className="max-h-64 text-sm font-sans">
+                {timeSlots.map((time) => (
+                    <SelectItem key={time} value={time}>
+                    {time}
+                    </SelectItem>
+                ))}
+                </SelectContent>
+            </Select>
             </div>
           </div>
 
