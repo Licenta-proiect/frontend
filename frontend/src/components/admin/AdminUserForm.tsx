@@ -5,32 +5,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserPlus } from "lucide-react";
+import { UserPlus, RotateCcw, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import api from "@/services/api";
+import { AxiosError } from "axios"; 
 
-export function AdminUserForm({ onAdd }: { onAdd: (u: any) => void }) {
+export function AdminUserForm({ onAdd }: { onAdd: () => void }) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Stare pentru erori, la fel ca în ProfessorAccessRequest
-  const [errors, setErrors] = useState<{
-    email?: boolean;
-    firstName?: boolean;
-    lastName?: boolean;
-  }>({});
+  const [errors, setErrors] = useState<{ email?: boolean; firstName?: boolean; lastName?: boolean; }>({});
 
-  const handleAdd = () => {
+  const handleReset = () => {
+    setFirstName(""); setLastName(""); setEmail(""); setErrors({});
+  };
+
+  const handleAdd = async () => {
     const newErrors: typeof errors = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    // Validare locală
     if (!firstName.trim()) newErrors.firstName = true;
     if (!lastName.trim()) newErrors.lastName = true;
-    if (!email.trim() || !emailRegex.test(email)) {
-      newErrors.email = true;
-    }
+    if (!email.trim() || !email.includes("@")) newErrors.email = true;
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -38,22 +35,28 @@ export function AdminUserForm({ onAdd }: { onAdd: (u: any) => void }) {
       return;
     }
 
-    onAdd({
-      id: Math.random().toString(),
-      name: `${firstName} ${lastName}`,
-      email,
-      role: "admin",
-      createdAt: new Date(),
-      status: "active"
-    });
+    setIsSubmitting(true);
+    try {
+      const response = await api.post("/admin/users/create", {
+        lastName: lastName.trim(),
+        firstName: firstName.trim(),
+        email: email.trim(),
+        role: "ADMIN" 
+      });
 
-    toast.success("Administrator adăugat cu succes!");
-    
-    // Resetare
-    setFirstName("");
-    setLastName("");
-    setEmail("");
-    setErrors({});
+      // Verificăm statusul de succes (200 sau 201 Created)
+      if (response.status === 200 || response.status === 201) {
+        // Folosim mesajul trimis de backend pentru o experiență mai precisă
+        toast.success("Administrator adăugat!");
+        onAdd(); 
+        handleReset();
+      }
+    } catch (err) {
+      const error = err as AxiosError<{ detail: string }>;
+      toast.error(error.response?.data?.detail || "Eroare la server");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -76,12 +79,13 @@ export function AdminUserForm({ onAdd }: { onAdd: (u: any) => void }) {
               id="last-name" 
               placeholder="Popescu" 
               value={lastName} 
+              disabled={isSubmitting}
               onChange={(e) => {
                 setLastName(e.target.value);
                 if (errors.lastName) setErrors(prev => ({ ...prev, lastName: false }));
               }} 
               className={cn(
-                "focus-visible:ring-1 border-gray-200 transition-colors shadow-xs",
+                "focus-visible:ring-1 border-gray-200 transition-colors shadow-xs h-10",
                 errors.lastName ? "border-brand-red focus-visible:ring-brand-red" : "focus-visible:ring-brand-blue/30"
               )}
             />
@@ -92,12 +96,13 @@ export function AdminUserForm({ onAdd }: { onAdd: (u: any) => void }) {
               id="first-name" 
               placeholder="Ion" 
               value={firstName} 
+              disabled={isSubmitting}
               onChange={(e) => {
                 setFirstName(e.target.value);
                 if (errors.firstName) setErrors(prev => ({ ...prev, firstName: false }));
               }} 
               className={cn(
-                "focus-visible:ring-1 border-gray-200 transition-colors shadow-xs",
+                "focus-visible:ring-1 border-gray-200 transition-colors shadow-xs h-10",
                 errors.firstName ? "border-brand-red focus-visible:ring-brand-red" : "focus-visible:ring-brand-blue/30"
               )}
             />
@@ -111,24 +116,39 @@ export function AdminUserForm({ onAdd }: { onAdd: (u: any) => void }) {
             type="email" 
             placeholder="admin@usm.ro" 
             value={email} 
+            disabled={isSubmitting}
             onChange={(e) => {
               setEmail(e.target.value);
               if (errors.email) setErrors(prev => ({ ...prev, email: false }));
             }} 
             className={cn(
-              "focus-visible:ring-1 border-gray-200 transition-colors shadow-xs",
+              "focus-visible:ring-1 border-gray-200 transition-colors shadow-xs h-10",
               errors.email ? "border-brand-red focus-visible:ring-brand-red" : "focus-visible:ring-brand-blue/30"
             )}
           />
         </div>
 
-        <div className="pt-2 mt-6">
+        <div className="flex flex-col sm:flex-row gap-3 pt-2 mt-6">
           <Button 
             onClick={handleAdd} 
-            className="bg-brand-blue hover:bg-brand-blue-dark active:bg-brand-blue-dark active:scale-95 text-white font-medium shadow-md transition-all"
+            disabled={isSubmitting}
+            className="bg-brand-blue hover:bg-brand-blue-dark active:bg-brand-blue-dark active:scale-95 text-white font-medium shadow-md transition-all h-10 px-6 sm:flex-none"
           >
-            <UserPlus className="h-4 w-4 mr-2" /> 
+            {isSubmitting ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <UserPlus className="h-4 w-4 mr-2" /> 
+            )}
             Adaugă administrator
+          </Button>
+          <Button 
+            onClick={handleReset} 
+            variant="outline" 
+            disabled={isSubmitting}
+            className="border-gray-200 text-gray-700 font-medium hover:bg-gray-50 flex-1 sm:flex-none h-10 px-6"
+          >
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Resetează
           </Button>
         </div>
       </CardContent>
