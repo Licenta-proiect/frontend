@@ -70,27 +70,29 @@ export function AdminUserList({
             </div>
             
             <div className="flex flex-col sm:flex-row items-center gap-3">
+              {/* Search Input*/}
               <div className="relative w-full sm:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input 
-                  placeholder="Caută nume sau email..." 
+                  placeholder="Caută după nume sau email..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 h-10 border-gray-200 shadow-xs focus-visible:ring-brand-blue/30"
+                  className="pl-9 h-10 border-gray-200 transition-colors focus-visible:ring-1 focus-visible:ring-brand-blue/30 shadow-xs text-sm"
                 />
               </div>
 
+              {/* Role Select*/}
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <Filter className="h-4 w-4 text-gray-400 shrink-0" />
                 <Select value={roleFilter} onValueChange={setRoleFilter}>
-                  <SelectTrigger className="h-10 text-sm border-gray-200 font-normal shadow-xs focus:ring-brand-blue/30 min-w-35">
+                  <SelectTrigger className="h-10 text-sm border-gray-200 transition-colors focus:ring-1 focus:ring-brand-blue/30 shadow-xs min-w-35 font-normal">
                     <SelectValue placeholder="Rol" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Toate Rolurile</SelectItem>
-                    <SelectItem value="student">Studenți</SelectItem>
-                    <SelectItem value="profesor">Profesori</SelectItem>
-                    <SelectItem value="admin">Administratori</SelectItem>
+                    <SelectItem value="all">Toate rolurile</SelectItem>
+                    <SelectItem value="student">Student</SelectItem>
+                    <SelectItem value="profesor">Profesor</SelectItem>
+                    <SelectItem value="admin">Administrator</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -111,7 +113,7 @@ export function AdminUserList({
 
             return (
               <Card key={user.id || user.email} className="border border-gray-100 shadow-xs hover:bg-gray-50/50 transition-colors">
-                <CardContent className="pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-2">
                     <div className="flex items-center gap-3">
                       <h4 className="font-medium text-gray-900">

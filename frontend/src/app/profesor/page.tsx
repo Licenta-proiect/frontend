@@ -27,7 +27,7 @@ function ProfessorDashboardContent() {
   const user = useMemo(() => {
     if (!isClient) return { name: "Utilizator", email: "", role: "professor" as const };
     return {
-      name: `${localStorage.getItem("userFirstName") || "Profesor"} ${localStorage.getItem("userLastName") || ""}`.trim(),
+      name: `${localStorage.getItem("userLastName") || "Profesor"} ${localStorage.getItem("userFirstName") || ""}`.trim(),
       email: localStorage.getItem("userEmail") || "",
       role: "professor" as const,
     };

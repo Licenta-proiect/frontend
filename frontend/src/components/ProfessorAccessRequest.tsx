@@ -30,6 +30,9 @@ export function ProfessorAccessRequest() {
     lastName?: boolean;
   }>({});
 
+  const handleReset = () => { setProfessorEmail(""); setProfessorFirstName(""); setProfessorLastName("");
+  };
+
   const handleProfessorRequest = async () => {
     const newErrors: typeof errors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -65,9 +68,7 @@ export function ProfessorAccessRequest() {
       if (status === 400) {
         toast.error(data?.detail || "Există deja o cerere pentru acest email.");
         
-        setProfessorEmail("");
-        setProfessorFirstName("");
-        setProfessorLastName("");
+        handleReset();
         return;
       }
 
@@ -118,6 +119,7 @@ export function ProfessorAccessRequest() {
               <Label htmlFor="last-name">Nume</Label>
               <Input 
                 id="last-name" 
+                placeholder="Popescu"
                 value={professorLastName} 
                 onChange={(e) => {
                   setProfessorLastName(e.target.value);
@@ -133,6 +135,7 @@ export function ProfessorAccessRequest() {
               <Label htmlFor="first-name">Prenume</Label>
               <Input 
                 id="first-name" 
+                placeholder="Ion"
                 value={professorFirstName} 
                 onChange={(e) => {
                   setProfessorFirstName(e.target.value);
@@ -164,7 +167,16 @@ export function ProfessorAccessRequest() {
           </div>
         </div>
         <div className="flex justify-end gap-2">
-          <Button variant="ghost" onClick={() => setProfessorDialogOpen(false)}>Anulează</Button>
+          <Button 
+            variant="outline"
+            className="font-semibold rounded-lg border-gray-200 text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-all active:scale-95"
+            onClick={() => {
+              setProfessorDialogOpen(false);
+              handleReset();
+            }}
+          >
+            Anulează
+          </Button>
           <Button 
             className="bg-brand-blue hover:bg-brand-blue-dark active:bg-brand-blue-dark active:scale-95 text-white transition-all shadow-md" 
             onClick={handleProfessorRequest}

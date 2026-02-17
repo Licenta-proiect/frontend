@@ -31,7 +31,7 @@ function AdminDashboardContent() {
     if (!isClient) return { name: "Utilizator", email: "", role: "admin" as const };
 
     return {
-      name: `${localStorage.getItem("userFirstName") || "Admin"} ${localStorage.getItem("userLastName") || ""}`.trim(),
+      name: `${localStorage.getItem("userLastName") || "Admin"} ${localStorage.getItem("userFirstName") || ""}`.trim(),
       email: localStorage.getItem("userEmail") || "",
       role: "admin" as const,
     };

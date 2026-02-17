@@ -9,6 +9,7 @@ import api from "@/services/api";
 import { AdminUserForm } from "./AdminUserForm";
 import { AdminUserList } from "./AdminUserList";
 import { AdminRequests } from "./AdminRequests";
+import { Button } from "../ui/button";
 
 export function AdminUsers() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -94,17 +95,30 @@ export function AdminUsers() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="rounded-xl border-gray-200 shadow-xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-semibold text-xl text-gray-900">Confirmare Ștergere</AlertDialogTitle>
-            <AlertDialogDescription className="font-medium text-gray-600">
+            <AlertDialogTitle className="font-semibold text-xl text-gray-900">Confirmare ștergere</AlertDialogTitle>
+            <AlertDialogDescription>
               Sunteți sigur că doriți să ștergeți acest utilizator? Această acțiune nu poate fi anulată.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="font-semibold rounded-lg border-gray-200">Anulează</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-brand-red hover:bg-red-700 text-white font-semibold rounded-lg shadow-md">
-              Șterge Utilizator
+            <AlertDialogCancel asChild>
+              <Button 
+                variant="ghost" 
+                className="font-semibold rounded-lg border-gray-200 text-gray-600 hover:bg-gray-100"
+              >
+                Anulează
+              </Button>
+            </AlertDialogCancel>
+            
+            <AlertDialogAction asChild>
+              <Button 
+                onClick={handleDeleteConfirm} 
+                className="bg-brand-red hover:bg-red-700 active:bg-red-600 text-white font-semibold rounded-lg shadow-md transition-all active:scale-95"
+              >
+                Șterge utilizator
+              </Button>
             </AlertDialogAction>
-          </AlertDialogFooter>
+        </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
