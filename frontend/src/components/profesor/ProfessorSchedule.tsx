@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { MultiSelect } from "@/components/ui/multi-select"; 
 import { Search, RotateCcw, Calendar, Clock, MapPin, Users, CheckCircle2, Filter } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface AvailableSlot {
   id: string;
@@ -36,7 +37,6 @@ export function ProfessorSchedule() {
   const [hasSearched, setHasSearched] = useState(false);
   const [sortBy, setSortBy] = useState<string>("week");
 
-  // Mock data
   const subjects = ["Programare Orientată pe Obiecte", "Structuri de Date", "Baze de Date", "Algoritmi Fundamentali"];
   const groupOptions = [
     { label: "1101A", value: "1101A" },
@@ -62,18 +62,8 @@ export function ProfessorSchedule() {
       toast.error("Vă rugăm să completați toate câmpurile obligatorii");
       return;
     }
-
     const mockSlots: AvailableSlot[] = [
-      {
-        id: "1",
-        week: 3,
-        date: new Date(2026, 1, 17, 14, 0),
-        startTime: "14:00",
-        endTime: "16:00",
-        room: "I015",
-        capacity: 20,
-        availableGroups: selectedGroups,
-      }
+      { id: "1", week: 3, date: new Date(2026, 1, 17, 14, 0), startTime: "14:00", endTime: "16:00", room: "I015", capacity: 20, availableGroups: selectedGroups }
     ];
     setAvailableSlots(mockSlots);
     setHasSearched(true);
@@ -81,17 +71,13 @@ export function ProfessorSchedule() {
   };
 
   const handleReset = () => {
-    setSelectedSubject("");
-    setSelectedGroups([]);
-    setSelectedRooms([]);
-    setDuration("");
-    setStudentCount("");
-    setSelectedProfessors([]);
-    setSelectedDay("");
-    setStartTime("");
-    setAvailableSlots([]);
-    setHasSearched(false);
+    setSelectedSubject(""); setSelectedGroups([]); setSelectedRooms([]); setDuration("");
+    setStudentCount(""); setSelectedProfessors([]); setSelectedDay(""); setStartTime("");
+    setAvailableSlots([]); setHasSearched(false);
   };
+
+  const inputClasses = "h-10 w-full border-gray-200 text-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-brand-blue/30 focus-visible:border-brand-blue/50 transition-all duration-200 shadow-xs";
+  const placeholderClasses = "text-muted-foreground font-normal";
 
   return (
     <div className="space-y-6">
@@ -101,74 +87,72 @@ export function ProfessorSchedule() {
             <Search className="h-5 w-5 text-brand-blue" />
             Programare recuperare
           </CardTitle>
-          <CardDescription className="text-gray-600 font-medium">
+          <CardDescription className="text-gray-600 font-medium text-sm">
             Completați detaliile pentru a găsi sloturile disponibile pentru recuperare
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
-            {/* 1. Materie (Obligatorie - Select) */}
+            {/* 1. Materie */}
             <div className="space-y-2">
               <Label htmlFor="subject" className="text-sm font-semibold text-gray-900">
                 Materia <span className="text-brand-red">*</span>
               </Label>
               <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-                <SelectTrigger id="subject" className="w-full focus:ring-brand-blue/30 border-gray-200">
+                <SelectTrigger id="subject" className={cn(inputClasses, !selectedSubject && placeholderClasses)}>
                   <SelectValue placeholder="Selectează materia" />
                 </SelectTrigger>
-                <SelectContent position="popper" className="max-h-64">
-                  {subjects.map((subject) => (
-                    <SelectItem key={subject} value={subject}>{subject}</SelectItem>
-                  ))}
+                <SelectContent position="popper" className="max-h-64 text-sm">
+                  {subjects.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
 
-            {/* 2. Grupe (Obligatorie - MultiSelect cu search) */}
+            {/* 2. Grupe */}
             <div className="space-y-2">
               <Label className="text-sm font-semibold text-gray-900">
                 Grupe <span className="text-brand-red">*</span>
               </Label>
-              <MultiSelect
+              <MultiSelect 
                 options={groupOptions}
                 selected={selectedGroups}
                 onChange={setSelectedGroups}
                 placeholder="Caută și selectează grupele"
+                className={inputClasses}              
               />
             </div>
 
-            {/* 3. Săli (Obligatorie - MultiSelect cu search) */}
+            {/* 3. Săli */}
             <div className="space-y-2">
               <Label className="text-sm font-semibold text-gray-900">
                 Săli <span className="text-brand-red">*</span>
               </Label>
-              <MultiSelect
+              <MultiSelect 
                 options={roomOptions}
                 selected={selectedRooms}
                 onChange={setSelectedRooms}
                 placeholder="Caută și selectează sălile"
+                className={inputClasses}
               />
             </div>
 
-            {/* 4. Durata (Obligatorie - Select) */}
+            {/* 4. Durata */}
             <div className="space-y-2">
               <Label htmlFor="duration" className="text-sm font-semibold text-gray-900">
                 Durata <span className="text-brand-red">*</span>
               </Label>
               <Select value={duration} onValueChange={setDuration}>
-                <SelectTrigger id="duration" className="w-full focus:ring-brand-blue/30 border-gray-200">
+                <SelectTrigger id="duration" className={cn(inputClasses, !duration && placeholderClasses)}>
                   <SelectValue placeholder="Selectează durata" />
                 </SelectTrigger>
-                <SelectContent position="popper" className="max-h-64">
-                  {durations.map((dur) => (
-                    <SelectItem key={dur} value={dur}>{dur}</SelectItem>
-                  ))}
+                <SelectContent position="popper" className="max-h-64 text-sm">
+                  {durations.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
 
-            {/* 5. Număr persoane (Optional - Input) */}
+            {/* 5. Număr persoane */}
             <div className="space-y-2">
               <Label htmlFor="student-count" className="text-sm font-semibold text-gray-900">Număr persoane</Label>
               <Input
@@ -177,37 +161,36 @@ export function ProfessorSchedule() {
                 placeholder="Exemplu: 15"
                 value={studentCount}
                 onChange={(e) => setStudentCount(e.target.value)}
-                className="focus:ring-brand-blue/30 border-gray-200"
+                className={cn(inputClasses, "px-3")}
               />
             </div>
 
-            {/* 6. Profesor asistent (Optional - MultiSelect cu search) */}
+            {/* 6. Profesor asistent */}
             <div className="space-y-2">
               <Label className="text-sm font-semibold text-gray-900">Profesor asistent</Label>
-              <MultiSelect
+              <MultiSelect 
                 options={professorOptions}
                 selected={selectedProfessors}
                 onChange={setSelectedProfessors}
                 placeholder="Caută asistenți"
+                className={inputClasses}
               />
             </div>
 
-            {/* 7. Ziua (Optional - Select) */}
+            {/* 7. Ziua */}
             <div className="space-y-2">
               <Label htmlFor="day" className="text-sm font-semibold text-gray-900">Ziua</Label>
               <Select value={selectedDay} onValueChange={setSelectedDay}>
-                <SelectTrigger id="day" className="w-full focus:ring-brand-blue/30 border-gray-200">
+                <SelectTrigger id="day" className={cn(inputClasses, !selectedDay && placeholderClasses)}>
                   <SelectValue placeholder="Selectează ziua" />
                 </SelectTrigger>
-                <SelectContent position="popper" className="max-h-64">
-                  {days.map((day) => (
-                    <SelectItem key={day} value={day}>{day}</SelectItem>
-                  ))}
+                <SelectContent position="popper" className="max-h-64 text-sm">
+                  {days.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
 
-            {/* 8. Ora de start (Optional - Input) */}
+            {/* 8. Ora de start */}
             <div className="space-y-2">
               <Label htmlFor="start-time" className="text-sm font-semibold text-gray-900">Ora de start</Label>
               <Input
@@ -215,10 +198,9 @@ export function ProfessorSchedule() {
                 type="time"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                className="focus:ring-brand-blue/30 border-gray-200"
+                className={cn(inputClasses, "px-3")}
               />
             </div>
-
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
@@ -241,13 +223,13 @@ export function ProfessorSchedule() {
         </CardContent>
       </Card>
 
-      {/* Rezultate Sloturi */}
+      {/* Rezultate ... */}
       {hasSearched && (
         <Card className="border-gray-200 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
               <CardTitle className="text-lg font-bold">Sloturi Disponibile</CardTitle>
-              <CardDescription className="font-medium text-gray-600">
+              <CardDescription className="font-medium text-gray-600 text-sm">
                 Am găsit {availableSlots.length} sloturi pentru săptămânile 1-14
               </CardDescription>
             </div>
@@ -257,7 +239,7 @@ export function ProfessorSchedule() {
                 <SelectTrigger className="w-45 h-8 text-xs border-gray-200">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="text-xs">
                   <SelectItem value="week">După săptămână</SelectItem>
                   <SelectItem value="date">După dată</SelectItem>
                   <SelectItem value="time">După oră</SelectItem>

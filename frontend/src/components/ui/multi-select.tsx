@@ -61,7 +61,7 @@ export function MultiSelect({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "w-full justify-between min-h-9 h-auto border-gray-200 hover:bg-transparent active:scale-100",
+            "w-full justify-between h-10 min-h-10 border-gray-200 hover:bg-transparent active:scale-100 px-3 py-2 shadow-xs font-normal",
             className
           )}
         >
@@ -98,7 +98,7 @@ export function MultiSelect({
                 );
               })
             ) : (
-              <span className="text-muted-foreground">{placeholder}</span>
+              <span className="text-muted-foreground text-sm">{placeholder}</span>
             )}
           </div>
           <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
@@ -127,7 +127,7 @@ export function MultiSelect({
                         isSelected ? "opacity-100" : "opacity-0"
                       )}
                     />
-                    <span className="text-gray-700">{option.label}</span>
+                    <span className="text-gray-900">{option.label}</span>
                   </CommandItem>
                 );
               })}
