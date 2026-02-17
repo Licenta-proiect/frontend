@@ -109,7 +109,7 @@ export function ProfessorAccessRequest() {
       </DialogTrigger>
       <DialogContent className="max-w-[95vw] sm:max-w-md rounded-lg">
         <DialogHeader>
-          <DialogTitle className="text-gray-900 font-bold text-xl">Solicitare acces profesor</DialogTitle>
+          <DialogTitle className="text-gray-900 font-semibold text-xl">Solicitare acces profesor</DialogTitle>
           <DialogDescription> Administratorul va fi notificat pentru a vă adăuga în sistem. </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
