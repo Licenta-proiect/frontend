@@ -4,8 +4,8 @@ import { useMemo, useSyncExternalStore, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import { ClipboardList, FileText } from "lucide-react";
+import { ProfessorSchedule } from "@/components/profesor/ProfessorSchedule";
 
-const ProfessorSchedule = () => <div className="p-6 bg-white rounded-lg shadow">Formular Programare Recuperări</div>;
 const ProfessorReservations = () => <div className="p-6 bg-white rounded-lg shadow">Lista Rezervărilor Mele</div>;
 
 const emptySubscribe = () => () => {};
