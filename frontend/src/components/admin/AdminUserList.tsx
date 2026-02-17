@@ -9,9 +9,30 @@ import { Input } from "@/components/ui/input";
 import { UserCog, Filter, Mail, Trash2, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export function AdminUserList({ users, onDeleteClick }: { users: any[], onDeleteClick: (email: string) => void }) {
+interface User {
+  id: string;
+  lastName: string;
+  firstName: string;
+  email: string;
+  role: string;
+}
+
+export function AdminUserList({ 
+  users, 
+  onDeleteClick 
+}: { 
+  users: User[], 
+  onDeleteClick: (email: string) => void
+}) {
   const [roleFilter, setRoleFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  
+  const [storedEmail] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("userEmail");
+    }
+    return null;
+  });
 
   const getRoleBadgeColor = (role: string) => {
     switch (role?.toLowerCase()) {
@@ -23,14 +44,9 @@ export function AdminUserList({ users, onDeleteClick }: { users: any[], onDelete
     }
   };
 
-  // Logică de filtrare combinată (Rol + Căutare text)
   const filtered = users.filter((user) => {
     if (!user) return false;
-
-    // 1. Filtru de Rol
     const matchesRole = roleFilter === "all" || user.role?.toLowerCase() === roleFilter.toLowerCase();
-
-    // 2. Filtru de Căutare (Nume, Prenume sau Email)
     const fullName = `${user.lastName} ${user.firstName}`.toLowerCase();
     const matchesSearch = 
       fullName.includes(searchQuery.toLowerCase()) || 
@@ -54,7 +70,6 @@ export function AdminUserList({ users, onDeleteClick }: { users: any[], onDelete
             </div>
             
             <div className="flex flex-col sm:flex-row items-center gap-3">
-              {/* Search Input */}
               <div className="relative w-full sm:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input 
@@ -65,11 +80,10 @@ export function AdminUserList({ users, onDeleteClick }: { users: any[], onDelete
                 />
               </div>
 
-              {/* Role Select */}
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <Filter className="h-4 w-4 text-gray-400 shrink-0" />
                 <Select value={roleFilter} onValueChange={setRoleFilter}>
-                  <SelectTrigger className="h-10 text-sm border-gray-200 font-normal shadow-xs focus:ring-brand-blue/30 min-w-[140px]">
+                  <SelectTrigger className="h-10 text-sm border-gray-200 font-normal shadow-xs focus:ring-brand-blue/30 min-w-35">
                     <SelectValue placeholder="Rol" />
                   </SelectTrigger>
                   <SelectContent>
@@ -93,13 +107,16 @@ export function AdminUserList({ users, onDeleteClick }: { users: any[], onDelete
         ) : (
           filtered.map((user) => {
             if (!user || (!user.lastName && !user.firstName)) return null;
+            const isMe = storedEmail && user.email?.toLowerCase().trim() === storedEmail.toLowerCase().trim();
 
             return (
               <Card key={user.id || user.email} className="border border-gray-100 shadow-xs hover:bg-gray-50/50 transition-colors">
                 <CardContent className="pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-2">
                     <div className="flex items-center gap-3">
-                      <h4 className="font-bold text-gray-900">{user.lastName} {user.firstName}</h4>
+                      <h4 className="font-medium text-gray-900">
+                        {user.lastName} {user.firstName}
+                      </h4>
                       <Badge variant="outline" className={cn(getRoleBadgeColor(user.role))}>
                         {user.role?.toUpperCase()}
                       </Badge>
@@ -110,12 +127,12 @@ export function AdminUserList({ users, onDeleteClick }: { users: any[], onDelete
                     </div>
                   </div>
                   <div className="flex gap-2 shrink-0">
-                    {user.role?.toLowerCase() !== "admin" && (
+                    {!isMe && (
                       <Button 
                         size="sm" 
                         variant="outline" 
                         onClick={() => onDeleteClick(user.email)} 
-                        className="text-brand-red border-red-100 hover:bg-red-50 font-semibold active:scale-95"
+                        className="text-brand-red border-red-100 hover:bg-red-50 hover:text-brand-red font-semibold active:scale-95 transition-colors"
                       >
                         <Trash2 className="h-3.5 w-3.5 mr-2" /> Șterge
                       </Button>
