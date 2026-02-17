@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import api from "@/services/api";
 import { cn } from "@/lib/utils";
 
-interface Grupa {
+export interface Grupa {
   id: number;
   nume: string;
   subgroupIndex: string;
@@ -114,14 +114,21 @@ export function StudentSearch() {
                   role="combobox"
                   aria-expanded={openGroups}
                   disabled={isLoadingGrupe}
-                  className="w-full justify-between font-normal border-gray-200 hover:bg-transparent active:scale-100"
+                  className={cn(
+                    "w-full justify-between font-normal border-gray-200 hover:bg-transparent active:scale-100",
+                    !selectedGroupId && "text-muted-foreground hover:text-muted-foreground"
+                  )}
                 >
-                  {selectedGroupId
-                    ? (() => {
-                        const g = grupe.find((g) => g.id.toString() === selectedGroupId);
-                        return g ? `${g.specializationShortName} • an ${g.studyYear} • ${g.nume}${g.subgroupIndex}` : "Selectează grupa";
-                      })()
-                    : isLoadingGrupe ? "Se încarcă..." : "Selectează grupa"}
+                  <span className="truncate">
+                    {selectedGroupId
+                      ? (() => {
+                          const g = grupe.find((g) => g.id.toString() === selectedGroupId);
+                          return g 
+                            ? `${g.specializationShortName} • an ${g.studyYear} • ${g.nume}${g.subgroupIndex}` 
+                            : "Selectează grupa";
+                        })()
+                      : isLoadingGrupe ? "Se încarcă..." : "Selectează grupa"}
+                  </span>
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
@@ -210,7 +217,7 @@ export function StudentSearch() {
           </div>
 
           {/* Checkbox Participare Curs */}
-          <div className="flex items-end pb-2">
+          <div className="flex items-end">
             <div className="flex items-center space-x-3 bg-gray-50 p-2.5 rounded-lg border border-gray-100 w-full h-10">
               <Checkbox
                 id="attends-course"
@@ -220,7 +227,7 @@ export function StudentSearch() {
               />
               <Label
                 htmlFor="attends-course"
-                className="text-sm font-medium text-gray-700 cursor-pointer select-none"
+                className="text-sm font-medium text-gray-900 cursor-pointer select-none"
               >
                 Particip la cursuri
               </Label>

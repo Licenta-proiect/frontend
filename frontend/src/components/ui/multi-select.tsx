@@ -75,7 +75,7 @@ export function MultiSelect({
           disabled={disabled} 
           className={cn(
             "w-full justify-between min-h-10 h-auto border-gray-200 hover:bg-transparent active:scale-100 px-3 py-2 shadow-xs font-normal",
-            disabled && "opacity-50 cursor-not-allowed bg-gray-50", // Stil vizual pentru disabled
+            disabled && "opacity-50 cursor-not-allowed disabled:pointer-events-auto bg-gray-50", // Stil vizual pentru disabled
             className
           )}
         >
@@ -87,7 +87,7 @@ export function MultiSelect({
                   <Badge
                     variant="secondary"
                     key={value}
-                    className="pr-1 font-medium bg-blue-50 text-brand-blue border-blue-100 shrink-0 h-auto py-0.5"
+                    className="pr-1.5 pl-2 py-1 text-sm font-medium bg-blue-50 text-brand-blue border-blue-100 shrink-0 h-auto"
                   >
                     {option?.label || value}
                     <span
@@ -103,7 +103,7 @@ export function MultiSelect({
                         handleUnselect(value);
                       }}
                     >
-                      <X className="h-3 w-3 text-brand-blue/60 hover:text-brand-blue" />
+                      <X className="h-3.5 w-3.5 text-brand-blue/60 hover:text-brand-blue" />
                     </span>
                   </Badge>
                 );

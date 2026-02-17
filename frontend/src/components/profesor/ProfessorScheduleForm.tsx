@@ -11,9 +11,9 @@ import { Search, RotateCcw, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import api from "@/services/api";
+import { Grupa  as ApiGroup } from "@/components/student/StudentSearch";
 
 // Interfețe pentru tipizare
-interface ApiGroup { id: number; nume: string; subgroupIndex?: string; }
 interface ApiRoom { id: number; nume: string; }
 interface ApiProfessor { id: number; lastName: string; firstName: string; emailAddress: string; }
 
@@ -75,7 +75,12 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
         ]);
 
         setSubjects(subResp.data.materii);
-        setAllGroups(groupsResp.data.map((g: ApiGroup) => ({ label: `${g.nume}${g.subgroupIndex ? `/${g.subgroupIndex}` : ""}`, value: g.id.toString() })));
+        setAllGroups(
+          groupsResp.data.map((g: ApiGroup) => ({
+            label: `${g.specializationShortName} • an ${g.studyYear} • ${g.nume}${g.subgroupIndex ? `${g.subgroupIndex}` : ""}`,
+            value: g.id.toString(),
+          }))
+        );
         setAllRooms(roomsResp.data.map((s: ApiRoom) => ({ label: s.nume, value: s.id.toString() })));
         setAllProfessors(profsResp.data.filter((p: ApiProfessor) => p.emailAddress !== email).map((p: ApiProfessor) => ({ label: `${p.lastName} ${p.firstName}`, value: p.id.toString() })));
       } catch {
