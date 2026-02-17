@@ -18,7 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Clock, UserCog, UserPlus, Trash2, Mail, CheckCircle2, XCircle, RefreshCw, Filter, Calendar } from "lucide-react";
+import { Clock, UserCog, UserPlus, Trash2, Mail, CheckCircle2, XCircle, RefreshCw, Filter, Calendar, History } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -56,6 +56,7 @@ export function AdminSync() {
   const [professorRequests, setProfessorRequests] = useState<ProfessorRequest[]>([
     { id: "1", email: "george.stanescu@usm.ro", requestDate: new Date(2026, 1, 14, 10, 30), status: "pending" },
     { id: "2", email: "ana.marinescu@usm.ro", requestDate: new Date(2026, 1, 13, 15, 20), status: "pending" },
+    { id: "3", email: "mihai.georgescu@usm.ro", requestDate: new Date(2026, 1, 12, 9, 45), status: "approved" },
   ]);
 
   const getRoleBadgeColor = (role: string) => {
@@ -67,7 +68,17 @@ export function AdminSync() {
     }
   };
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "pending": return "bg-amber-50 text-amber-700 border-amber-100 font-bold";
+      case "approved": return "bg-green-50 text-green-700 border-green-100 font-bold";
+      case "rejected": return "bg-red-50 text-brand-red border-red-100 font-bold";
+      default: return "bg-gray-50 text-gray-700 border-gray-100 font-bold";
+    }
+  };
+
   const pendingRequests = professorRequests.filter((r) => r.status === "pending");
+  const processedRequests = professorRequests.filter((r) => r.status !== "pending");
   const filteredUsers = roleFilter === "all" ? users : users.filter((u) => u.role === roleFilter);
 
   const handleAddAdmin = () => {
@@ -160,15 +171,9 @@ export function AdminSync() {
                         <Badge variant="outline" className={cn(getRoleBadgeColor(user.role))}>{user.role.toUpperCase()}</Badge>
                         <Badge variant="outline" className="text-[10px] uppercase tracking-wider font-bold border-gray-200 text-gray-500">{user.status}</Badge>
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-sm font-medium">
-                        <div className="flex items-center gap-2 text-gray-600">
-                          <Mail className="h-4 w-4 text-brand-blue" />
-                          <span>{user.email}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-gray-600">
-                          <Calendar className="h-4 w-4 text-brand-blue" />
-                          <span>{user.createdAt.toLocaleDateString("ro-RO")}</span>
-                        </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-sm font-medium text-gray-600">
+                        <div className="flex items-center gap-2"><Mail className="h-4 w-4 text-brand-blue" /><span>{user.email}</span></div>
+                        <div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-brand-blue" /><span>{user.createdAt.toLocaleDateString("ro-RO")}</span></div>
                       </div>
                     </div>
                     <div className="flex gap-2 shrink-0">
@@ -190,16 +195,16 @@ export function AdminSync() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="requests" className="mt-6">
+        <TabsContent value="requests" className="space-y-6 mt-6">
           <Card className="border-gray-200 shadow-sm">
-            <CardHeader>
+            <CardHeader className="border-b border-gray-100 bg-linear-to-r from-white to-blue-50/30">
               <CardTitle className="flex items-center gap-2 text-gray-900 font-bold text-xl">
                 <Mail className="h-5 w-5 text-brand-blue" />
-                Cereri Profesori în Așteptare
+                Cereri în Așteptare
               </CardTitle>
               <CardDescription className="font-medium text-gray-600">Procesați solicitările de acces pentru cadrele didactice</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6">
               {pendingRequests.length === 0 ? (
                 <div className="text-center py-12 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
                   <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-gray-300" />
@@ -212,20 +217,52 @@ export function AdminSync() {
                       <div className="space-y-1 w-full">
                         <div className="flex items-center gap-3">
                           <span className="font-bold text-gray-900">{request.email}</span>
-                          <Badge className="bg-amber-50 text-amber-700 border-amber-100 font-bold">ÎN AȘTEPTARE</Badge>
+                          <Badge className={getStatusBadge(request.status)}>ÎN AȘTEPTARE</Badge>
                         </div>
                         <p className="text-sm text-gray-500 font-medium flex items-center gap-2">
-                          <Clock className="h-3.5 w-3.5" />
-                          Trimisă la: {request.requestDate.toLocaleString("ro-RO")}
+                          <Clock className="h-3.5 w-3.5 text-brand-blue" />
+                          Trimisă: {request.requestDate.toLocaleString("ro-RO")}
                         </p>
                       </div>
                       <div className="flex gap-2 shrink-0 w-full sm:w-auto">
-                        <Button onClick={() => toast.success("Aprobat!")} className="bg-green-600 hover:bg-green-700 text-white font-bold flex-1 sm:flex-none active:scale-95 shadow-sm">
+                        <Button className="bg-green-600 hover:bg-green-700 text-white font-bold flex-1 sm:flex-none active:scale-95 shadow-sm">
                           <CheckCircle2 className="h-4 w-4 mr-2" /> Aprobă
                         </Button>
-                        <Button variant="outline" onClick={() => toast.error("Respins!")} className="text-brand-red border-red-100 hover:bg-red-50 font-bold flex-1 sm:flex-none active:scale-95 shadow-sm">
+                        <Button variant="outline" className="text-brand-red border-red-100 hover:bg-red-50 font-bold flex-1 sm:flex-none active:scale-95 shadow-sm">
                           <XCircle className="h-4 w-4 mr-2" /> Respinge
                         </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Secțiunea ISTORIC CERERI */}
+          <Card className="border-gray-200 shadow-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-gray-900 font-bold text-xl">
+                <History className="h-5 w-5 text-brand-blue" />
+                Istoric Cereri
+              </CardTitle>
+              <CardDescription className="font-medium">Cereri procesate recent în sistem</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {processedRequests.length === 0 ? (
+                <p className="text-center py-6 text-gray-500 font-medium text-sm italic">Nicio cerere procesată în istoric</p>
+              ) : (
+                processedRequests.map((request) => (
+                  <Card key={request.id} className="opacity-85 border-gray-100 shadow-none hover:opacity-100 transition-opacity">
+                    <CardContent className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-3">
+                          <span className="font-bold text-gray-900 text-sm">{request.email}</span>
+                          <Badge className={cn(getStatusBadge(request.status), "text-[10px]")}>
+                            {request.status === "approved" ? "APROBATĂ" : "RESPINSĂ"}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-gray-500 font-medium">Procesată la: {request.requestDate.toLocaleDateString("ro-RO")}</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -237,18 +274,14 @@ export function AdminSync() {
       </Tabs>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="rounded-xl border-gray-200">
+        <AlertDialogContent className="rounded-xl border-gray-200 shadow-lg">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-bold text-xl text-gray-900">Confirmare Ștergere</AlertDialogTitle>
-            <AlertDialogDescription className="font-medium text-gray-600">
-              Sunteți sigur că doriți să ștergeți acest utilizator? Această acțiune nu poate fi anulată.
-            </AlertDialogDescription>
+            <AlertDialogDescription className="font-medium text-gray-600">Sunteți sigur că doriți să ștergeți acest utilizator? Această acțiune nu poate fi anulată.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="font-bold rounded-lg border-gray-200 shadow-xs">Anulează</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { setUsers(users.filter(u => u.id !== userToDelete)); setDeleteDialogOpen(false); toast.success("Utilizator șters!"); }} className="bg-brand-red hover:bg-red-700 text-white font-bold rounded-lg shadow-md">
-              Șterge Utilizator
-            </AlertDialogAction>
+            <AlertDialogCancel className="font-bold rounded-lg border-gray-200">Anulează</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setUsers(users.filter(u => u.id !== userToDelete)); setDeleteDialogOpen(false); toast.success("Utilizator șters!"); }} className="bg-brand-red hover:bg-red-700 text-white font-bold rounded-lg shadow-md">Șterge Utilizator</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
