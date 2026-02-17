@@ -51,26 +51,23 @@ export function AdminUsers() {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-6 animate-in fade-in duration-500 font-sans">
       <Tabs defaultValue="users" className="w-full">
         <TabsList className="grid w-full grid-cols-2 bg-gray-100/50 p-1 h-12 rounded-xl border border-gray-200">
-          <TabsTrigger value="users" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-brand-blue data-[state=active]:shadow-sm font-bold">
+          <TabsTrigger value="users" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-brand-blue data-[state=active]:shadow-sm font-semibold">
             Gestionare Utilizatori
           </TabsTrigger>
-          <TabsTrigger value="requests" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-brand-blue data-[state=active]:shadow-sm font-bold">
+          <TabsTrigger value="requests" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-brand-blue data-[state=active]:shadow-sm font-semibold">
             Cereri Profesori
             {pendingCount > 0 && (
-              <Badge className="ml-2 bg-brand-red text-white border-none">{pendingCount}</Badge>
+              <Badge className="ml-2 bg-brand-red text-white border-none font-bold">{pendingCount}</Badge>
             )}
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="space-y-6 mt-6">
-          <AdminUserForm onAdd={(newUser) => setUsers([...users, newUser as User])} />
-          <AdminUserList 
-            users={users} 
-            onDeleteClick={(id) => { setUserToDelete(id); setDeleteDialogOpen(true); }} 
-          />
+          <AdminUserForm onAdd={(newUser) => setUsers([...users, newUser])} />
+          <AdminUserList users={users} onDeleteClick={(id) => { setUserToDelete(id); setDeleteDialogOpen(true); }} />
         </TabsContent>
 
         <TabsContent value="requests" className="mt-6">
@@ -79,18 +76,14 @@ export function AdminUsers() {
       </Tabs>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="rounded-xl border-gray-200 shadow-lg">
+        <AlertDialogContent className="rounded-xl border-gray-200 shadow-xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-bold text-xl text-gray-900">Confirmare Ștergere</AlertDialogTitle>
-            <AlertDialogDescription className="font-medium text-gray-600">
-              Sunteți sigur că doriți să ștergeți acest utilizator? Această acțiune nu poate fi anulată.
-            </AlertDialogDescription>
+            <AlertDialogTitle className="font-semibold text-xl text-gray-900">Confirmare Ștergere</AlertDialogTitle>
+            <AlertDialogDescription className="font-medium text-gray-600">Sunteți sigur că doriți să ștergeți acest utilizator? Această acțiune nu poate fi anulată.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="font-bold rounded-lg border-gray-200">Anulează</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-brand-red hover:bg-red-700 text-white font-bold rounded-lg shadow-md">
-              Șterge Utilizator
-            </AlertDialogAction>
+            <AlertDialogCancel className="font-semibold rounded-lg border-gray-200">Anulează</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setUsers(users.filter(u => u.id !== userToDelete)); setDeleteDialogOpen(false); toast.success("Utilizator șters!"); }} className="bg-brand-red hover:bg-red-700 text-white font-semibold rounded-lg shadow-md">Șterge Utilizator</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

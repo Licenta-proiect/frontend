@@ -22,8 +22,8 @@ export function AdminRequests({ requests }: { requests: any[] }) {
     <div className="space-y-6">
       <Card className="border-gray-200 shadow-sm">
         <CardHeader className="border-b border-gray-100 bg-linear-to-r from-white to-blue-50/30">
-          <CardTitle className="flex items-center gap-2 text-gray-900 font-bold text-xl">
-            <Mail className="h-5 w-5 text-brand-blue" /> Cereri în Așteptare
+          <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
+            <Mail className="h-5 w-5 text-brand-blue" /> Cereri în așteptare
           </CardTitle>
           <CardDescription className="font-medium text-gray-600">Procesați solicitările de acces pentru cadrele didactice</CardDescription>
         </CardHeader>
@@ -31,11 +31,11 @@ export function AdminRequests({ requests }: { requests: any[] }) {
           {pending.length === 0 ? (
             <div className="text-center py-12 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
               <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <p className="font-bold text-gray-500">Nu există cereri în așteptare</p>
+              <p className="font-semibold text-gray-500">Nu există cereri în așteptare</p>
             </div>
           ) : (
             pending.map((request) => (
-              <Card key={request.id} className="border-l-4 border-l-amber-500 shadow-xs">
+              <Card key={request.id} className="border-l-4 border-l-amber-500 shadow-xs hover:bg-gray-50/30 transition-colors">
                 <CardContent className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="space-y-1 w-full">
                     <div className="flex items-center gap-3">
@@ -47,10 +47,10 @@ export function AdminRequests({ requests }: { requests: any[] }) {
                     </p>
                   </div>
                   <div className="flex gap-2 shrink-0 w-full sm:w-auto">
-                    <Button onClick={() => toast.success("Aprobat!")} className="bg-green-600 hover:bg-green-700 text-white font-bold flex-1 sm:flex-none active:scale-95 shadow-sm">
+                    <Button onClick={() => toast.success("Aprobat!")} className="bg-green-600 hover:bg-green-700 text-white font-semibold flex-1 sm:flex-none active:scale-95 shadow-md">
                       <CheckCircle2 className="h-4 w-4 mr-2" /> Aprobă
                     </Button>
-                    <Button variant="outline" onClick={() => toast.error("Respins!")} className="text-brand-red border-red-100 hover:bg-red-50 font-bold flex-1 sm:flex-none active:scale-95 shadow-sm">
+                    <Button variant="outline" onClick={() => toast.error("Respins!")} className="text-brand-red border-red-100 hover:bg-red-50 font-semibold flex-1 sm:flex-none active:scale-95 shadow-md">
                       <XCircle className="h-4 w-4 mr-2" /> Respinge
                     </Button>
                   </div>
@@ -62,8 +62,8 @@ export function AdminRequests({ requests }: { requests: any[] }) {
       </Card>
 
       <Card className="border-gray-200 shadow-sm">
-        <CardHeader><CardTitle className="flex items-center gap-2 text-gray-900 font-bold text-xl"><History className="h-5 w-5 text-brand-blue" /> Istoric Cereri</CardTitle></CardHeader>
-        <CardContent className="space-y-3">
+        <CardHeader className="border-b border-gray-50"><CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl"><History className="h-5 w-5 text-brand-blue" /> Istoric cereri</CardTitle></CardHeader>
+        <CardContent className="space-y-3 pt-4">
           {processed.length === 0 ? <p className="text-center py-6 text-gray-500 font-medium text-sm italic">Nicio cerere procesată</p> : 
             processed.map((request: any) => (
               <Card key={request.id} className="opacity-85 border-gray-100 shadow-none hover:opacity-100 transition-opacity">
@@ -75,7 +75,7 @@ export function AdminRequests({ requests }: { requests: any[] }) {
                         {request.status === "approved" ? "APROBATĂ" : "RESPINSĂ"}
                       </Badge>
                     </div>
-                    <p className="text-xs text-gray-500 font-medium">Procesată la: {request.requestDate.toLocaleDateString("ro-RO")}</p>
+                    <p className="text-xs text-gray-500 font-semibold">Procesată la: {request.requestDate.toLocaleDateString("ro-RO")}</p>
                   </div>
                 </CardContent>
               </Card>

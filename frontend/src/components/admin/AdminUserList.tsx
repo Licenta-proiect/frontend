@@ -26,16 +26,16 @@ export function AdminUserList({ users, onDeleteClick }: { users: any[], onDelete
       <CardHeader>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <CardTitle className="flex items-center gap-2 text-gray-900 font-bold text-xl">
+            <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
               <UserCog className="h-5 w-5 text-brand-blue" />
-              Lista Utilizatori
+              Lista utilizatori
             </CardTitle>
-            <CardDescription className="font-medium">{filtered.length} utilizatori înregistrați</CardDescription>
+            <CardDescription className="font-medium text-gray-600">{filtered.length} utilizatori înregistrați</CardDescription>
           </div>
           <div className="flex items-center gap-2 min-w-[200px]">
             <Filter className="h-4 w-4 text-gray-400" />
             <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="h-9 text-xs border-gray-200 font-medium"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-10 text-sm border-gray-200 font-normal shadow-xs focus:ring-brand-blue/30"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Toate Rolurile</SelectItem>
                 <SelectItem value="student">Studenți</SelectItem>
@@ -63,12 +63,12 @@ export function AdminUserList({ users, onDeleteClick }: { users: any[], onDelete
               </div>
               <div className="flex gap-2 shrink-0">
                 {user.role === "student" && (
-                  <Button size="sm" variant="outline" onClick={() => toast.success("Rol schimbat!")} className="border-gray-200 font-bold hover:text-brand-blue">
+                  <Button size="sm" variant="outline" onClick={() => toast.success("Rol schimbat!")} className="border-gray-200 font-semibold text-gray-700 hover:text-brand-blue active:scale-95">
                     <RefreshCw className="h-3.5 w-3.5 mr-2" /> Schimbă în Profesor
                   </Button>
                 )}
                 {user.role !== "admin" && (
-                  <Button size="sm" variant="outline" onClick={() => onDeleteClick(user.id)} className="text-brand-red border-red-100 hover:bg-red-50 font-bold">
+                  <Button size="sm" variant="outline" onClick={() => onDeleteClick(user.id)} className="text-brand-red border-red-100 hover:bg-red-50 font-semibold active:scale-95">
                     <Trash2 className="h-3.5 w-3.5 mr-2" /> Șterge
                   </Button>
                 )}
