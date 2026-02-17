@@ -149,6 +149,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
   const handleReset = () => {
     setSelectedSubject(""); setSelectedGroups([]); setSelectedRooms([]); setDuration("");
     setStudentCount(""); setSelectedProfessors([]); setSelectedDay(""); setStartTime("");
+    lastSyncedSubject.current = "";
     onSearch(null, []);
   };
 
@@ -183,33 +184,55 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
             </Select>
           </div>
 
-            {/*Grupe*/}
+            {/* Grupe - Blocat până la selectarea materiei */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Grupe <span className="text-brand-red">*</span></Label>
             <div className="relative">
-              <MultiSelect 
+                <MultiSelect 
                 options={allGroups} 
                 selected={selectedGroups} 
                 onChange={setSelectedGroups} 
-                placeholder={isSyncing ? "Se încarcă grupele..." : "Selectează grupele"} 
-                className={cn(inputClasses, isSyncing && "opacity-50 cursor-not-allowed")} 
-              />
-              {isSyncing && <Loader2 className="absolute right-8 top-3 h-4 w-4 animate-spin text-brand-blue" />}
+                // Dezactivat dacă nu e selectată materia SAU dacă se sincronizează
+                disabled={!selectedSubject || isSyncing}
+                placeholder={
+                    !selectedSubject 
+                    ? "Selectează materia mai întâi" 
+                    : isSyncing 
+                        ? "Se încarcă grupele..." 
+                        : "Selectează grupele"
+                } 
+                className={cn(
+                    inputClasses, 
+                    (!selectedSubject || isSyncing) && "opacity-50 cursor-not-allowed bg-gray-50"
+                )} 
+                />
+                {isSyncing && <Loader2 className="absolute right-8 top-3 h-4 w-4 animate-spin text-brand-blue" />}
             </div>
           </div>
 
-            {/*Săli*/}
+            {/* Săli - Blocat până la selectarea materiei */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Săli <span className="text-brand-red">*</span></Label>
             <div className="relative">
-              <MultiSelect 
+                <MultiSelect 
                 options={allRooms} 
                 selected={selectedRooms} 
                 onChange={setSelectedRooms} 
-                placeholder={isSyncing ? "Se încarcă sălile..." : "Selectează sălile"} 
-                className={cn(inputClasses, isSyncing && "opacity-50 cursor-not-allowed")} 
-              />
-              {isSyncing && <Loader2 className="absolute right-8 top-3 h-4 w-4 animate-spin text-brand-blue" />}
+                // Dezactivat dacă nu e selectată materia SAU dacă se sincronizează
+                disabled={!selectedSubject || isSyncing}
+                placeholder={
+                    !selectedSubject 
+                    ? "Selectează materia mai întâi" 
+                    : isSyncing 
+                        ? "Se încarcă sălile..." 
+                        : "Selectează sălile"
+                } 
+                className={cn(
+                    inputClasses, 
+                    (!selectedSubject || isSyncing) && "opacity-50 cursor-not-allowed bg-gray-50"
+                )} 
+                />
+                {isSyncing && <Loader2 className="absolute right-8 top-3 h-4 w-4 animate-spin text-brand-blue" />}
             </div>
           </div>
 

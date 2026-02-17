@@ -30,6 +30,7 @@ interface MultiSelectProps {
   onChange: (selected: string[]) => void;
   placeholder?: string;
   className?: string;
+  disabled?: boolean;
 }
 
 export function MultiSelect({
@@ -38,14 +39,17 @@ export function MultiSelect({
   onChange,
   placeholder = "Selectează...",
   className,
+  disabled,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
 
   const handleUnselect = (itemValue: string) => {
+    if (disabled) return; 
     onChange(selected.filter((val) => val !== itemValue));
   };
 
   const handleSelect = (itemValue: string) => {
+    if (disabled) return; 
     if (selected.includes(itemValue)) {
       onChange(selected.filter((val) => val !== itemValue));
     } else {
@@ -56,22 +60,25 @@ export function MultiSelect({
   const handleClear = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (disabled) return;
     onChange([]);
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    // Dacă componenta este disabled, Popover nu ar trebui să se deschidă
+    <Popover open={disabled ? false : open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
           role="combobox"
           aria-expanded={open}
+          disabled={disabled} 
           className={cn(
             "w-full justify-between min-h-10 h-auto border-gray-200 hover:bg-transparent active:scale-100 px-3 py-2 shadow-xs font-normal",
-            className 
+            disabled && "opacity-50 cursor-not-allowed bg-gray-50", // Stil vizual pentru disabled
+            className
           )}
         >
-          {/* gap-y-2 adauga spatiu intre randurile de badge-uri cand se face wrap */}
           <div className="flex gap-x-1 gap-y-2 flex-wrap items-center flex-1 overflow-hidden">
             {selected.length > 0 ? (
               selected.map((value) => {
@@ -80,14 +87,16 @@ export function MultiSelect({
                   <Badge
                     variant="secondary"
                     key={value}
-                    // h-auto pe badge ca să nu forțeze înălțimea rândului
                     className="pr-1 font-medium bg-blue-50 text-brand-blue border-blue-100 shrink-0 h-auto py-0.5"
                   >
                     {option?.label || value}
                     <span
                       role="button" 
-                      tabIndex={0}  
-                      className="ml-1 rounded-full outline-none cursor-pointer inline-flex items-center justify-center hover:bg-blue-100"
+                      tabIndex={disabled ? -1 : 0}  
+                      className={cn(
+                        "ml-1 rounded-full outline-none cursor-pointer inline-flex items-center justify-center hover:bg-blue-100",
+                        disabled && "cursor-not-allowed pointer-events-none"
+                      )}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation(); 
@@ -104,8 +113,8 @@ export function MultiSelect({
             )}
           </div>
           
-          <div className="flex items-center gap-1 opacity-50 shrink-0 ml-2 self-start mt-1">
-            {selected.length > 0 && (
+          <div className="flex items-center gap-1 opacity-50 shrink-0 ml-2 self-center">
+            {selected.length > 0 && !disabled && ( // Ascunde butonul Clear dacă e disabled
               <div
                 role="button"
                 className="p-0.5 hover:bg-gray-100 rounded-md cursor-pointer pointer-events-auto"
@@ -118,37 +127,34 @@ export function MultiSelect({
           </div>
         </Button>
       </PopoverTrigger>
-      <PopoverContent 
-        className="w-(--radix-popover-trigger-width) p-0 border-gray-200 shadow-md" 
-        align="start"
-      >
-        <Command>
-          <CommandInput placeholder="Caută..." className="h-9" />
-          <CommandList className="max-h-64">
-            <CommandEmpty>Nu am găsit rezultate.</CommandEmpty>
-            <CommandGroup className="p-1">
-              {options.map((option) => {
-                const isSelected = selected.includes(option.value);
-                return (
-                  <CommandItem
-                    key={option.value}
-                    onSelect={() => handleSelect(option.value)}
-                    className="aria-selected:bg-gray-100 aria-selected:text-brand-blue"
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4 text-brand-blue",
-                        isSelected ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                    <span className="text-gray-900">{option.label}</span>
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
+      {!disabled && ( // Nu randa conținutul Popover-ului dacă e disabled
+        <PopoverContent 
+          className="w-(--radix-popover-trigger-width) p-0 border-gray-200 shadow-md" 
+          align="start"
+        >
+          <Command>
+            <CommandInput placeholder="Caută..." className="h-9" />
+            <CommandList className="max-h-64">
+              <CommandEmpty>Nu am găsit rezultate.</CommandEmpty>
+              <CommandGroup className="p-1">
+                {options.map((option) => {
+                  const isSelected = selected.includes(option.value);
+                  return (
+                    <CommandItem
+                      key={option.value}
+                      onSelect={() => handleSelect(option.value)}
+                      className="aria-selected:bg-gray-100 aria-selected:text-brand-blue"
+                    >
+                      <Check className={cn("mr-2 h-4 w-4 text-brand-blue", isSelected ? "opacity-100" : "opacity-0")} />
+                      <span className="text-gray-900">{option.label}</span>
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      )}
     </Popover>
   );
 }

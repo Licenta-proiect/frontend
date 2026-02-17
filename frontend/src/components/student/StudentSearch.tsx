@@ -166,11 +166,22 @@ export function StudentSearch() {
               onValueChange={setSelectedSubject} 
               disabled={!selectedGroupId || isLoadingMaterii}
             >
-              <SelectTrigger id="search-subject" className="w-full focus:ring-brand-blue/30 border-gray-200">
+              <SelectTrigger 
+                id="search-subject" 
+                className={cn(
+                  "w-full border-gray-200 focus:ring-brand-blue/30 transition-all",
+                  (!selectedGroupId || isLoadingMaterii) && "opacity-50 cursor-not-allowed bg-gray-50"
+                )}
+              >
                 {isLoadingMaterii ? (
-                  <div className="flex items-center gap-2"><Loader2 className="h-3 w-3 animate-spin"/> Se încarcă...</div>
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-3 w-3 animate-spin text-brand-blue"/> 
+                    <span className="text-muted-foreground">Se încarcă...</span>
+                  </div>
                 ) : (
-                  <SelectValue placeholder={!selectedGroupId ? "Alegeți mai întâi grupa" : "Selectează materia"} />
+                  <SelectValue 
+                    placeholder={!selectedGroupId ? "Alegeți mai întâi grupa" : "Selectează materia"} 
+                  />
                 )}
               </SelectTrigger>
               <SelectContent>
