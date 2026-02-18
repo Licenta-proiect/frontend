@@ -4,8 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { Mail, CheckCircle2, XCircle, Clock, History } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { ProfessorRequest } from "@/components/admin/AdminUsers";
+import api from "@/services/api";
 
-export function AdminRequests({ requests }: { requests: any[] }) {
+export function AdminRequests({ requests, onUpdate }: { requests: ProfessorRequest[], onUpdate: () => void }) {
   const pending = requests.filter(r => r.status === "pending");
   const processed = requests.filter(r => r.status !== "pending");
 
@@ -18,8 +20,25 @@ export function AdminRequests({ requests }: { requests: any[] }) {
     }
   };
 
+  const handleAction = async (requestId: number, action: 'approve' | 'reject') => {
+    try {
+      await api.post(`/admin/requests/${action}/${requestId}`);
+      toast.success(action === 'approve' ? "Cerere aprobată!" : "Cerere respinsă!");
+      onUpdate(); // Reîmprospătăm lista din AdminUsers
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || "Eroare la procesarea cererii");
+    }
+  };
+
+  // Funcție pentru a formata data în siguranță
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return "N/A";
+    const date = new Date(dateStr);
+    return isNaN(date.getTime()) ? "Dată invalidă" : date.toLocaleString("ro-RO");
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <Card className="border-gray-200 shadow-sm">
         <CardHeader className="bg-transparent border-none pb-2">
           <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
@@ -38,19 +57,27 @@ export function AdminRequests({ requests }: { requests: any[] }) {
               <Card key={request.id} className="border-l-4 border-l-amber-500 shadow-xs hover:bg-gray-50/30 transition-colors">
                 <CardContent className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="space-y-1 w-full">
-                    <div className="flex items-center gap-3">
-                      <span className="font-bold text-gray-900">{request.email}</span>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="font-bold text-gray-900">{request.lastName} {request.firstName}</span>
+                      <span className="text-sm text-gray-600">({request.email})</span>
                       <Badge className={getStatusBadge(request.status)}>ÎN AȘTEPTARE</Badge>
                     </div>
                     <p className="text-sm text-gray-500 font-medium flex items-center gap-2">
-                      <Clock className="h-3.5 w-3.5 text-brand-blue" /> Trimisă: {request.requestDate.toLocaleString("ro-RO")}
+                      <Clock className="h-3.5 w-3.5 text-brand-blue" /> Trimisă: {formatDate(request.data_cerere)}
                     </p>
                   </div>
                   <div className="flex gap-2 shrink-0 w-full sm:w-auto">
-                    <Button onClick={() => toast.success("Aprobat!")} className="bg-green-600 hover:bg-green-700 text-white font-semibold flex-1 sm:flex-none active:scale-95 shadow-md">
+                    <Button 
+                      onClick={() => handleAction(request.id, 'approve')} 
+                      className="bg-green-600 hover:bg-green-700 text-white font-semibold flex-1 sm:flex-none active:scale-95 shadow-md"
+                    >
                       <CheckCircle2 className="h-4 w-4 mr-2" /> Aprobă
                     </Button>
-                    <Button variant="outline" onClick={() => toast.error("Respins!")} className="text-brand-red border-red-100 hover:bg-red-50 font-semibold flex-1 sm:flex-none active:scale-95 shadow-md">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleAction(request.id, 'reject')} 
+                      className="text-brand-red border-red-100 hover:bg-red-50 font-semibold flex-1 sm:flex-none active:scale-95 shadow-md"
+                    >
                       <XCircle className="h-4 w-4 mr-2" /> Respinge
                     </Button>
                   </div>
@@ -62,24 +89,33 @@ export function AdminRequests({ requests }: { requests: any[] }) {
       </Card>
 
       <Card className="border-gray-200 shadow-sm">
-        <CardHeader className="bg-transparent border-none pb-2"><CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl"><History className="h-5 w-5 text-brand-blue" /> Istoric cereri</CardTitle></CardHeader>
+        <CardHeader className="bg-transparent border-none pb-2">
+          <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
+            <History className="h-5 w-5 text-brand-blue" /> Istoric cereri
+          </CardTitle>
+        </CardHeader>
         <CardContent className="space-y-3">
-          {processed.length === 0 ? <p className="text-center py-6 text-gray-500 font-medium text-sm italic">Nicio cerere procesată</p> : 
-            processed.map((request: any) => (
+          {processed.length === 0 ? (
+            <p className="text-center py-6 text-gray-500 font-medium text-sm italic">Nicio cerere procesată</p>
+          ) : (
+            processed.map((request) => (
               <Card key={request.id} className="opacity-85 border-gray-100 shadow-none hover:opacity-100 transition-opacity">
                 <CardContent className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-3">
-                      <span className="font-bold text-gray-900 text-sm">{request.email}</span>
+                      <span className="font-bold text-gray-900 text-sm">{request.lastName} {request.firstName}</span>
                       <Badge className={cn(getStatusBadge(request.status), "text-[10px]")}>
                         {request.status === "approved" ? "APROBATĂ" : "RESPINSĂ"}
                       </Badge>
                     </div>
-                    <p className="text-xs text-gray-500 font-semibold">Procesată la: {request.requestDate.toLocaleDateString("ro-RO")}</p>
+                    <p className="text-xs text-gray-500 font-semibold">
+                      Solicitat la: {formatDate(request.data_cerere)}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            ))
+          )}
         </CardContent>
       </Card>
     </div>

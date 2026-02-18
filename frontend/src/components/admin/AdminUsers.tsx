@@ -16,13 +16,14 @@ import { Button } from "../ui/button";
 import { RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface ProfessorRequest {
+export interface ProfessorRequest {
   id: number;
   lastName: string;
   firstName: string;
   email: string;
   status: string;
   data_cerere: string;
+  data_solutionare?: string;
 }
 
 export function AdminUsers() {
