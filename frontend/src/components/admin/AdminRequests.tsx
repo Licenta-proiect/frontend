@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import api from "@/services/api";
 import { AxiosError } from "axios";
+import { useState } from "react";
 
 // Definim interfața aici pentru a evita importurile circulare și eroarea de tip "any"
 export interface ProfessorRequest {
@@ -26,6 +27,8 @@ interface AdminRequestsProps {
 }
 
 export function AdminRequests({ requests, onUpdate }: AdminRequestsProps) {
+  const [processingId, setProcessingId] = useState<number | null>(null);
+
   const pending = requests.filter(r => r.status === "pending");
   const processed = requests.filter(r => r.status !== "pending");
 
@@ -39,6 +42,8 @@ export function AdminRequests({ requests, onUpdate }: AdminRequestsProps) {
   };
 
   const handleAction = async (requestId: number, action: 'approve' | 'reject') => {
+    setProcessingId(requestId);
+
     try {
       await api.post(`/admin/requests/${action}/${requestId}`);
       toast.success(action === 'approve' ? "Cerere aprobată!" : "Cerere respinsă!");
@@ -49,6 +54,7 @@ export function AdminRequests({ requests, onUpdate }: AdminRequestsProps) {
     } finally {
       // Executăm onUpdate() indiferent dacă a reușit sau a dat eroare
       // pentru a reflecta noul status (rejected) în listă
+      setProcessingId(null); // Finalizează procesarea
       onUpdate();
     }
   };
@@ -79,7 +85,7 @@ export function AdminRequests({ requests, onUpdate }: AdminRequestsProps) {
           ) : (
             pending.map((request) => (
               <Card key={request.id} className="border-l-4 border-l-amber-700 shadow-xs hover:bg-gray-50/30 transition-colors">
-                <CardContent className="pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="space-y-2 w-full">
                     {/* 1. Numele cu eticheta */}
                     <div className="flex items-center gap-3">
@@ -103,17 +109,19 @@ export function AdminRequests({ requests, onUpdate }: AdminRequestsProps) {
 
                   <div className="flex gap-2 shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
                     <Button 
+                      disabled={processingId === request.id}
                       onClick={() => handleAction(request.id, 'approve')} 
                       className="bg-green-600 hover:bg-green-700 text-white font-semibold flex-1 sm:flex-none active:scale-95 shadow-md"
                     >
-                      <CheckCircle2 className="h-4 w-4 mr-2" /> Aprobă
+                      <CheckCircle2 className="h-4 w-4 mr-2" /> {processingId === request.id ? "Se procesează..." : "Aprobă"}
                     </Button>
                     <Button 
                       variant="outline" 
+                      disabled={processingId === request.id}
                       onClick={() => handleAction(request.id, 'reject')} 
                       className="text-brand-red hover:text-brand-red border-red-100 hover:bg-red-50 font-semibold flex-1 sm:flex-none active:scale-95 shadow-md"
                     >
-                      <XCircle className="h-4 w-4 mr-2" /> Respinge
+                      <XCircle className="h-4 w-4 mr-2" /> {processingId === request.id ? "Se procesează..." : "Respinge"} 
                     </Button>
                   </div>
                 </CardContent>

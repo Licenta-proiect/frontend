@@ -34,6 +34,10 @@ export function AdminUsers() {
 
   // Handler pentru schimbarea tab-urilor interne (Toggle-ul de Admin)
   const handleViewChange = (value: string) => {
+    // Resetăm stările de dialog/eroare când schimbăm tab-ul
+    setEditDialogOpen(false);
+    setDeleteDialogOpen(false);
+    setEmailError("");
     updateParams(value);
   };
 
@@ -67,7 +71,7 @@ export function AdminUsers() {
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, [fetchData, currentView]);
 
   const pendingCount = useMemo(() => 
     professorRequests.filter(r => r.status === "pending").length, 
