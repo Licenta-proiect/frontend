@@ -2,9 +2,6 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import api from "@/services/api";
@@ -12,6 +9,8 @@ import { AxiosError } from "axios";
 import { AdminUserForm } from "./AdminUserForm";
 import { AdminUserList, User as UserData } from "./AdminUserList";
 import { AdminRequests } from "./AdminRequests";
+import { AdminUserDeleteDialog } from "./AdminUserDeleteDialog";
+import { AdminUserEditDialog } from "./AdminUserEditDialog";
 import { Button } from "../ui/button";
 import { RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -161,79 +160,24 @@ export function AdminUsers() {
       </Tabs>
 
       {/* Dialog Editare Email */}
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-[95vw] sm:max-w-md rounded-lg">
-          <DialogHeader>
-            <DialogTitle className="text-gray-900 font-semibold text-xl">Modificare email utilizator</DialogTitle>
-            <DialogDescription>
-              Utilizator: {userToEdit?.lastName} {userToEdit?.firstName}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-4">
-              <Input
-                type="email"
-                placeholder="Noua adresă de email"
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-                className={cn(
-                  "focus-visible:ring-1 border-gray-200 transition-colors",
-                  emailError ? "border-brand-red focus-visible:ring-brand-red" : "focus-visible:ring-brand-blue/30"
-                )}
-              />
-              <p className="text-xs text-gray-500 italic">
-                * Schimbarea emailului va duce la deconectarea utilizatorului dacă acesta este online.
-              </p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button 
-              variant="outline"
-              className="font-semibold rounded-lg border-gray-200 text-gray-600 hover:bg-gray-100"
-              onClick={() => setEditDialogOpen(false)}
-            >
-              Anulează
-            </Button>
-            <Button 
-              onClick={handleUpdateEmail} 
-              disabled={isUpdating || !newEmail || newEmail === userToEdit?.email}
-              className="bg-brand-blue hover:bg-brand-blue-dark active:bg-brand-blue-dark active:scale-95 text-white transition-all shadow-md" 
-            >
-              {isUpdating ? "Se salvează..." : "Salvează"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AdminUserEditDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        userToEdit={userToEdit}
+        newEmail={newEmail}
+        setNewEmail={setNewEmail}
+        emailError={emailError}
+        isUpdating={isUpdating}
+        onConfirm={handleUpdateEmail}
+        isSameEmail={newEmail === userToEdit?.email}
+      />
 
       {/* Alert Dialog Ștergere */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="rounded-xl border-gray-200 shadow-xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="font-semibold text-xl text-gray-900">Confirmare ștergere</AlertDialogTitle>
-            <AlertDialogDescription>
-              Sunteți sigur că doriți să ștergeți acest utilizator? Această acțiune nu poate fi anulată.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel asChild>
-              <Button 
-                variant="ghost" 
-                className="font-semibold rounded-lg border-gray-200 text-gray-600 hover:bg-gray-100"
-              >
-                Anulează
-              </Button>
-            </AlertDialogCancel>
-            <AlertDialogAction asChild>
-              <Button 
-                onClick={handleDeleteConfirm} 
-                className="bg-brand-red hover:bg-red-700 text-white font-semibold rounded-lg shadow-md transition-all active:scale-95"
-              >
-                Șterge utilizator
-              </Button>
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <AdminUserDeleteDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 }
