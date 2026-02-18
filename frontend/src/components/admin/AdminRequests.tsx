@@ -167,7 +167,7 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
                   className="w-full font-semibold border-gray-200 text-brand-blue hover:bg-blue-50 transition-all active:scale-95"
                   onClick={() => setPendingLimit(prev => prev + step)}
                 >
-                  Vezi mai multe cereri ({allPending.length - pendingLimit} rămase)
+                  Încarcă mai multe cereri ({allPending.length - pendingLimit} rămase)
                 </Button>
               )}
             </>
@@ -235,6 +235,19 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
                 onClick={() => setDisplayLimit(prev => prev + step)}
               >
                 Încarcă mai multe cereri ({allProcessed.length - displayLimit} rămase)
+              </Button>
+            )}
+
+            {/* butonul de "Vezi mai puțin" */}
+            {displayLimit > step && (
+              <Button 
+                variant="link" 
+                onClick={() => {
+                  setDisplayLimit(step);
+                  //window.scrollTo({ top: 0, behavior: 'smooth' }); // Opțional, pentru a reveni sus
+                }}
+              >
+                Arată mai puține
               </Button>
             )}
           </>

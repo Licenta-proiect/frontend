@@ -28,8 +28,10 @@ export function AdminUserList({
   onEditClick: (user: User) => void,
   refreshButton?: React.ReactNode
 }) {
+  const step = 10;
   const [roleFilter, setRoleFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [displayLimit, setDisplayLimit] = useState(step);
   
   const [storedEmail] = useState<string | null>(() => {
     if (typeof window !== "undefined") return localStorage.getItem("userEmail");
@@ -56,6 +58,8 @@ export function AdminUserList({
     return matchesRole && matchesSearch;
   });
 
+  const visibleUsers = filtered.slice(0, displayLimit);
+
   return (
     <Card className="border-gray-200 shadow-sm">
       <CardHeader>
@@ -78,11 +82,17 @@ export function AdminUserList({
                 <Input 
                   placeholder="Caută după nume sau email..." 
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setDisplayLimit(step); // Resetăm limita la căutare nouă
+                  }}
                   className="pl-9 h-10 focus-visible:ring-1 border-gray-200 transition-colors shadow-xs text-sm"
                 />
               </div>
-              <Select value={roleFilter} onValueChange={setRoleFilter}>
+              <Select value={roleFilter} onValueChange={(val) => {
+                setRoleFilter(val);
+                setDisplayLimit(step); // Resetăm limita la schimbarea filtrului
+              }}>
                 <SelectTrigger className="h-10 text-sm border-gray-200 shadow-xs min-w-35">
                   <SelectValue placeholder="Rol" />
                 </SelectTrigger>
@@ -98,52 +108,69 @@ export function AdminUserList({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {filtered.map((user) => {
-          if (!user) return null;
-          const isMe = storedEmail && user.email?.toLowerCase().trim() === storedEmail.toLowerCase().trim();
+        {filtered.length === 0 ? (
+          <p className="text-center py-6 text-gray-500 font-medium text-sm italic">Niciun utilizator găsit</p>
+        ) : (
+          <>
+            {visibleUsers.map((user) => {
+              if (!user) return null;
+              const isMe = storedEmail && user.email?.toLowerCase().trim() === storedEmail.toLowerCase().trim();
 
-          return (
-            <Card key={user.id || user.email} className="border shadow-xs hover:bg-gray-50/50 transition-colors">
-              <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <div className="font-medium text-md text-gray-900">{user.lastName} {user.firstName}</div>
-                    <Badge variant="outline" className={cn(getRoleBadgeColor(user.role))}>
-                      {user.role?.toUpperCase()}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
-                    <Mail className="h-4 w-4 text-brand-blue" />
-                    <span>{user.email}</span>
-                  </div>
-                </div>
-                <div className="flex gap-2 shrink-0">
-                  {/* Ascundem butoanele dacă este userul curent */}
-                  {!isMe && (
-                    <>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => onEditClick(user)}
-                        className="text-gray-600 shadow-xs border-gray-200 hover:bg-gray-100 font-semibold"
-                      >
-                        <Edit2 className="h-3.5 w-3.5 mr-2" /> Editează
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => onDeleteClick(user.email)} 
-                        className="text-brand-red shadow-xs border-red-100 hover:bg-red-50 hover:text-brand-red font-semibold"
-                      >
-                        <Trash2 className="h-3.5 w-3.5 mr-2" /> Șterge
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+              return (
+                <Card key={user.id || user.email} className="border shadow-xs hover:bg-gray-50/50 transition-colors">
+                  <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <div className="font-medium text-md text-gray-900">{user.lastName} {user.firstName}</div>
+                        <Badge variant="outline" className={cn(getRoleBadgeColor(user.role))}>
+                          {user.role?.toUpperCase()}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
+                        <Mail className="h-4 w-4 text-brand-blue" />
+                        <span>{user.email}</span>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      {/* Ascundem butoanele dacă este userul curent */}
+                      {!isMe && (
+                        <>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={() => onEditClick(user)}
+                            className="text-gray-600 shadow-xs border-gray-200 hover:bg-gray-100 font-semibold"
+                          >
+                            <Edit2 className="h-3.5 w-3.5 mr-2" /> Editează
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={() => onDeleteClick(user.email)} 
+                            className="text-brand-red shadow-xs border-red-100 hover:bg-red-50 hover:text-brand-red font-semibold"
+                          >
+                            <Trash2 className="h-3.5 w-3.5 mr-2" /> Șterge
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+      
+            {/* Butonul "Vezi mai mulți" - apare doar dacă mai sunt utilizatori de afișat */}
+            {filtered.length > displayLimit && (
+              <Button 
+                variant="ghost" 
+                className="w-full font-semibold border-gray-200 text-brand-blue hover:bg-blue-50 transition-all active:scale-95"
+                onClick={() => setDisplayLimit(prev => prev + step)}
+              >
+                Încarcă mai mulți utilizatori ({filtered.length - displayLimit} rămași)
+              </Button>
+            )}
+          </>
+        )}
       </CardContent>
     </Card>
   );
