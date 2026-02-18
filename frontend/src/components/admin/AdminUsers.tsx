@@ -9,22 +9,12 @@ import api from "@/services/api";
 import { AxiosError } from "axios";
 import { AdminUserForm } from "./AdminUserForm";
 import { AdminUserList, User as UserData } from "./AdminUserList";
-import { AdminRequests } from "./AdminRequests";
+import { AdminRequests, ProfessorRequest } from "./AdminRequests";
 import { AdminUserDeleteDialog } from "./AdminUserDeleteDialog";
 import { AdminUserEditDialog } from "./AdminUserEditDialog";
 import { Button } from "../ui/button";
 import { RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-export interface ProfessorRequest {
-  id: number;
-  lastName: string;
-  firstName: string;
-  email: string;
-  status: string;
-  data_cerere: string;
-  data_solutionare?: string;
-}
 
 export function AdminUsers() {
   const searchParams = useSearchParams();
@@ -174,7 +164,10 @@ export function AdminUsers() {
         </TabsContent>
 
         <TabsContent value="requests" className="mt-6">
-          <AdminRequests requests={professorRequests} />
+          <AdminRequests 
+            requests={professorRequests} 
+            onUpdate={fetchData} 
+          />
         </TabsContent>
       </Tabs>
 

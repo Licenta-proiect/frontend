@@ -1,13 +1,31 @@
+"use client";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Mail, CheckCircle2, XCircle, Clock, History } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { ProfessorRequest } from "@/components/admin/AdminUsers";
 import api from "@/services/api";
+import { AxiosError } from "axios";
 
-export function AdminRequests({ requests, onUpdate }: { requests: ProfessorRequest[], onUpdate: () => void }) {
+// Definim interfața aici pentru a evita importurile circulare și eroarea de tip "any"
+export interface ProfessorRequest {
+  id: number;
+  lastName: string;
+  firstName: string;
+  email: string;
+  status: string;
+  data_cerere: string;
+  data_solutionare?: string;
+}
+
+interface AdminRequestsProps {
+  requests: ProfessorRequest[];
+  onUpdate: () => void;
+}
+
+export function AdminRequests({ requests, onUpdate }: AdminRequestsProps) {
   const pending = requests.filter(r => r.status === "pending");
   const processed = requests.filter(r => r.status !== "pending");
 
@@ -24,13 +42,15 @@ export function AdminRequests({ requests, onUpdate }: { requests: ProfessorReque
     try {
       await api.post(`/admin/requests/${action}/${requestId}`);
       toast.success(action === 'approve' ? "Cerere aprobată!" : "Cerere respinsă!");
-      onUpdate(); // Reîmprospătăm lista din AdminUsers
-    } catch (error: any) {
-      toast.error(error.response?.data?.detail || "Eroare la procesarea cererii");
+      onUpdate(); 
+    } catch (error) {
+      // Castăm eroarea la AxiosError pentru a extrage detaliile fără a folosi "any"
+      const axiosError = error as AxiosError<{ detail: string }>;
+      const errorMessage = axiosError.response?.data?.detail || "Eroare la procesarea cererii";
+      toast.error(errorMessage);
     }
   };
 
-  // Funcție pentru a formata data în siguranță
   const formatDate = (dateStr: string) => {
     if (!dateStr) return "N/A";
     const date = new Date(dateStr);
@@ -44,7 +64,9 @@ export function AdminRequests({ requests, onUpdate }: { requests: ProfessorReque
           <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
             <Mail className="h-5 w-5 text-brand-blue" /> Cereri în așteptare
           </CardTitle>
-          <CardDescription className="text-gray-600 font-medium">Procesați solicitările de acces pentru cadrele didactice</CardDescription>
+          <CardDescription className="text-gray-600 font-medium">
+            Procesați solicitările de acces pentru cadrele didactice
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {pending.length === 0 ? (
