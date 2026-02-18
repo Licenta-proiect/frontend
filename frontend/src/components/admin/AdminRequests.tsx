@@ -42,12 +42,14 @@ export function AdminRequests({ requests, onUpdate }: AdminRequestsProps) {
     try {
       await api.post(`/admin/requests/${action}/${requestId}`);
       toast.success(action === 'approve' ? "Cerere aprobată!" : "Cerere respinsă!");
-      onUpdate(); 
     } catch (error) {
-      // Castăm eroarea la AxiosError pentru a extrage detaliile fără a folosi "any"
       const axiosError = error as AxiosError<{ detail: string }>;
-      const errorMessage = axiosError.response?.data?.detail || "Eroare la procesarea cererii";
+      const errorMessage = axiosError.response?.data?.detail || "Eroare la procesare";
       toast.error(errorMessage);
+    } finally {
+      // Executăm onUpdate() indiferent dacă a reușit sau a dat eroare
+      // pentru a reflecta noul status (rejected) în listă
+      onUpdate();
     }
   };
 
@@ -115,6 +117,7 @@ export function AdminRequests({ requests, onUpdate }: AdminRequestsProps) {
           <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
             <History className="h-5 w-5 text-brand-blue" /> Istoric cereri
           </CardTitle>
+          <CardDescription className="text-gray-600 font-medium">Cereri procesate recent</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {processed.length === 0 ? (
