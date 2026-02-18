@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -25,15 +26,33 @@ interface ProfessorRequest {
 }
 
 export function AdminUsers() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const currentView = searchParams.get("view") || "list";
+
+  const updateParams = useCallback((viewValue: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    // Păstrăm tab=users (sau îl setăm dacă nu există) pentru nav bar
+    params.set("tab", "users"); 
+    // Actualizăm view-ul (list sau requests)
+    params.set("view", viewValue);
+    
+    router.replace(`?${params.toString()}`, { scroll: false });
+  }, [searchParams, router]);
+
+  // Handler pentru schimbarea tab-urilor interne (Toggle-ul de Admin)
+  const handleViewChange = (value: string) => {
+    updateParams(value);
+  };
+
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
-  
-  // Stări pentru Editare
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [userToEdit, setUserToEdit] = useState<UserData | null>(null);
   const [newEmail, setNewEmail] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
-  const [emailError, setEmailError] = useState(""); // Folosim un string pentru mesaj de eroare local
+  const [emailError, setEmailError] = useState("");
 
   const [users, setUsers] = useState<UserData[]>([]);
   const [professorRequests, setProfessorRequests] = useState<ProfessorRequest[]>([]);
@@ -123,9 +142,9 @@ export function AdminUsers() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 font-sans">
-      <Tabs defaultValue="users" className="w-full">
+      <Tabs value={currentView} onValueChange={handleViewChange} className="w-full">
         <TabsList className="grid w-full grid-cols-2 bg-gray-100/50 p-1 h-12 rounded-xl border border-gray-200">
-          <TabsTrigger value="users" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-brand-blue data-[state=active]:shadow-sm font-semibold">
+          <TabsTrigger value="list" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-brand-blue data-[state=active]:shadow-sm font-semibold">
             Gestionare utilizatori
           </TabsTrigger>
           <TabsTrigger value="requests" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-brand-blue data-[state=active]:shadow-sm font-semibold">
@@ -138,7 +157,7 @@ export function AdminUsers() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="users" className="space-y-6 mt-6">
+        <TabsContent value="list" className="space-y-6 mt-6">
           <AdminUserForm onAdd={fetchData} />
           <AdminUserList 
             users={users} 
@@ -154,7 +173,6 @@ export function AdminUsers() {
         </TabsContent>
 
         <TabsContent value="requests" className="mt-6">
-          {/* Eliminat onUpdate dacă componenta AdminRequests nu îl suportă în interfață */}
           <AdminRequests requests={professorRequests} />
         </TabsContent>
       </Tabs>

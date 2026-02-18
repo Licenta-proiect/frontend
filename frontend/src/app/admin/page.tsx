@@ -57,7 +57,7 @@ function AdminDashboardContent() {
       <div className="space-y-6">
         {activeTab === "sync" && <AdminSync />}
         {activeTab === "history" && <AdminHistory />}
-        {activeTab === "users" && <AdminUsers />}
+        {activeTab === "users" && <Suspense fallback={<div>Încărcare...</div>}><AdminUsers /></Suspense>}
       </div>
     </DashboardLayout>
   );
