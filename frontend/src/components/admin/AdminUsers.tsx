@@ -6,6 +6,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import api from "@/services/api";
+import { AxiosError } from "axios";
 import { AdminUserForm } from "./AdminUserForm";
 import { AdminUserList } from "./AdminUserList";
 import { AdminRequests } from "./AdminRequests";
@@ -48,12 +49,22 @@ export function AdminUsers() {
 
   const handleDeleteConfirm = async () => {
     if (!userToDelete) return;
+    
     try {
-      await api.delete(`/admin/users/delete/${userToDelete}`);
-      toast.success("Utilizator șters!");
+      // Captăm răspunsul de la server
+      const response = await api.delete(`/admin/users/delete/${userToDelete}`);
+      
+      // Afișăm mesajul exact trimis de backend
+      toast.success(response.data.message || "Utilizator șters!");
+      
       fetchData(); 
-    } catch {
-      toast.error("Eroare la ștergere");
+    } catch (err) {
+      // Castăm eroarea la AxiosError cu structura specifică FastAPI ({ detail: string })
+      const error = err as AxiosError<{ detail: string }>;
+      
+      // Extragem detaliile erorii trimise de backend
+      const detail = error.response?.data?.detail || "Eroare la ștergere";
+      toast.error(detail);
     } finally {
       setDeleteDialogOpen(false);
       setUserToDelete(null);

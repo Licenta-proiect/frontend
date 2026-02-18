@@ -25,13 +25,32 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
   const router = useRouter();
 
   useEffect(() => {
+    // 1. Verificare locală rapidă
     const token = Cookies.get("access_token");
     const userFirstName = localStorage.getItem("userFirstName");
+    
     if (!token || !userFirstName) {
       localStorage.clear();
       Cookies.remove("access_token");
       router.push("/");
+      return;
     }
+
+    // 2. Verificare "Who Am I" către server
+    // Acest apel va forța backend-ul să verifice dacă user-ul mai există în DB
+    const verifyAuth = async () => {
+      try {
+        // Folosim un endpoint care returnează date puține pentru performanță
+        // În cazul tău, /data/tip-activitate sau un endpoint nou de profile
+        await api.get("/me");
+      } catch {
+        // Dacă primești 401, interceptorul din services/api.ts 
+        // va rula automat localStorage.clear() și window.location.href = "/"
+        console.error("Sesiune invalidă detectată de server.");
+      }
+    };
+
+    verifyAuth();
   }, [router]);
 
   const [sheetOpen, setSheetOpen] = useState(false);
