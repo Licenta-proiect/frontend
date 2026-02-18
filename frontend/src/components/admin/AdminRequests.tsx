@@ -31,15 +31,22 @@ interface AdminRequestsProps {
 export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsProps) {
   const [processingId, setProcessingId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [displayLimit, setDisplayLimit] = useState(10);
 
   const pending = requests.filter(r => r.status === "pending");
 
   // Filtrăm istoricul în funcție de starea locală statusFilter
-  const processed = useMemo(() => {
+  const allProcessed = useMemo(() => {
     const history = requests.filter(r => r.status !== "pending");
-    if (statusFilter === "all") return history;
-    return history.filter(r => r.status === statusFilter);
+    const filtered = statusFilter === "all" 
+      ? history 
+      : history.filter(r => r.status === statusFilter);
+      
+    // Sortăm mereu cele mai recente la început
+    return filtered.sort((a, b) => new Date(b.data_cerere).getTime() - new Date(a.data_cerere).getTime());
   }, [requests, statusFilter]);
+
+  const visibleProcessed = allProcessed.slice(0, displayLimit);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -176,37 +183,47 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          {processed.length === 0 ? (
+          {allProcessed.length === 0 ? (
             <p className="text-center py-6 text-gray-500 font-medium text-sm italic">Nicio cerere găsită</p>
           ) : (
-            processed.map((request) => (
-              <Card key={request.id} className="shadow-xs hover:bg-gray-50/50 hover:opacity-100 transition-opacity">
-                <CardContent className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <>
+            {visibleProcessed.map((request) => (
+              <Card key={request.id} className="shadow-xs hover:bg-gray-50/50 transition-opacity">
+                <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="space-y-1">
-                    {/* 1. Numele cu eticheta */}
                     <div className="flex items-center gap-3">
-                      <span className="font-bold text-gray-900 text-md">{request.lastName} {request.firstName}</span>
+                      <span className="font-bold text-gray-900 text-md">
+                        {request.lastName} {request.firstName}
+                      </span>
                       <Badge className={cn(getStatusBadge(request.status))}>
                         {request.status === "approved" ? "APROBATĂ" : "RESPINSĂ"}
                       </Badge>
                     </div>
-
-                    {/* 2. Emailul cu icon */}
                     <div className="flex items-center gap-2 text-brand-blue font-semibold">
                       <Mail className="h-4 w-4" />
                       <span className="text-sm">{request.email}</span>
                     </div>
-
-                    {/* 3. Restul (Data) */}
                     <p className="text-xs text-gray-500 font-semibold">
                       Solicitat la: {formatDate(request.data_cerere)}
                     </p>
                   </div>
                 </CardContent>
               </Card>
-            ))
-          )}
-        </CardContent>
+            ))}
+
+            {/* butonul de "Vezi mai mult" */}
+            {allProcessed.length > displayLimit && (
+              <Button 
+                variant="ghost" 
+                className="w-full font-semibold border-gray-200 text-brand-blue hover:bg-blue-50 transition-all active:scale-95"
+                onClick={() => setDisplayLimit(prev => prev + 10)}
+              >
+                Încarcă mai multe cereri ({allProcessed.length - displayLimit} rămase)
+              </Button>
+            )}
+          </>
+        )}
+      </CardContent>
       </Card>
     </div>
   );
