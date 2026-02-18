@@ -11,6 +11,7 @@ import { AdminUserForm } from "./AdminUserForm";
 import { AdminUserList } from "./AdminUserList";
 import { AdminRequests } from "./AdminRequests";
 import { Button } from "../ui/button";
+import { RefreshCw } from "lucide-react"; // Import pentru iconița de refresh
 
 export function AdminUsers() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -26,7 +27,7 @@ export function AdminUsers() {
       // Putem aduce ambele seturi de date în paralel
       const [usersResponse, requestsResponse] = await Promise.all([
         api.get("/admin/users"),
-        //api.get("/admin/requests") // Presupunând că aceasta este ruta pentru cereri
+        api.get("/admin/requests") 
       ]);
       setUsers(usersResponse.data);
       setProfessorRequests(requestsResponse.data);
@@ -51,18 +52,11 @@ export function AdminUsers() {
     if (!userToDelete) return;
     
     try {
-      // Captăm răspunsul de la server
       const response = await api.delete(`/admin/users/delete/${userToDelete}`);
-      
-      // Afișăm mesajul exact trimis de backend
       toast.success(response.data.message || "Utilizator șters!");
-      
       fetchData(); 
     } catch (err) {
-      // Castăm eroarea la AxiosError cu structura specifică FastAPI ({ detail: string })
       const error = err as AxiosError<{ detail: string }>;
-      
-      // Extragem detaliile erorii trimise de backend
       const detail = error.response?.data?.detail || "Eroare la ștergere";
       toast.error(detail);
     } finally {
@@ -76,11 +70,10 @@ export function AdminUsers() {
       <Tabs defaultValue="users" className="w-full">
         <TabsList className="grid w-full grid-cols-2 bg-gray-100/50 p-1 h-12 rounded-xl border border-gray-200">
           <TabsTrigger value="users" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-brand-blue data-[state=active]:shadow-sm font-semibold">
-            Gestionare Utilizatori
+            Gestionare utilizatori
           </TabsTrigger>
           <TabsTrigger value="requests" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-brand-blue data-[state=active]:shadow-sm font-semibold">
-            Cereri Profesori
-            {/* Badge pentru cereri în așteptare */}
+            Cereri profesori
             {pendingCount > 0 && (
               <Badge className="ml-2 bg-brand-red text-white border-none font-bold">
                 {pendingCount}
@@ -91,15 +84,31 @@ export function AdminUsers() {
 
         <TabsContent value="users" className="space-y-6 mt-6">
           <AdminUserForm onAdd={fetchData} />
-          <AdminUserList 
-            users={users} 
-            onDeleteClick={(email) => { setUserToDelete(email); setDeleteDialogOpen(true); }} 
-          />
+          
+          {/* Container pentru butonul de Refresh și listă */}
+          <div className="space-y-4">
+            <div className="flex justify-end">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={fetchData} 
+                disabled={isLoading}
+                className="gap-2 text-brand-blue border-brand-blue hover:bg-blue-50"
+              >
+                <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+                Actualizează lista
+              </Button>
+            </div>
+            
+            <AdminUserList 
+              users={users} 
+              onDeleteClick={(email) => { setUserToDelete(email); setDeleteDialogOpen(true); }} 
+            />
+          </div>
         </TabsContent>
 
-        {/* Tab-ul pentru Cereri restaurat */}
         <TabsContent value="requests" className="mt-6">
-          <AdminRequests requests={professorRequests} />
+          <AdminRequests requests={professorRequests} onUpdate={fetchData} />
         </TabsContent>
       </Tabs>
 
@@ -129,7 +138,7 @@ export function AdminUsers() {
                 Șterge utilizator
               </Button>
             </AlertDialogAction>
-        </AlertDialogFooter>
+          </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
