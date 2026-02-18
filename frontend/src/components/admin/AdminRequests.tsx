@@ -78,19 +78,30 @@ export function AdminRequests({ requests, onUpdate }: AdminRequestsProps) {
             </div>
           ) : (
             pending.map((request) => (
-              <Card key={request.id} className="border-l-4 border-l-amber-500 shadow-xs hover:bg-gray-50/30 transition-colors">
-                <CardContent className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="space-y-1 w-full">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span className="font-bold text-gray-900">{request.lastName} {request.firstName}</span>
-                      <span className="text-sm text-gray-600">({request.email})</span>
+              <Card key={request.id} className="border-l-4 border-l-amber-700 shadow-xs hover:bg-gray-50/30 transition-colors">
+                <CardContent className="pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="space-y-2 w-full">
+                    {/* 1. Numele cu eticheta */}
+                    <div className="flex items-center gap-3">
+                      <span className="font-semibold text-gray-900 text-lg">
+                        {request.lastName} {request.firstName}
+                      </span>
                       <Badge className={getStatusBadge(request.status)}>ÎN AȘTEPTARE</Badge>
                     </div>
+
+                    {/* 2. Emailul cu icon */}
+                    <div className="flex items-center gap-2 text-brand-blue font-semibold">
+                      <Mail className="h-4 w-4" />
+                      <span className="text-sm">{request.email}</span>
+                    </div>
+
+                    {/* 3. Restul (Data) */}
                     <p className="text-sm text-gray-500 font-medium flex items-center gap-2">
-                      <Clock className="h-3.5 w-3.5 text-brand-blue" /> Trimisă: {formatDate(request.data_cerere)}
+                      <Clock className="h-3.5 w-3.5" /> Trimisă la: {formatDate(request.data_cerere)}
                     </p>
                   </div>
-                  <div className="flex gap-2 shrink-0 w-full sm:w-auto">
+
+                  <div className="flex gap-2 shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
                     <Button 
                       onClick={() => handleAction(request.id, 'approve')} 
                       className="bg-green-600 hover:bg-green-700 text-white font-semibold flex-1 sm:flex-none active:scale-95 shadow-md"
@@ -100,7 +111,7 @@ export function AdminRequests({ requests, onUpdate }: AdminRequestsProps) {
                     <Button 
                       variant="outline" 
                       onClick={() => handleAction(request.id, 'reject')} 
-                      className="text-brand-red border-red-100 hover:bg-red-50 font-semibold flex-1 sm:flex-none active:scale-95 shadow-md"
+                      className="text-brand-red hover:text-brand-red border-red-100 hover:bg-red-50 font-semibold flex-1 sm:flex-none active:scale-95 shadow-md"
                     >
                       <XCircle className="h-4 w-4 mr-2" /> Respinge
                     </Button>
