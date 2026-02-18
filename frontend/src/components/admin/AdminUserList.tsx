@@ -19,10 +19,12 @@ interface User {
 
 export function AdminUserList({ 
   users, 
-  onDeleteClick 
+  onDeleteClick,
+  refreshButton
 }: { 
   users: User[], 
-  onDeleteClick: (email: string) => void
+  onDeleteClick: (email: string) => void,
+  refreshButton?: React.ReactNode
 }) {
   const [roleFilter, setRoleFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -61,9 +63,12 @@ export function AdminUserList({
         <div className="flex flex-col gap-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="space-y-1">
-              <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
-                <UserCog className="h-5 w-5 text-brand-blue" /> Lista utilizatori
-              </CardTitle>
+              <div className="flex items-center gap-3"> 
+                <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
+                  <UserCog className="h-5 w-5 text-brand-blue" /> Lista utilizatori
+                </CardTitle>
+                {refreshButton} 
+              </div>
               <CardDescription className="font-medium text-gray-600">
                 {filtered.length} utilizatori găsiți
               </CardDescription>

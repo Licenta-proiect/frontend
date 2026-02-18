@@ -65,6 +65,20 @@ export function AdminUsers() {
     }
   };
 
+  // Definim butonul de refresh pentru a-l trimite ca parametru
+  const refreshButton = (
+    <Button 
+      variant="ghost" 
+      size="icon" 
+      onClick={fetchData} 
+      disabled={isLoading}
+      className="h-8 w-8 text-brand-blue hover:bg-blue-50 rounded-full transition-all"
+      title="Actualizează lista"
+    >
+      <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+    </Button>
+  );
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500 font-sans">
       <Tabs defaultValue="users" className="w-full">
@@ -84,27 +98,11 @@ export function AdminUsers() {
 
         <TabsContent value="users" className="space-y-6 mt-6">
           <AdminUserForm onAdd={fetchData} />
-          
-          {/* Container pentru butonul de Refresh și listă */}
-          <div className="space-y-4">
-            <div className="flex justify-end">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={fetchData} 
-                disabled={isLoading}
-                className="gap-2 text-brand-blue border-brand-blue hover:bg-blue-50"
-              >
-                <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
-                Actualizează lista
-              </Button>
-            </div>
-            
             <AdminUserList 
               users={users} 
               onDeleteClick={(email) => { setUserToDelete(email); setDeleteDialogOpen(true); }} 
+              refreshButton={refreshButton}
             />
-          </div>
         </TabsContent>
 
         <TabsContent value="requests" className="mt-6">
