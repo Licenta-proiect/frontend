@@ -105,12 +105,12 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
             </div>
           ) : (
             pending.map((request) => (
-              <Card key={request.id} className="border-l-4 border-l-amber-700 shadow-xs hover:bg-gray-50/30 transition-colors">
+              <Card key={request.id} className="border-l-4 border-l-amber-700 shadow-xs hover:bg-gray-50/50 transition-colors">
                 <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="space-y-2 w-full">
                     {/* 1. Numele cu eticheta */}
                     <div className="flex items-center gap-3">
-                      <span className="font-semibold text-gray-900 text-lg">
+                      <span className="font-semibold text-gray-900 text-md">
                         {request.lastName} {request.firstName}
                       </span>
                       <Badge className={getStatusBadge(request.status)}>ÎN AȘTEPTARE</Badge>
@@ -132,7 +132,7 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
                     <Button 
                       disabled={processingId === request.id}
                       onClick={() => handleAction(request.id, 'approve')} 
-                      className="bg-green-600 hover:bg-green-700 text-white font-semibold flex-1 sm:flex-none active:scale-95 shadow-md"
+                      className="bg-green-600 hover:bg-green-700 text-white font-semibold flex-1 sm:flex-none active:scale-95 shadow-sm"
                     >
                       <CheckCircle2 className="h-4 w-4 mr-2" /> {processingId === request.id ? "Se procesează..." : "Aprobă"}
                     </Button>
@@ -140,7 +140,7 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
                       variant="outline" 
                       disabled={processingId === request.id}
                       onClick={() => handleAction(request.id, 'reject')} 
-                      className="text-brand-red hover:text-brand-red border-red-100 hover:bg-red-50 font-semibold flex-1 sm:flex-none active:scale-95 shadow-md"
+                      className="text-brand-red hover:text-brand-red border-red-100 hover:bg-red-50 font-semibold flex-1 sm:flex-none active:scale-95 shadow-sm"
                     >
                       <XCircle className="h-4 w-4 mr-2" /> {processingId === request.id ? "Se procesează..." : "Respinge"} 
                     </Button>
@@ -180,15 +180,24 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
             <p className="text-center py-6 text-gray-500 font-medium text-sm italic">Nicio cerere găsită</p>
           ) : (
             processed.map((request) => (
-              <Card key={request.id} className="opacity-85 border-gray-100 shadow-none hover:opacity-100 transition-opacity">
-                <CardContent className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <Card key={request.id} className="shadow-xs hover:bg-gray-50/50 hover:opacity-100 transition-opacity">
+                <CardContent className="flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="space-y-1">
+                    {/* 1. Numele cu eticheta */}
                     <div className="flex items-center gap-3">
-                      <span className="font-bold text-gray-900 text-sm">{request.lastName} {request.firstName}</span>
+                      <span className="font-bold text-gray-900 text-md">{request.lastName} {request.firstName}</span>
                       <Badge className={cn(getStatusBadge(request.status))}>
                         {request.status === "approved" ? "APROBATĂ" : "RESPINSĂ"}
                       </Badge>
                     </div>
+
+                    {/* 2. Emailul cu icon */}
+                    <div className="flex items-center gap-2 text-brand-blue font-semibold">
+                      <Mail className="h-4 w-4" />
+                      <span className="text-sm">{request.email}</span>
+                    </div>
+
+                    {/* 3. Restul (Data) */}
                     <p className="text-xs text-gray-500 font-semibold">
                       Solicitat la: {formatDate(request.data_cerere)}
                     </p>

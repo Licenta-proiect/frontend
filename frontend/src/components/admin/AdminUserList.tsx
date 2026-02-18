@@ -103,11 +103,11 @@ export function AdminUserList({
           const isMe = storedEmail && user.email?.toLowerCase().trim() === storedEmail.toLowerCase().trim();
 
           return (
-            <Card key={user.id || user.email} className="border border-gray-100 shadow-xs hover:bg-gray-50/50 transition-colors">
+            <Card key={user.id || user.email} className="border shadow-xs hover:bg-gray-50/50 transition-colors">
               <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-3">
-                    <h4 className="font-medium text-gray-900">{user.lastName} {user.firstName}</h4>
+                    <div className="font-medium text-md text-gray-900">{user.lastName} {user.firstName}</div>
                     <Badge variant="outline" className={cn(getRoleBadgeColor(user.role))}>
                       {user.role?.toUpperCase()}
                     </Badge>
@@ -125,7 +125,7 @@ export function AdminUserList({
                         size="sm" 
                         variant="outline" 
                         onClick={() => onEditClick(user)}
-                        className="text-gray-600 border-gray-200 hover:bg-gray-100 font-semibold"
+                        className="text-gray-600 shadow-xs border-gray-200 hover:bg-gray-100 font-semibold"
                       >
                         <Edit2 className="h-3.5 w-3.5 mr-2" /> Editează
                       </Button>
@@ -133,7 +133,7 @@ export function AdminUserList({
                         size="sm" 
                         variant="outline" 
                         onClick={() => onDeleteClick(user.email)} 
-                        className="text-brand-red border-red-100 hover:bg-red-50 hover:text-brand-red font-semibold"
+                        className="text-brand-red shadow-xs border-red-100 hover:bg-red-50 hover:text-brand-red font-semibold"
                       >
                         <Trash2 className="h-3.5 w-3.5 mr-2" /> Șterge
                       </Button>
