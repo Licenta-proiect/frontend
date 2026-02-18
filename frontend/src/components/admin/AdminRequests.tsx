@@ -21,17 +21,17 @@ export function AdminRequests({ requests }: { requests: any[] }) {
   return (
     <div className="space-y-6">
       <Card className="border-gray-200 shadow-sm">
-        <CardHeader className="border-b border-gray-100 bg-linear-to-r from-white to-blue-50/30">
+        <CardHeader className="bg-transparent border-none pb-2">
           <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
             <Mail className="h-5 w-5 text-brand-blue" /> Cereri în așteptare
           </CardTitle>
-          <CardDescription className="font-medium text-gray-600">Procesați solicitările de acces pentru cadrele didactice</CardDescription>
+          <CardDescription className="text-gray-600 font-medium">Procesați solicitările de acces pentru cadrele didactice</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4 pt-6">
+        <CardContent className="space-y-4">
           {pending.length === 0 ? (
             <div className="text-center py-12 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
               <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <p className="font-semibold text-gray-500">Nu există cereri în așteptare</p>
+              <p className="font-medium text-gray-500">Nu există cereri în așteptare</p>
             </div>
           ) : (
             pending.map((request) => (
@@ -62,8 +62,8 @@ export function AdminRequests({ requests }: { requests: any[] }) {
       </Card>
 
       <Card className="border-gray-200 shadow-sm">
-        <CardHeader className="border-b border-gray-50"><CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl"><History className="h-5 w-5 text-brand-blue" /> Istoric cereri</CardTitle></CardHeader>
-        <CardContent className="space-y-3 pt-4">
+        <CardHeader className="bg-transparent border-none pb-2"><CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl"><History className="h-5 w-5 text-brand-blue" /> Istoric cereri</CardTitle></CardHeader>
+        <CardContent className="space-y-3">
           {processed.length === 0 ? <p className="text-center py-6 text-gray-500 font-medium text-sm italic">Nicio cerere procesată</p> : 
             processed.map((request: any) => (
               <Card key={request.id} className="opacity-85 border-gray-100 shadow-none hover:opacity-100 transition-opacity">
