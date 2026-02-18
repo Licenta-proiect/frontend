@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Mail, CheckCircle2, XCircle, Clock, History } from "lucide-react";
+import { Mail, CheckCircle2, XCircle, Clock, History, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import api from "@/services/api";
@@ -24,9 +24,10 @@ export interface ProfessorRequest {
 interface AdminRequestsProps {
   requests: ProfessorRequest[];
   onUpdate: () => void;
+  isLoading: boolean;
 }
 
-export function AdminRequests({ requests, onUpdate }: AdminRequestsProps) {
+export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsProps) {
   const [processingId, setProcessingId] = useState<number | null>(null);
 
   const pending = requests.filter(r => r.status === "pending");
@@ -69,9 +70,21 @@ export function AdminRequests({ requests, onUpdate }: AdminRequestsProps) {
     <div className="space-y-6 animate-in fade-in duration-500">
       <Card className="border-gray-200 shadow-sm">
         <CardHeader className="bg-transparent border-none pb-2">
-          <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
-            <Mail className="h-5 w-5 text-brand-blue" /> Cereri în așteptare
-          </CardTitle>
+          {/* Antetul cu titlu și buton de refresh */}
+          <div className="flex items-center gap-3">
+            <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
+              <Mail className="h-5 w-5 text-brand-blue" /> Cereri în așteptare
+            </CardTitle>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={onUpdate}
+              disabled={isLoading} 
+              className="h-8 w-8 text-brand-blue hover:bg-blue-50 rounded-full transition-all"
+            >
+              <RefreshCw className={cn("h-4 w-4", isLoading && "animate-spin")} />
+            </Button>
+          </div>
           <CardDescription className="text-gray-600 font-medium">
             Procesați solicitările de acces pentru cadrele didactice
           </CardDescription>

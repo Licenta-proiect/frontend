@@ -171,6 +171,7 @@ export function AdminUsers() {
           <AdminRequests 
             requests={professorRequests} 
             onUpdate={fetchData} 
+            isLoading={isLoading}
           />
         </TabsContent>
       </Tabs>
