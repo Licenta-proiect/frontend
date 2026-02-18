@@ -4,11 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Mail, CheckCircle2, XCircle, Clock, History, RefreshCw } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import api from "@/services/api";
 import { AxiosError } from "axios";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 // Definim interfața aici pentru a evita importurile circulare și eroarea de tip "any"
 export interface ProfessorRequest {
@@ -29,9 +30,16 @@ interface AdminRequestsProps {
 
 export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsProps) {
   const [processingId, setProcessingId] = useState<number | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const pending = requests.filter(r => r.status === "pending");
-  const processed = requests.filter(r => r.status !== "pending");
+
+  // Filtrăm istoricul în funcție de starea locală statusFilter
+  const processed = useMemo(() => {
+    const history = requests.filter(r => r.status !== "pending");
+    if (statusFilter === "all") return history;
+    return history.filter(r => r.status === statusFilter);
+  }, [requests, statusFilter]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -145,15 +153,31 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
       </Card>
 
       <Card className="border-gray-200 shadow-sm">
-        <CardHeader className="bg-transparent border-none pb-2">
-          <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
-            <History className="h-5 w-5 text-brand-blue" /> Istoric cereri
-          </CardTitle>
-          <CardDescription className="text-gray-600 font-medium">Cereri procesate recent</CardDescription>
+        <CardHeader className="bg-transparent border-none pb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
+              <History className="h-5 w-5 text-brand-blue" /> Istoric cereri
+            </CardTitle>
+            <CardDescription className="text-gray-600 font-medium pt-1">Cereri procesate recent</CardDescription>
+          </div>
+          
+          {/* Filtru Istoric */}
+          <div className="flex items-center gap-2">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="h-10 text-sm border-gray-200 shadow-xs min-w-35">
+                <SelectValue placeholder="Filtrează" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toate</SelectItem>
+                <SelectItem value="approved">Aprobate</SelectItem>
+                <SelectItem value="rejected">Respinse</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </CardHeader>
         <CardContent className="space-y-3">
           {processed.length === 0 ? (
-            <p className="text-center py-6 text-gray-500 font-medium text-sm italic">Nicio cerere procesată</p>
+            <p className="text-center py-6 text-gray-500 font-medium text-sm italic">Nicio cerere găsită</p>
           ) : (
             processed.map((request) => (
               <Card key={request.id} className="opacity-85 border-gray-100 shadow-none hover:opacity-100 transition-opacity">
@@ -161,7 +185,7 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
                   <div className="space-y-1">
                     <div className="flex items-center gap-3">
                       <span className="font-bold text-gray-900 text-sm">{request.lastName} {request.firstName}</span>
-                      <Badge className={cn(getStatusBadge(request.status), "text-[10px]")}>
+                      <Badge className={cn(getStatusBadge(request.status))}>
                         {request.status === "approved" ? "APROBATĂ" : "RESPINSĂ"}
                       </Badge>
                     </div>
