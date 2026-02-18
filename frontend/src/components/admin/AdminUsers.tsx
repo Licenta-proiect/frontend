@@ -10,11 +10,20 @@ import { toast } from "sonner";
 import api from "@/services/api";
 import { AxiosError } from "axios";
 import { AdminUserForm } from "./AdminUserForm";
-import { AdminUserList } from "./AdminUserList";
+import { AdminUserList, User as UserData } from "./AdminUserList";
 import { AdminRequests } from "./AdminRequests";
 import { Button } from "../ui/button";
 import { RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+interface ProfessorRequest {
+  id: number;
+  lastName: string;
+  firstName: string;
+  email: string;
+  status: string;
+  data_cerere: string;
+}
 
 export function AdminUsers() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -22,20 +31,21 @@ export function AdminUsers() {
   
   // Stări pentru Editare
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [userToEdit, setUserToEdit] = useState<{email: string, firstName: string, lastName: string} | null>(null);
+  const [userToEdit, setUserToEdit] = useState<UserData | null>(null);
   const [newEmail, setNewEmail] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
+  const [emailError, setEmailError] = useState(""); // Folosim un string pentru mesaj de eroare local
 
-  const [users, setUsers] = useState<any[]>([]);
-  const [professorRequests, setProfessorRequests] = useState<any[]>([]);
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [professorRequests, setProfessorRequests] = useState<ProfessorRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
       const [usersResponse, requestsResponse] = await Promise.all([
-        api.get("/admin/users"),
-        api.get("/admin/requests") 
+        api.get<UserData[]>("/admin/users"),
+        api.get<ProfessorRequest[]>("/admin/requests") 
       ]);
       setUsers(usersResponse.data);
       setProfessorRequests(requestsResponse.data);
@@ -58,11 +68,11 @@ export function AdminUsers() {
   const handleDeleteConfirm = async () => {
     if (!userToDelete) return;
     try {
-      const response = await api.delete(`/admin/users/delete/${userToDelete}`);
+      const response = await api.delete<{message: string}>(`/admin/users/delete/${userToDelete}`);
       toast.success(response.data.message || "Utilizator șters!");
       fetchData(); 
     } catch (err) {
-      const error = err as AxiosError<any>;
+      const error = err as AxiosError<{detail: string | object}>;
       const detail = error.response?.data?.detail;
       toast.error(typeof detail === 'object' ? "Date invalide" : (detail || "Eroare la ștergere"));
     } finally {
@@ -72,16 +82,17 @@ export function AdminUsers() {
   };
 
   const handleUpdateEmail = async () => {
-    const newErrors: typeof errors = {};
+    setEmailError("");
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      toast.error("Vă rugăm să corectați câmpurile marcate");
+    if (!emailRegex.test(newEmail)) {
+      setEmailError("Format email invalid");
+      toast.error("Vă rugăm să introduceți o adresă de email validă");
       return;
     }
     
     if (!userToEdit || !newEmail || newEmail === userToEdit.email) return;
+    
     setIsUpdating(true);
     try {
       await api.put(`/admin/users/update/${userToEdit.email}`, {
@@ -91,7 +102,7 @@ export function AdminUsers() {
       setEditDialogOpen(false);
       fetchData();
     } catch (err) {
-      const error = err as AxiosError<any>;
+      const error = err as AxiosError<{detail: string | object}>;
       const detail = error.response?.data?.detail;
       toast.error(typeof detail === 'object' ? "Format email invalid" : (detail || "Eroare la actualizare"));
     } finally {
@@ -107,7 +118,7 @@ export function AdminUsers() {
       disabled={isLoading}
       className="h-8 w-8 text-brand-blue hover:bg-blue-50 rounded-full transition-all"
     >
-      <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+      <RefreshCw className={cn("h-4 w-4", isLoading && "animate-spin")} />
     </Button>
   );
 
@@ -136,6 +147,7 @@ export function AdminUsers() {
             onEditClick={(user) => { 
               setUserToEdit(user); 
               setNewEmail(user.email);
+              setEmailError("");
               setEditDialogOpen(true); 
             }}
             refreshButton={refreshButton}
@@ -143,37 +155,49 @@ export function AdminUsers() {
         </TabsContent>
 
         <TabsContent value="requests" className="mt-6">
-          <AdminRequests requests={professorRequests} onUpdate={fetchData} />
+          {/* Eliminat onUpdate dacă componenta AdminRequests nu îl suportă în interfață */}
+          <AdminRequests requests={professorRequests} />
         </TabsContent>
       </Tabs>
 
       {/* Dialog Editare Email */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="max-w-[95vw] sm:max-w-md rounded-lg">
-        <DialogHeader>
-          <DialogTitle className="text-gray-900 font-semibold text-xl">Modificare email utilizator</DialogTitle>
-          <DialogDescription>Utilizator: {userToEdit?.lastName} {userToEdit?.firstName}</DialogDescription>
+          <DialogHeader>
+            <DialogTitle className="text-gray-900 font-semibold text-xl">Modificare email utilizator</DialogTitle>
+            <DialogDescription>
+              Utilizator: {userToEdit?.lastName} {userToEdit?.firstName}
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <Input
-              type="email"
-              placeholder="Noua adresă de email"
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-              className={cn(
-                              "focus-visible:ring-1 border-gray-200 transition-colors",
-                              errors.email ? "border-brand-red focus-visible:ring-brand-red" : "focus-visible:ring-brand-blue/30"
-                            )}
-            />
+          <div className="space-y-4 py-2">
+            <div className="space-y-4">
+              <Input
+                type="email"
+                placeholder="Noua adresă de email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                className={cn(
+                  "focus-visible:ring-1 border-gray-200 transition-colors",
+                  emailError ? "border-brand-red focus-visible:ring-brand-red" : "focus-visible:ring-brand-blue/30"
+                )}
+              />
+              <p className="text-xs text-gray-500 italic">
+                * Schimbarea emailului va duce la deconectarea utilizatorului dacă acesta este online.
+              </p>
+            </div>
           </div>
           <DialogFooter>
-            <Button variant="outline"
-            className="font-semibold rounded-lg border-gray-200 text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-all active:scale-95"
-             onClick={() => setEditDialogOpen(false)}>Anulează</Button>
+            <Button 
+              variant="outline"
+              className="font-semibold rounded-lg border-gray-200 text-gray-600 hover:bg-gray-100"
+              onClick={() => setEditDialogOpen(false)}
+            >
+              Anulează
+            </Button>
             <Button 
               onClick={handleUpdateEmail} 
               disabled={isUpdating || !newEmail || newEmail === userToEdit?.email}
-              className="bg-brand-blue text-white"
+              className="bg-brand-blue hover:bg-brand-blue-dark active:bg-brand-blue-dark active:scale-95 text-white transition-all shadow-md" 
             >
               {isUpdating ? "Se salvează..." : "Salvează"}
             </Button>
@@ -202,7 +226,7 @@ export function AdminUsers() {
             <AlertDialogAction asChild>
               <Button 
                 onClick={handleDeleteConfirm} 
-                className="bg-brand-red hover:bg-red-700 active:bg-red-600 text-white font-semibold rounded-lg shadow-md transition-all active:scale-95"
+                className="bg-brand-red hover:bg-red-700 text-white font-semibold rounded-lg shadow-md transition-all active:scale-95"
               >
                 Șterge utilizator
               </Button>

@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input"; 
-import { UserCog, Filter, Mail, Trash2, Search, Edit2 } from "lucide-react";
+import { UserCog, Mail, Trash2, Search, Edit2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface User {
+export interface User {
   id: string;
   lastName: string;
   firstName: string;
@@ -76,10 +76,10 @@ export function AdminUserList({
               <div className="relative w-full sm:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input 
-                  placeholder="Caută..." 
+                  placeholder="Caută după nume sau email..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 h-10 border-gray-200 shadow-xs text-sm"
+                  className="pl-9 h-10 focus-visible:ring-1 border-gray-200 transition-colors shadow-xs text-sm"
                 />
               </div>
               <Select value={roleFilter} onValueChange={setRoleFilter}>
