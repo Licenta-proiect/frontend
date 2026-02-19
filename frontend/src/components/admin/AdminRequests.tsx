@@ -204,7 +204,7 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
           ) : (
             <>
             {visibleProcessed.map((request) => (
-              <Card key={request.id} className="shadow-xs hover:bg-gray-50/50 transition-opacity">
+              <Card key={request.id} className="shadow-xs bg-gray-50/55 transition-opacity">
                 <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-3">

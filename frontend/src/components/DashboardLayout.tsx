@@ -95,7 +95,7 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
           <div className="flex items-center gap-4">
             <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="h-9 w-9 md:h-11 md:w-11 hover:text-brand-blue hover:border-brand-blue text-black border-gray-200">
+                <Button variant="outline" size="icon" className="h-9 w-9 md:h-11 md:w-11 hover:text-brand-blue hover:border-brand-blue hover:bg-gray-100 text-black border-gray-200">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
