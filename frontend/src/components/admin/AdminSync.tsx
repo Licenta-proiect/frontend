@@ -29,13 +29,14 @@ export function AdminSync() {
   const [isSyncingBazaOrar, setIsSyncingBazaOrar] = useState(false);
   const [isSyncingCalendar, setIsSyncingCalendar] = useState(false);
   const [syncLogs, setSyncLogs] = useState<SyncLog[]>([]);
+  
   const isAnySyncActive = isSyncingBazaOrar || isSyncingCalendar;
 
   // 1. Preluare setări și istoric de la Backend
   const fetchLogs = useCallback(async () => {
     try {
       const response = await api.get("/admin/sync/history");
-      // Filtrăm doar tipurile solicitate: "Calendar" și "Bază + Orar"
+      // Filtrăm doar tipurile solicitate: "Calendar" și "Baza + Orar"
       const filteredLogs = response.data.filter((log: SyncLog) => 
         log.tip_sincronizare === "Calendar" || log.tip_sincronizare === "Baza + Orar"
       );
@@ -45,6 +46,7 @@ export function AdminSync() {
     }
   }, []);
 
+  
   useEffect(() => {
     const fetchSettings = async () => {
       try {
@@ -73,7 +75,7 @@ export function AdminSync() {
 
     try {
       await api.post(endpoint);
-      toast.success(`Sincronizarea ${isBaza ? "Bază + Orar" : "Calendar"} a pornit în fundal.`);
+      toast.success(`Sincronizarea ${isBaza ? "Baza + Orar" : "Calendar"} a pornit în fundal.`);
       setTimeout(() => {
         fetchLogs();
       }, 1500);
@@ -130,7 +132,7 @@ export function AdminSync() {
   };
 
   const getSyncTypeBadge = (type: string) => {
-    return type === "Bază + Orar" 
+    return type === "Baza + Orar" 
       ? "bg-blue-50 text-brand-blue border-blue-100 font-bold" 
       : "bg-orange-50 text-orange-700 border-orange-100 font-bold";
   };
@@ -172,7 +174,7 @@ export function AdminSync() {
           </CardContent>
         </Card>
 
-        {/* Card Bază + Orar */}
+        {/* Card Baza + Orar */}
         <Card className="border-gray-200 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
@@ -187,8 +189,8 @@ export function AdminSync() {
                 <p className="text-sm font-semibold text-gray-900">Ultima sincronizare</p>
               </div>
               <p className="text-sm font-medium text-gray-700">
-                {syncLogs.find(l => l.tip_sincronizare === "Bază + Orar" && l.status === "Succes")?.data_final 
-                  ? new Date(syncLogs.find(l => l.tip_sincronizare === "Bază + Orar" && l.status === "Succes")!.data_final!).toLocaleString("ro-RO") 
+                {syncLogs.find(l => l.tip_sincronizare === "Baza + Orar" && l.status === "Succes")?.data_final 
+                  ? new Date(syncLogs.find(l => l.tip_sincronizare === "Baza + Orar" && l.status === "Succes")!.data_final!).toLocaleString("ro-RO") 
                   : "Nicio sincronizare reușită"}
               </p>
             </div>
