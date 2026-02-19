@@ -116,7 +116,7 @@ export function ProfessorAccessRequest() {
         <div className="space-y-4 py-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="last-name">Nume</Label>
+              <Label htmlFor="last-name" className="text-md font-semibold text-gray-900">Nume</Label>
               <Input 
                 id="last-name" 
                 placeholder="Popescu"
@@ -132,7 +132,7 @@ export function ProfessorAccessRequest() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="first-name">Prenume</Label>
+              <Label htmlFor="first-name" className="text-md font-semibold text-gray-900">Prenume</Label>
               <Input 
                 id="first-name" 
                 placeholder="Ion"
@@ -149,7 +149,7 @@ export function ProfessorAccessRequest() {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" className="text-md font-semibold text-gray-900">Email</Label>
             <Input 
               id="email" 
               type="email" 
@@ -169,7 +169,7 @@ export function ProfessorAccessRequest() {
         <div className="flex justify-end gap-2">
           <Button 
             variant="outline"
-            className="font-semibold rounded-lg border-gray-200 text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-all active:scale-95"
+            className="font-semibold rounded-lg border-gray-200 text-gray-900 hover:bg-gray-100 hover:text-gray-900 transition-all active:scale-95"
             onClick={() => {
               setProfessorDialogOpen(false);
               handleReset();

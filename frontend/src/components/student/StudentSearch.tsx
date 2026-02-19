@@ -104,7 +104,7 @@ export function StudentSearch() {
           
           {/* Select Grupă cu SEARCH (Combobox) */}
           <div className="space-y-2 flex flex-col w-full">
-            <Label htmlFor="search-group" className="text-sm font-semibold text-gray-900">
+            <Label htmlFor="search-group" className="text- font-semibold text-gray-900">
               Grupa <span className="text-brand-red">*</span>
             </Label>
             <Popover open={openGroups} onOpenChange={setOpenGroups}>

@@ -139,7 +139,7 @@ export function AdminUserList({
                             size="sm" 
                             variant="outline" 
                             onClick={() => onEditClick(user)}
-                            className="text-gray-600 shadow-xs border-gray-200 hover:bg-gray-100 font-semibold"
+                            className="text-gray-900 shadow-xs border-gray-200 hover:bg-gray-100 font-semibold"
                           >
                             <Edit2 className="h-3.5 w-3.5 mr-2" /> Editează
                           </Button>

@@ -5,9 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Database, FileText, UserCog } from "lucide-react";
 import { AdminUsers } from "@/components/admin/AdminUsers";
+import { AdminSync } from "@/components/admin/AdminSync";
 
 const AdminHistory = () => <div className="p-6 bg-white rounded-lg shadow">Istoric Rezervări Sistem</div>;
-const AdminSync = () => <div className="p-6 bg-white rounded-lg shadow">Gestionare Utilizatori și Roluri</div>;
 
 const emptySubscribe = () => () => {};
 function useIsClient() {

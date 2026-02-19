@@ -74,7 +74,7 @@ export function AdminUserForm({ onAdd }: { onAdd: () => void }) {
       <CardContent className="pt-2"> 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="last-name" className="text-sm font-semibold text-gray-900">Nume</Label>
+            <Label htmlFor="last-name" className="text-md font-semibold text-gray-900">Nume</Label>
             <Input 
               id="last-name" 
               placeholder="Popescu" 
@@ -91,7 +91,7 @@ export function AdminUserForm({ onAdd }: { onAdd: () => void }) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="first-name" className="text-sm font-semibold text-gray-900">Prenume</Label>
+            <Label htmlFor="first-name" className="text-md font-semibold text-gray-900">Prenume</Label>
             <Input 
               id="first-name" 
               placeholder="Ion" 
@@ -110,7 +110,7 @@ export function AdminUserForm({ onAdd }: { onAdd: () => void }) {
         </div>
 
         <div className="space-y-2 mt-4">
-          <Label htmlFor="admin-email" className="text-sm font-semibold text-gray-900">Email</Label>
+          <Label htmlFor="admin-email" className="text-md font-semibold text-gray-900">Email</Label>
           <Input 
             id="admin-email" 
             type="email" 
@@ -145,7 +145,7 @@ export function AdminUserForm({ onAdd }: { onAdd: () => void }) {
             onClick={handleReset} 
             variant="outline" 
             disabled={isSubmitting}
-            className="border-gray-200 text-gray-700 font-medium hover:bg-gray-50 flex-1 sm:flex-none h-10 px-6"
+            className="border-gray-200 text-gray-900 font-medium hover:bg-gray-100 flex-1 sm:flex-none h-10 px-6"
           >
             <RotateCcw className="h-4 w-4 mr-2" />
             Resetează
