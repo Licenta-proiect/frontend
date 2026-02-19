@@ -202,7 +202,7 @@ export function AdminSync() {
         <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
-              <RefreshCw className="h-5 w-5 text-brand-blue" /> Sincronizare automată
+              <RefreshCw className="h-5 w-5 text-brand-blue" /> Sincronizare automată orar
             </CardTitle>
             <CardDescription className="text-gray-600 font-medium pt-1">
               Configurați planificarea execuțiilor automate
@@ -226,9 +226,9 @@ export function AdminSync() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="hourly">La fiecare oră</SelectItem>
                   <SelectItem value="daily">Zilnic (Noaptea)</SelectItem>
-                  <SelectItem value="weekly">Săptămânal</SelectItem>
+                  <SelectItem value="weekly">Săptămânal (Duminică)</SelectItem>
+                  <SelectItem value="monthly">Lunar (Prima zi a lunii)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
