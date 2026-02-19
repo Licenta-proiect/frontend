@@ -28,14 +28,22 @@ export function AdminSync() {
   const [syncTime, setSyncTime] = useState("00:00");
   const [syncLogs, setSyncLogs] = useState<SyncLog[]>([]);
   
-  // Referință pentru a detecta când o sincronizare tocmai s-a terminat
   const prevSyncActive = useRef(false);
+
+  const lastCalendarSyncDate = useMemo(() => {
+    const lastSync = syncLogs.find(l => l.tip_sincronizare === "Calendar" && l.status === "Succes");
+    return lastSync?.data_final ? new Date(lastSync.data_final).toLocaleString("ro-RO") : "Nicio sincronizare reușită";
+  }, [syncLogs]);
+
+  const lastOrarSyncDate = useMemo(() => {
+    const lastSync = syncLogs.find(l => l.tip_sincronizare === "Baza + Orar" && l.status === "Succes");
+    return lastSync?.data_final ? new Date(lastSync.data_final).toLocaleString("ro-RO") : "Nicio sincronizare reușită";
+  }, [syncLogs]);
 
   const isAnySyncActive = useMemo(() => 
     syncLogs.some(log => log.status === "În curs"), 
   [syncLogs]);
 
-  // FORMATARE DURATĂ: minute și secunde
   const formatDuration = (start: string, end: string | null) => {
     if (!end) return null;
     const s = new Date(start).getTime();
@@ -55,10 +63,8 @@ export function AdminSync() {
         log.tip_sincronizare === "Calendar" || log.tip_sincronizare === "Baza + Orar"
       );
       
-      // LOGICĂ TOAST FINALIZARE:
-      // Dacă înainte aveam ceva "În curs" și acum nu mai avem, înseamnă că s-a terminat
       if (prevSyncActive.current && !filteredLogs.some((l: SyncLog) => l.status === "În curs")) {
-        const lastLog = filteredLogs[0]; // Cel mai recent
+        const lastLog = filteredLogs[0];
         if (lastLog.status === "Succes") {
           toast.success(`Sincronizarea ${lastLog.tip_sincronizare} s-a finalizat cu succes!`);
         } else if (lastLog.status === "Eroare") {
@@ -113,7 +119,7 @@ export function AdminSync() {
       toast.info("Sincronizarea a început pe server...");
       fetchLogs();
     } catch {
-      toast.error("Ero Birou: Nu s-a putut contacta serverul.");
+      toast.error("Eroare: Nu s-a putut contacta serverul.");
     }
   };
 
@@ -124,7 +130,7 @@ export function AdminSync() {
         sync_interval: syncInterval,
         sync_time: syncTime
       });
-      toast.success("Setări salvate în baza de date!");
+      toast.success("Setări salvate cu succes!");
     } catch {
       toast.error("Eroare la salvarea setărilor");
     }
@@ -171,6 +177,7 @@ export function AdminSync() {
       
       {/* 1. Control Sincronizare Manuală */}
       <div className="grid md:grid-cols-2 gap-6">
+        {/* Card Calendar */}
         <Card className="border-gray-200 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
@@ -184,11 +191,8 @@ export function AdminSync() {
                 <Clock className="h-4 w-4 text-orange-700" />
                 <p className="text-sm font-semibold text-gray-900">Ultima sincronizare</p>
               </div>
-              <p className="text-sm font-medium text-gray-700">
-                {syncLogs.find(l => l.tip_sincronizare === "Calendar" && l.status === "Succes")?.data_final 
-                  ? new Date(syncLogs.find(l => l.tip_sincronizare === "Calendar" && l.status === "Succes")!.data_final!).toLocaleString("ro-RO") 
-                  : "Nicio sincronizare reușită"}
-              </p>
+              {/* Folosim variabila calculată prin useMemo */}
+              <p className="text-sm font-medium text-gray-700">{lastCalendarSyncDate}</p>
             </div>
             <Button
               onClick={() => handleManualSync("calendar")}
@@ -201,6 +205,7 @@ export function AdminSync() {
           </CardContent>
         </Card>
 
+        {/* Card Baza + Orar */}
         <Card className="border-gray-200 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
@@ -214,11 +219,8 @@ export function AdminSync() {
                 <Clock className="h-4 w-4 text-brand-blue" />
                 <p className="text-sm font-semibold text-gray-900">Ultima sincronizare</p>
               </div>
-              <p className="text-sm font-medium text-gray-700">
-                {syncLogs.find(l => l.tip_sincronizare === "Baza + Orar" && l.status === "Succes")?.data_final 
-                  ? new Date(syncLogs.find(l => l.tip_sincronizare === "Baza + Orar" && l.status === "Succes")!.data_final!).toLocaleString("ro-RO") 
-                  : "Nicio sincronizare reușită"}
-              </p>
+              {/* Folosim variabila calculată prin useMemo */}
+              <p className="text-sm font-medium text-gray-700">{lastOrarSyncDate}</p>
             </div>
             <Button
               onClick={() => handleManualSync("orar")}
