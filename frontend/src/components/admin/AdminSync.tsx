@@ -28,12 +28,10 @@ export function AdminSync() {
   const [syncTime, setSyncTime] = useState("00:00");
   const [syncLogs, setSyncLogs] = useState<SyncLog[]>([]);
   
-  // LOGICA NOUĂ: Verificăm în log-uri dacă există ceva activ pe backend
   const isAnySyncActive = useMemo(() => 
     syncLogs.some(log => log.status === "În curs"), 
   [syncLogs]);
 
-  // Funcție pentru calculul duratei (în secunde)
   const calculateDuration = (start: string, end: string | null) => {
     if (!end) return null;
     const s = new Date(start).getTime();
@@ -41,45 +39,60 @@ export function AdminSync() {
     return Math.floor((e - s) / 1000);
   };
 
+  // 1. Definim fetch-urile
   const fetchLogs = useCallback(async () => {
     try {
       const response = await api.get("/admin/sync/history");
       const filteredLogs = response.data.filter((log: SyncLog) => 
-        log.tip_sincronizare === "Calendar" || log.tip_sincronizare === "Bază + Orar"
+        log.tip_sincronizare === "Calendar" || log.tip_sincronizare === "Baza + Orar"
       );
       setSyncLogs(filteredLogs);
-    } catch {
-      toast.error("Eroare la încărcarea istoricului");
+    } catch (error) {
+      // Nu punem toast aici pentru a evita cascadele de erori la mount
+      console.error("Eroare la încărcarea istoricului:", error);
     }
   }, []);
 
-  // Polling: Dacă există un sync activ, verificăm la fiecare 3 secunde statusul
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isAnySyncActive) {
-      interval = setInterval(() => {
-        fetchLogs();
-      }, 3000);
+  const fetchSettings = useCallback(async () => {
+    try {
+      const response = await api.get("/admin/sync/settings");
+      if (response.data) {
+        setSyncInterval(response.data.sync_interval);
+        setAutoSyncEnabled(response.data.auto_sync_enabled);
+        setSyncTime(response.data.sync_time);
+      }
+    } catch (error) {
+      console.error("Eroare setări:", error);
     }
+  }, []);
+
+  // 2. REPARARE: Folosim un singur useEffect pentru datele inițiale
+  // Fără apeluri sincrone de setState care să declanșeze cascade
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadInitialData = async () => {
+      if (!isMounted) return;
+      await Promise.all([fetchSettings(), fetchLogs()]);
+    };
+
+    loadInitialData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchSettings, fetchLogs]); // useCallback se asigură că acestea sunt stabile
+
+  // 3. Effect separat pentru polling (se activează DOAR când isAnySyncActive este true)
+  useEffect(() => {
+    if (!isAnySyncActive) return;
+
+    const interval = setInterval(() => {
+      fetchLogs();
+    }, 4000); // Mărim puțin intervalul pentru siguranță
+
     return () => clearInterval(interval);
   }, [isAnySyncActive, fetchLogs]);
-
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const response = await api.get("/admin/sync/settings");
-        if (response.data) {
-          setSyncInterval(response.data.sync_interval);
-          setAutoSyncEnabled(response.data.auto_sync_enabled);
-          setSyncTime(response.data.sync_time);
-        }
-      } catch (error) {
-        console.error("Eroare setări:", error);
-      }
-    };
-    fetchSettings();
-    fetchLogs();
-  }, [fetchLogs]);
 
   const handleManualSync = async (type: "orar" | "calendar") => {
     const isBaza = type === "orar";
@@ -88,14 +101,12 @@ export function AdminSync() {
     try {
       await api.post(endpoint);
       toast.info("Sincronizarea a fost lansată pe server...");
-      // Reîmprospătăm imediat pentru a vedea statusul "În curs"
-      await fetchLogs();
+      fetchLogs();
     } catch {
       toast.error("Eroare la pornirea sincronizării");
     }
   };
 
-  // 3. Salvare Setări în Backend
   const handleSaveSettings = async () => {
     try {
       await api.post("/admin/sync/settings", {
@@ -126,7 +137,7 @@ export function AdminSync() {
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = `sync-history-${new Date().toISOString().split("T")[0]}.csv`;
+    link.download = `istoric-sync-${new Date().toISOString().split("T")[0]}.csv`;
     link.click();
   };
 
@@ -140,7 +151,7 @@ export function AdminSync() {
   };
 
   const getSyncTypeBadge = (type: string) => {
-    return type === "Baza + Orar" 
+    return type === "Bază + Orar" 
       ? "bg-blue-50 text-brand-blue border-blue-100 font-bold" 
       : "bg-orange-50 text-orange-700 border-orange-100 font-bold";
   };
@@ -150,7 +161,6 @@ export function AdminSync() {
       
       {/* 1. Control Sincronizare Manuală */}
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Card Calendar */}
         <Card className="border-gray-200 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
@@ -181,7 +191,6 @@ export function AdminSync() {
           </CardContent>
         </Card>
 
-        {/* Card Baza + Orar */}
         <Card className="border-gray-200 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
@@ -215,7 +224,6 @@ export function AdminSync() {
 
       {/* 2. Setări Sincronizare Automată */}
       <Card className={cn("border-gray-200 shadow-sm transition-opacity", isAnySyncActive && "opacity-60 pointer-events-none")}>
-        {/* Cardul va fi semi-transparent și nu va accepta click-uri dacă isAnySyncActive este true */}
         <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
