@@ -23,10 +23,12 @@ interface SyncLog {
 }
 
 export function AdminSync() {
+  const step = 5; // Limita de pași pentru afișare
   const [syncInterval, setSyncInterval] = useState<string>("daily");
   const [autoSyncEnabled, setAutoSyncEnabled] = useState(true);
   const [syncTime, setSyncTime] = useState("00:00");
   const [syncLogs, setSyncLogs] = useState<SyncLog[]>([]);
+  const [displayLimit, setDisplayLimit] = useState(step); // State pentru limită
   
   const prevSyncActive = useRef(false);
 
@@ -172,6 +174,9 @@ export function AdminSync() {
       : "bg-orange-50 text-orange-700 border-orange-100 font-bold";
   };
 
+  // Slice-ul pentru istoricul vizibil
+  const visibleLogs = syncLogs.slice(0, displayLimit);
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500 font-sans">
       
@@ -191,7 +196,6 @@ export function AdminSync() {
                 <Clock className="h-4 w-4 text-orange-700" />
                 <p className="text-sm font-semibold text-gray-900">Ultima sincronizare</p>
               </div>
-              {/* Folosim variabila calculată prin useMemo */}
               <p className="text-sm font-medium text-gray-700">{lastCalendarSyncDate}</p>
             </div>
             <Button
@@ -219,7 +223,6 @@ export function AdminSync() {
                 <Clock className="h-4 w-4 text-brand-blue" />
                 <p className="text-sm font-semibold text-gray-900">Ultima sincronizare</p>
               </div>
-              {/* Folosim variabila calculată prin useMemo */}
               <p className="text-sm font-medium text-gray-700">{lastOrarSyncDate}</p>
             </div>
             <Button
@@ -306,34 +309,46 @@ export function AdminSync() {
           {syncLogs.length === 0 ? (
             <p className="text-center py-6 text-gray-500 italic">Nicio activitate înregistrată</p>
           ) : (
-            syncLogs.map((log) => {
-              const durationText = formatDuration(log.data_start, log.data_final);
-              return (
-                <div key={log.id} className="flex items-center justify-between p-4 bg-gray-50/50 rounded-xl border shadow-xs transition-colors">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 flex-wrap text-[10px]">
-                      <Badge className={cn(getStatusBadge(log.status))}>{log.status.toUpperCase()}</Badge>
-                      <Badge className={cn(getSyncTypeBadge(log.tip_sincronizare))}>{log.tip_sincronizare.toUpperCase()}</Badge>
-                      <Badge variant="outline" className="font-bold border-gray-200 text-gray-500 bg-white">{log.tip_declansare.toUpperCase()}</Badge>
+            <>
+              {visibleLogs.map((log) => {
+                const durationText = formatDuration(log.data_start, log.data_final);
+                return (
+                  <div key={log.id} className="flex items-center justify-between p-4 bg-gray-50/30 rounded-xl border shadow-xs transition-colors">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 flex-wrap text-[10px]">
+                        <Badge className={cn(getStatusBadge(log.status))}>{log.status.toUpperCase()}</Badge>
+                        <Badge className={cn(getSyncTypeBadge(log.tip_sincronizare))}>{log.tip_sincronizare.toUpperCase()}</Badge>
+                        <Badge variant="outline" className="font-bold border-gray-200 text-gray-500 bg-white">{log.tip_declansare.toUpperCase()}</Badge>
+                      </div>
+                      <p className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                        <Clock className="h-3.5 w-3.5" /> {new Date(log.data_start).toLocaleString("ro-RO")}
+                      </p>
                     </div>
-                    <p className="text-sm font-medium text-gray-600 flex items-center gap-2">
-                      <Clock className="h-3.5 w-3.5" /> {new Date(log.data_start).toLocaleString("ro-RO")}
-                    </p>
-                  </div>
-                  <div className="text-right space-y-1">
-                    <div className="flex items-center justify-end gap-1.5 text-gray-900 font-semibold text-sm">
-                      {log.status === "În curs" ? (
-                        <RefreshCw className="h-3.5 w-3.5 animate-spin text-brand-blue" />
-                      ) : (
-                        <Timer className="h-3.5 w-3.5 text-gray-400" />
-                      )}
-                      <span>{log.status === "În curs" ? "Se procesează..." : durationText}</span>
+                    <div className="text-right space-y-1">
+                      <div className="flex items-center justify-end gap-1.5 text-gray-900 font-semibold text-sm">
+                        {log.status === "În curs" ? (
+                          <RefreshCw className="h-3.5 w-3.5 animate-spin text-brand-blue" />
+                        ) : (
+                          <Timer className="h-3.5 w-3.5 text-gray-400" />
+                        )}
+                        <span>{log.status === "În curs" ? "Se procesează..." : durationText}</span>
+                      </div>
                     </div>
-                    {log.mesaj_eroare && <p className="text-[10px] text-red-500 max-w-xs truncate">{log.mesaj_eroare}</p>}
                   </div>
-                </div>
-              );
-            })
+                );
+              })}
+
+              {/* Butonul Încarcă mai mulți */}
+              {syncLogs.length > displayLimit && (
+                <Button 
+                  variant="ghost" 
+                  className="w-full font-semibold border-gray-200 text-brand-blue hover:bg-blue-50 transition-all active:scale-95"
+                  onClick={() => setDisplayLimit(prev => prev + step)}
+                >
+                  Încarcă mai multe înregistrări ({syncLogs.length - displayLimit} rămase)
+                </Button>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
