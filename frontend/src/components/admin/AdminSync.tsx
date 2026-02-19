@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Database, RefreshCw, Clock, Calendar, BookOpen, Download, Save, Power } from "lucide-react";
+import { Database, RefreshCw, Clock, Calendar, BookOpen, Download, Save, Power, Timer } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import api from "@/services/api"; 
@@ -26,27 +26,44 @@ export function AdminSync() {
   const [syncInterval, setSyncInterval] = useState<string>("daily");
   const [autoSyncEnabled, setAutoSyncEnabled] = useState(true);
   const [syncTime, setSyncTime] = useState("00:00");
-  const [isSyncingBazaOrar, setIsSyncingBazaOrar] = useState(false);
-  const [isSyncingCalendar, setIsSyncingCalendar] = useState(false);
   const [syncLogs, setSyncLogs] = useState<SyncLog[]>([]);
   
-  const isAnySyncActive = isSyncingBazaOrar || isSyncingCalendar;
+  // LOGICA NOUĂ: Verificăm în log-uri dacă există ceva activ pe backend
+  const isAnySyncActive = useMemo(() => 
+    syncLogs.some(log => log.status === "În curs"), 
+  [syncLogs]);
 
-  // 1. Preluare setări și istoric de la Backend
+  // Funcție pentru calculul duratei (în secunde)
+  const calculateDuration = (start: string, end: string | null) => {
+    if (!end) return null;
+    const s = new Date(start).getTime();
+    const e = new Date(end).getTime();
+    return Math.floor((e - s) / 1000);
+  };
+
   const fetchLogs = useCallback(async () => {
     try {
       const response = await api.get("/admin/sync/history");
-      // Filtrăm doar tipurile solicitate: "Calendar" și "Baza + Orar"
       const filteredLogs = response.data.filter((log: SyncLog) => 
-        log.tip_sincronizare === "Calendar" || log.tip_sincronizare === "Baza + Orar"
+        log.tip_sincronizare === "Calendar" || log.tip_sincronizare === "Bază + Orar"
       );
       setSyncLogs(filteredLogs);
-    } catch{
+    } catch {
       toast.error("Eroare la încărcarea istoricului");
     }
   }, []);
 
-  
+  // Polling: Dacă există un sync activ, verificăm la fiecare 3 secunde statusul
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isAnySyncActive) {
+      interval = setInterval(() => {
+        fetchLogs();
+      }, 3000);
+    }
+    return () => clearInterval(interval);
+  }, [isAnySyncActive, fetchLogs]);
+
   useEffect(() => {
     const fetchSettings = async () => {
       try {
@@ -60,30 +77,21 @@ export function AdminSync() {
         console.error("Eroare setări:", error);
       }
     };
-
     fetchSettings();
     fetchLogs();
   }, [fetchLogs]);
 
-  // 2. Handler Sincronizare Manuală Reală
   const handleManualSync = async (type: "orar" | "calendar") => {
     const isBaza = type === "orar";
     const endpoint = isBaza ? "/admin/sync/baza-orar" : "/admin/sync/calendar";
     
-    if (isBaza) setIsSyncingBazaOrar(true);
-    else setIsSyncingCalendar(true);
-
     try {
       await api.post(endpoint);
-      toast.success(`Sincronizarea ${isBaza ? "Baza + Orar" : "Calendar"} a pornit în fundal.`);
-      setTimeout(() => {
-        fetchLogs();
-      }, 1500);
+      toast.info("Sincronizarea a fost lansată pe server...");
+      // Reîmprospătăm imediat pentru a vedea statusul "În curs"
+      await fetchLogs();
     } catch {
       toast.error("Eroare la pornirea sincronizării");
-    } finally {
-      if (isBaza) setIsSyncingBazaOrar(false);
-      else setIsSyncingCalendar(false);
     }
   };
 
@@ -96,7 +104,7 @@ export function AdminSync() {
         sync_time: syncTime
       });
       toast.success("Setări salvate cu succes!");
-    } catch{
+    } catch {
       toast.error("Eroare la salvarea setărilor");
     }
   };
@@ -105,20 +113,20 @@ export function AdminSync() {
 
   const handleExportCSV = () => {
     const csvContent = [
-      ["Data Start", "Tip Sincronizare", "Mod", "Status", "Eroare"],
+      ["Data Start", "Tip Sincronizare", "Mod", "Status", "Durata (s)"],
       ...syncLogs.map((log) => [
         new Date(log.data_start).toLocaleString("ro-RO"),
         log.tip_sincronizare,
         log.tip_declansare,
         log.status,
-        log.mesaj_eroare || "-"
+        calculateDuration(log.data_start, log.data_final) || "0"
       ]),
     ].map((row) => row.join(",")).join("\n");
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = `istoric-sync-${new Date().toISOString().split("T")[0]}.csv`;
+    link.download = `sync-history-${new Date().toISOString().split("T")[0]}.csv`;
     link.click();
   };
 
@@ -164,12 +172,11 @@ export function AdminSync() {
             </div>
             <Button
               onClick={() => handleManualSync("calendar")}
-              disabled={isAnySyncActive} // Blocăm dacă ORICARE e activ
+              disabled={isAnySyncActive}
               className="w-full bg-orange-700 hover:bg-orange-800 text-white font-medium active:scale-95 transition-all shadow-md"
             >
-              {/* Adăugăm animația animate-spin când isSyncingCalendar este true */}
-              <RefreshCw className={cn("h-4 w-4 mr-2", isSyncingCalendar && "animate-spin")} />
-              {isSyncingCalendar ? "Se procesează..." : "Sincronizează calendar"}
+              <RefreshCw className={cn("h-4 w-4 mr-2", isAnySyncActive && "animate-spin")} />
+              {isAnySyncActive ? "Sistem ocupat..." : "Sincronizează calendar"}
             </Button>
           </CardContent>
         </Card>
@@ -189,19 +196,18 @@ export function AdminSync() {
                 <p className="text-sm font-semibold text-gray-900">Ultima sincronizare</p>
               </div>
               <p className="text-sm font-medium text-gray-700">
-                {syncLogs.find(l => l.tip_sincronizare === "Baza + Orar" && l.status === "Succes")?.data_final 
-                  ? new Date(syncLogs.find(l => l.tip_sincronizare === "Baza + Orar" && l.status === "Succes")!.data_final!).toLocaleString("ro-RO") 
+                {syncLogs.find(l => l.tip_sincronizare === "Bază + Orar" && l.status === "Succes")?.data_final 
+                  ? new Date(syncLogs.find(l => l.tip_sincronizare === "Bază + Orar" && l.status === "Succes")!.data_final!).toLocaleString("ro-RO") 
                   : "Nicio sincronizare reușită"}
               </p>
             </div>
             <Button
               onClick={() => handleManualSync("orar")}
-              disabled={isAnySyncActive} // Blocăm dacă ORICARE e activ
+              disabled={isAnySyncActive}
               className="w-full bg-brand-blue hover:bg-brand-blue-dark text-white font-medium active:scale-95 transition-all shadow-md"
             >
-              {/* Adăugăm animația animate-spin când isSyncingBazaOrar este true */}
-              <RefreshCw className={cn("h-4 w-4 mr-2", isSyncingBazaOrar && "animate-spin")} />
-              {isSyncingBazaOrar ? "Se procesează..." : "Sincronizează orar"}
+              <RefreshCw className={cn("h-4 w-4 mr-2", isAnySyncActive && "animate-spin")} />
+              {isAnySyncActive ? "Sistem ocupat..." : "Sincronizează orar"}
             </Button>
           </CardContent>
         </Card>
@@ -253,19 +259,10 @@ export function AdminSync() {
             </div>
           </div>
           <div className="flex gap-3">
-            <Button 
-              onClick={handleSaveSettings} 
-              className="flex-1 bg-brand-blue hover:bg-brand-blue-dark font-medium active:scale-95 text-white" 
-              disabled={!autoSyncEnabled}
-            >
+            <Button onClick={handleSaveSettings} className="flex-1 bg-brand-blue hover:bg-brand-blue-dark font-medium active:scale-95 text-white" disabled={!autoSyncEnabled}>
               <Save className="h-4 w-4 mr-2" /> Salvează setările
             </Button>
-            <Button 
-              variant="outline" 
-              className="text-gray-900 shadow-xs border-gray-200 hover:bg-gray-100 font-medium"
-              onClick={() => { setSyncInterval("daily"); setSyncTime("00:00"); }}
-              disabled={!autoSyncEnabled}
-            >
+            <Button variant="outline" className="text-gray-900 shadow-xs border-gray-200 hover:bg-gray-100 font-medium" onClick={() => { setSyncInterval("daily"); setSyncTime("00:00"); }} disabled={!autoSyncEnabled}>
               Resetează
             </Button>
           </div>
@@ -289,32 +286,34 @@ export function AdminSync() {
           {syncLogs.length === 0 ? (
             <p className="text-center py-6 text-gray-500 italic">Nicio activitate înregistrată</p>
           ) : (
-            syncLogs.map((log) => (
-              <div key={log.id} className="flex items-center justify-between p-4 bg-gray-50/50 rounded-xl border shadow-xs transition-colors">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 flex-wrap text-[10px]">
-                    <Badge className={cn(getStatusBadge(log.status))}>
-                      {log.status.toUpperCase()}
-                    </Badge>
-                    <Badge className={cn(getSyncTypeBadge(log.tip_sincronizare))}>
-                      {log.tip_sincronizare.toUpperCase()}
-                    </Badge>
-                    <Badge variant="outline" className="font-bold border-gray-200 text-gray-500 bg-white">
-                      {log.tip_declansare.toUpperCase()}
-                    </Badge>
+            syncLogs.map((log) => {
+              const duration = calculateDuration(log.data_start, log.data_final);
+              return (
+                <div key={log.id} className="flex items-center justify-between p-4 bg-gray-50/50 rounded-xl border shadow-xs transition-colors">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 flex-wrap text-[10px]">
+                      <Badge className={cn(getStatusBadge(log.status))}>{log.status.toUpperCase()}</Badge>
+                      <Badge className={cn(getSyncTypeBadge(log.tip_sincronizare))}>{log.tip_sincronizare.toUpperCase()}</Badge>
+                      <Badge variant="outline" className="font-bold border-gray-200 text-gray-500 bg-white">{log.tip_declansare.toUpperCase()}</Badge>
+                    </div>
+                    <p className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                      <Clock className="h-3.5 w-3.5" /> {new Date(log.data_start).toLocaleString("ro-RO")}
+                    </p>
                   </div>
-                  <p className="text-sm font-medium text-gray-600 flex items-center gap-2">
-                    <Clock className="h-3.5 w-3.5" /> {new Date(log.data_start).toLocaleString("ro-RO")}
-                  </p>
+                  <div className="text-right space-y-1">
+                    <div className="flex items-center justify-end gap-1.5 text-gray-900 font-semibold text-sm">
+                      {log.status === "În curs" ? (
+                        <RefreshCw className="h-3.5 w-3.5 animate-spin text-brand-blue" />
+                      ) : (
+                        <Timer className="h-3.5 w-3.5 text-gray-400" />
+                      )}
+                      <span>{log.status === "În curs" ? "Se procesează..." : `${duration || 0} secunde`}</span>
+                    </div>
+                    {log.mesaj_eroare && <p className="text-[10px] text-red-500 max-w-xs truncate">{log.mesaj_eroare}</p>}
+                  </div>
                 </div>
-                <div className="text-right space-y-1">
-                  <p className="font-semibold text-gray-900 text-sm">
-                    {log.status === "Succes" ? "Finalizat" : log.status === "În curs" ? "Se procesează" : "Eroare"}
-                  </p>
-                  {log.mesaj_eroare && <p className="text-[10px] text-red-500 max-w-xs truncate">{log.mesaj_eroare}</p>}
-                </div>
-              </div>
-            ))
+              );
+            })
           )}
         </CardContent>
       </Card>
