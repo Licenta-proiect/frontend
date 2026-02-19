@@ -161,7 +161,7 @@ export function AdminSync() {
   };
 
   const getSyncTypeBadge = (type: string) => {
-    return type === "Bază + Orar" 
+    return type === "Baza + Orar" 
       ? "bg-blue-50 text-brand-blue border-blue-100 font-bold" 
       : "bg-orange-50 text-orange-700 border-orange-100 font-bold";
   };
@@ -215,8 +215,8 @@ export function AdminSync() {
                 <p className="text-sm font-semibold text-gray-900">Ultima sincronizare</p>
               </div>
               <p className="text-sm font-medium text-gray-700">
-                {syncLogs.find(l => l.tip_sincronizare === "Bază + Orar" && l.status === "Succes")?.data_final 
-                  ? new Date(syncLogs.find(l => l.tip_sincronizare === "Bază + Orar" && l.status === "Succes")!.data_final!).toLocaleString("ro-RO") 
+                {syncLogs.find(l => l.tip_sincronizare === "Baza + Orar" && l.status === "Succes")?.data_final 
+                  ? new Date(syncLogs.find(l => l.tip_sincronizare === "Baza + Orar" && l.status === "Succes")!.data_final!).toLocaleString("ro-RO") 
                   : "Nicio sincronizare reușită"}
               </p>
             </div>
