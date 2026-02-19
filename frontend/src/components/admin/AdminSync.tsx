@@ -29,6 +29,7 @@ export function AdminSync() {
   const [isSyncingBazaOrar, setIsSyncingBazaOrar] = useState(false);
   const [isSyncingCalendar, setIsSyncingCalendar] = useState(false);
   const [syncLogs, setSyncLogs] = useState<SyncLog[]>([]);
+  const isAnySyncActive = isSyncingBazaOrar || isSyncingCalendar;
 
   // 1. Preluare setări și istoric de la Backend
   const fetchLogs = useCallback(async () => {
@@ -67,17 +68,20 @@ export function AdminSync() {
     const isBaza = type === "orar";
     const endpoint = isBaza ? "/admin/sync/baza-orar" : "/admin/sync/calendar";
     
-    isBaza ? setIsSyncingBazaOrar(true) : setIsSyncingCalendar(true);
+    if (isBaza) setIsSyncingBazaOrar(true);
+    else setIsSyncingCalendar(true);
 
     try {
       await api.post(endpoint);
       toast.success(`Sincronizarea ${isBaza ? "Bază + Orar" : "Calendar"} a pornit în fundal.`);
-      // Reîmprospătăm lista după un scurt timp pentru a vedea intrarea "În curs"
-      setTimeout(fetchLogs, 1000);
-    } catch{
+      setTimeout(() => {
+        fetchLogs();
+      }, 1500);
+    } catch {
       toast.error("Eroare la pornirea sincronizării");
     } finally {
-      isBaza ? setIsSyncingBazaOrar(false) : setIsSyncingCalendar(false);
+      if (isBaza) setIsSyncingBazaOrar(false);
+      else setIsSyncingCalendar(false);
     }
   };
 
@@ -152,15 +156,16 @@ export function AdminSync() {
               </div>
               <p className="text-sm font-medium text-gray-700">
                 {syncLogs.find(l => l.tip_sincronizare === "Calendar" && l.status === "Succes")?.data_final 
-                  ? new Date(syncLogs.find(l => l.tip_sincronizare === "Calendar")!.data_final!).toLocaleString("ro-RO") 
+                  ? new Date(syncLogs.find(l => l.tip_sincronizare === "Calendar" && l.status === "Succes")!.data_final!).toLocaleString("ro-RO") 
                   : "Nicio sincronizare reușită"}
               </p>
             </div>
             <Button
               onClick={() => handleManualSync("calendar")}
-              disabled={isSyncingCalendar}
+              disabled={isAnySyncActive} // Blocăm dacă ORICARE e activ
               className="w-full bg-orange-700 hover:bg-orange-800 text-white font-medium active:scale-95 transition-all shadow-md"
             >
+              {/* Adăugăm animația animate-spin când isSyncingCalendar este true */}
               <RefreshCw className={cn("h-4 w-4 mr-2", isSyncingCalendar && "animate-spin")} />
               {isSyncingCalendar ? "Se procesează..." : "Sincronizează calendar"}
             </Button>
@@ -183,15 +188,16 @@ export function AdminSync() {
               </div>
               <p className="text-sm font-medium text-gray-700">
                 {syncLogs.find(l => l.tip_sincronizare === "Bază + Orar" && l.status === "Succes")?.data_final 
-                  ? new Date(syncLogs.find(l => l.tip_sincronizare === "Bază + Orar")!.data_final!).toLocaleString("ro-RO") 
+                  ? new Date(syncLogs.find(l => l.tip_sincronizare === "Bază + Orar" && l.status === "Succes")!.data_final!).toLocaleString("ro-RO") 
                   : "Nicio sincronizare reușită"}
               </p>
             </div>
             <Button
               onClick={() => handleManualSync("orar")}
-              disabled={isSyncingBazaOrar}
+              disabled={isAnySyncActive} // Blocăm dacă ORICARE e activ
               className="w-full bg-brand-blue hover:bg-brand-blue-dark text-white font-medium active:scale-95 transition-all shadow-md"
             >
+              {/* Adăugăm animația animate-spin când isSyncingBazaOrar este true */}
               <RefreshCw className={cn("h-4 w-4 mr-2", isSyncingBazaOrar && "animate-spin")} />
               {isSyncingBazaOrar ? "Se procesează..." : "Sincronizează orar"}
             </Button>
@@ -200,7 +206,8 @@ export function AdminSync() {
       </div>
 
       {/* 2. Setări Sincronizare Automată */}
-      <Card className="border-gray-200 shadow-sm">
+      <Card className={cn("border-gray-200 shadow-sm transition-opacity", isAnySyncActive && "opacity-60 pointer-events-none")}>
+        {/* Cardul va fi semi-transparent și nu va accepta click-uri dacă isAnySyncActive este true */}
         <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
