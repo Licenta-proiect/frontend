@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -28,27 +28,47 @@ export function AdminSync() {
   const [syncTime, setSyncTime] = useState("00:00");
   const [syncLogs, setSyncLogs] = useState<SyncLog[]>([]);
   
+  // Referință pentru a detecta când o sincronizare tocmai s-a terminat
+  const prevSyncActive = useRef(false);
+
   const isAnySyncActive = useMemo(() => 
     syncLogs.some(log => log.status === "În curs"), 
   [syncLogs]);
 
-  const calculateDuration = (start: string, end: string | null) => {
+  // FORMATARE DURATĂ: minute și secunde
+  const formatDuration = (start: string, end: string | null) => {
     if (!end) return null;
     const s = new Date(start).getTime();
     const e = new Date(end).getTime();
-    return Math.floor((e - s) / 1000);
+    const totalSeconds = Math.floor((e - s) / 1000);
+    
+    if (totalSeconds < 60) return `${totalSeconds} secunde`;
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes} min și ${seconds} sec`;
   };
 
-  // 1. Definim fetch-urile
   const fetchLogs = useCallback(async () => {
     try {
       const response = await api.get("/admin/sync/history");
       const filteredLogs = response.data.filter((log: SyncLog) => 
         log.tip_sincronizare === "Calendar" || log.tip_sincronizare === "Baza + Orar"
       );
+      
+      // LOGICĂ TOAST FINALIZARE:
+      // Dacă înainte aveam ceva "În curs" și acum nu mai avem, înseamnă că s-a terminat
+      if (prevSyncActive.current && !filteredLogs.some((l: SyncLog) => l.status === "În curs")) {
+        const lastLog = filteredLogs[0]; // Cel mai recent
+        if (lastLog.status === "Succes") {
+          toast.success(`Sincronizarea ${lastLog.tip_sincronizare} s-a finalizat cu succes!`);
+        } else if (lastLog.status === "Eroare") {
+          toast.error(`Eroare la sincronizarea ${lastLog.tip_sincronizare}!`);
+        }
+      }
+      
+      prevSyncActive.current = filteredLogs.some((l: SyncLog) => l.status === "În curs");
       setSyncLogs(filteredLogs);
     } catch (error) {
-      // Nu punem toast aici pentru a evita cascadele de erori la mount
       console.error("Eroare la încărcarea istoricului:", error);
     }
   }, []);
@@ -66,31 +86,21 @@ export function AdminSync() {
     }
   }, []);
 
-  // 2. REPARARE: Folosim un singur useEffect pentru datele inițiale
-  // Fără apeluri sincrone de setState care să declanșeze cascade
   useEffect(() => {
     let isMounted = true;
-
     const loadInitialData = async () => {
       if (!isMounted) return;
       await Promise.all([fetchSettings(), fetchLogs()]);
     };
-
     loadInitialData();
+    return () => { isMounted = false; };
+  }, [fetchSettings, fetchLogs]);
 
-    return () => {
-      isMounted = false;
-    };
-  }, [fetchSettings, fetchLogs]); // useCallback se asigură că acestea sunt stabile
-
-  // 3. Effect separat pentru polling (se activează DOAR când isAnySyncActive este true)
   useEffect(() => {
     if (!isAnySyncActive) return;
-
     const interval = setInterval(() => {
       fetchLogs();
-    }, 4000); // Mărim puțin intervalul pentru siguranță
-
+    }, 3000);
     return () => clearInterval(interval);
   }, [isAnySyncActive, fetchLogs]);
 
@@ -100,10 +110,10 @@ export function AdminSync() {
     
     try {
       await api.post(endpoint);
-      toast.info("Sincronizarea a fost lansată pe server...");
+      toast.info("Sincronizarea a început pe server...");
       fetchLogs();
     } catch {
-      toast.error("Eroare la pornirea sincronizării");
+      toast.error("Ero Birou: Nu s-a putut contacta serverul.");
     }
   };
 
@@ -114,7 +124,7 @@ export function AdminSync() {
         sync_interval: syncInterval,
         sync_time: syncTime
       });
-      toast.success("Setări salvate cu succes!");
+      toast.success("Setări salvate în baza de date!");
     } catch {
       toast.error("Eroare la salvarea setărilor");
     }
@@ -124,13 +134,13 @@ export function AdminSync() {
 
   const handleExportCSV = () => {
     const csvContent = [
-      ["Data Start", "Tip Sincronizare", "Mod", "Status", "Durata (s)"],
+      ["Data Start", "Tip Sincronizare", "Mod", "Status", "Durata"],
       ...syncLogs.map((log) => [
         new Date(log.data_start).toLocaleString("ro-RO"),
         log.tip_sincronizare,
         log.tip_declansare,
         log.status,
-        calculateDuration(log.data_start, log.data_final) || "0"
+        formatDuration(log.data_start, log.data_final) || "N/A"
       ]),
     ].map((row) => row.join(",")).join("\n");
 
@@ -295,7 +305,7 @@ export function AdminSync() {
             <p className="text-center py-6 text-gray-500 italic">Nicio activitate înregistrată</p>
           ) : (
             syncLogs.map((log) => {
-              const duration = calculateDuration(log.data_start, log.data_final);
+              const durationText = formatDuration(log.data_start, log.data_final);
               return (
                 <div key={log.id} className="flex items-center justify-between p-4 bg-gray-50/50 rounded-xl border shadow-xs transition-colors">
                   <div className="space-y-2">
@@ -315,7 +325,7 @@ export function AdminSync() {
                       ) : (
                         <Timer className="h-3.5 w-3.5 text-gray-400" />
                       )}
-                      <span>{log.status === "În curs" ? "Se procesează..." : `${duration || 0} secunde`}</span>
+                      <span>{log.status === "În curs" ? "Se procesează..." : durationText}</span>
                     </div>
                     {log.mesaj_eroare && <p className="text-[10px] text-red-500 max-w-xs truncate">{log.mesaj_eroare}</p>}
                   </div>
