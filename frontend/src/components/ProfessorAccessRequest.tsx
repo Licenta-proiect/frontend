@@ -101,17 +101,17 @@ export function ProfessorAccessRequest() {
         <Button 
           variant="outline" 
           size="sm" 
-          className="md:h-11 md:px-6 gap-2 text-xs md:text-base px-3 border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white active:scale-95 transition-all duration-200"
+          className="md:h-11 text-sm md:px-6 gap-2 md:text-base px-3 border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white active:scale-95 transition-all duration-200"
         >
           <Bell className="h-4 w-4 md:h-5 md:w-5" />
           <span className="hidden sm:inline">Solicitare acces</span>
-          <span className="sm:hidden">Solicitare acces</span>
+          <span className="sm:hidden">Solicitare</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-[95vw] sm:max-w-md rounded-lg">
         <DialogHeader>
           <DialogTitle className="text-gray-900 font-semibold text-xl">Solicitare acces profesor</DialogTitle>
-          <DialogDescription> Administratorul va fi notificat pentru a vă adăuga în sistem. </DialogDescription>
+          <DialogDescription className="text-gray-800"> Administratorul va fi notificat pentru a vă activa accesul în sistem. Această procedură este necesară doar pentru cadrele didactice care nu au adresa de email configurată în orarul oficial.</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
