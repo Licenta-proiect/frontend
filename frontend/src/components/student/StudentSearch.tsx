@@ -6,13 +6,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { SearchResults } from "./SearchResults";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { 
-  Search, Calendar, Clock, MapPin, Users, 
-  RotateCcw, Loader2, Check, ChevronsUpDown, Filter 
+  Search, RotateCcw, Loader2, Check, ChevronsUpDown 
 } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/services/api";
@@ -56,11 +54,6 @@ export function StudentSearch() {
   const [isLoadingMaterii, setIsLoadingMaterii] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-  const [sortBy, setSortBy] = useState<string>("time");
-
-  // Filtrare
-  const [filterDay, setFilterDay] = useState<string>("all");
-  const [filterWeek, setFilterWeek] = useState<string>("all");
 
   const types = ["Seminar", "Laborator", "Proiect"];
 
@@ -101,7 +94,7 @@ export function StudentSearch() {
     fetchMaterii();
   }, [selectedGroupId]);
 
-  // 3. Search Handler (POST către backend)
+  // Search Handler (POST către backend)
   const handleSearch = async () => {
     if (!selectedGroupId || !selectedSubject || !selectedType) {
       toast.error("Vă rugăm să completați toate câmpurile obligatorii");
@@ -120,7 +113,7 @@ export function StudentSearch() {
       setSearchResults(response.data.optiuni);
       setHasSearched(true);
       toast.success(`Am găsit ${response.data.total_optiuni} opțiuni disponibile`);
-    } catch (error: any) {
+    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       const msg = error.response?.data?.detail || "Eroare la căutare";
       toast.error(msg);
     } finally {
@@ -135,33 +128,6 @@ export function StudentSearch() {
     setAttendsCourse(false);
     setSearchResults([]);
     setHasSearched(false);
-    setFilterDay("all");
-    setFilterWeek("all");
-  };
-
-  // Sortare și filtrare rezultate
-  const filteredAndSortedResults = searchResults
-    .filter((result) => {
-      const matchDay = filterDay === "all" || result.zi === filterDay;
-      const matchWeek = filterWeek === "all" || result.saptamani_lista.includes(parseInt(filterWeek));
-      return matchDay && matchWeek;
-    })
-    .sort((a, b) => {
-      if (sortBy === "time") return a.ora_start.localeCompare(b.ora_start);
-      if (sortBy === "group") return a.grupa.localeCompare(b.grupa);
-      return 0;
-    });
-
-  const availableWeeks = Array.from(
-    new Set(searchResults.flatMap((r) => r.saptamani_lista))
-  ).sort((a, b) => a - b);
-
-  const getTypeColor = (type: string) => {
-    const t = type.toLowerCase();
-    if (t.includes("lab")) return "bg-blue-100 text-blue-700 border-blue-200";
-    if (t.includes("sem")) return "bg-green-100 text-green-700 border-green-200";
-    if (t.includes("pro")) return "bg-purple-100 text-purple-700 border-purple-200";
-    return "bg-gray-100 text-gray-700";
   };
 
   return (
@@ -181,7 +147,7 @@ export function StudentSearch() {
             
             {/* Select Grupă cu SEARCH (Combobox) */}
             <div className="space-y-2 flex flex-col w-full">
-              <Label htmlFor="search-group" className="text- font-semibold text-gray-900">
+              <Label htmlFor="search-group" className="font-semibold text-gray-900">
                 Grupa <span className="text-brand-red">*</span>
               </Label>
               <Popover open={openGroups} onOpenChange={setOpenGroups}>
@@ -299,8 +265,7 @@ export function StudentSearch() {
                 <Checkbox
                   id="attends-course"
                   checked={attendsCourse}
-                  onCheckedChange={(checked: boolean | "indeterminate") => setAttendsCourse(checked === true)}
-                  className="data-[state=checked]:bg-brand-blue data-[state=checked]:border-brand-blue"
+                  onCheckedChange={(checked) => setAttendsCourse(checked === true)}
                 />
                 <Label
                   htmlFor="attends-course"
@@ -315,10 +280,10 @@ export function StudentSearch() {
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <Button 
               onClick={handleSearch} 
-              disabled={isLoadingMaterii}
+              disabled={isSearching}
               className="bg-brand-blue hover:bg-brand-blue-dark text-white font-medium shadow-md transition-all active:scale-95 flex-1 sm:flex-none"
             >
-              <Search className="h-4 w-4 mr-2" />
+              {isSearching ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Search className="h-4 w-4 mr-2" />}
               Caută 
             </Button>
             <Button 
