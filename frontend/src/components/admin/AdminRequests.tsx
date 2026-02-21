@@ -119,7 +119,7 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
           ) : (
             <>
               {visiblePending.map((request) => (
-                <Card key={request.id} className="border-l-4 border-l-amber-700 shadow-xs hover:bg-gray-50/50 transition-colors">
+                <Card key={request.id} className="shadow-xs group hover:border-brand-blue/50 transition-all duration-300">
                   <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5">
                     <div className="space-y-2 w-full">
                       <div className="flex items-center gap-3">
@@ -204,7 +204,7 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
           ) : (
             <>
             {visibleProcessed.map((request) => (
-              <Card key={request.id} className="shadow-xs bg-gray-50/30 transition-opacity">
+              <Card key={request.id} className="shadow-xs group hover:border-brand-blue/50 transition-all duration-300">
                 <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-3">

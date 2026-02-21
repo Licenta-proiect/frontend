@@ -57,14 +57,14 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
   };
 
   return (
-    <Card className="border-gray-200 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <CardHeader className="border-b border-gray-50 bg-gray-50/50">
+    <Card className="border-gray-200 shadow-sm">
+      <CardHeader>
         <div className="flex flex-col space-y-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <CardTitle className="text-lg">Opțiuni de recuperare găsite</CardTitle>
               <CardDescription>
-                {filteredAndSortedResults.length} sloturi filtrate dintr-un total de {results.length}
+                {filteredAndSortedResults.length} sloturi găsite
               </CardDescription>
             </div>
             
@@ -128,7 +128,7 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
         </div>
       </CardHeader>
 
-      <CardContent className="pt-6">
+      <CardContent>
         {filteredAndSortedResults.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <Users className="h-12 w-12 mx-auto mb-4 opacity-20" />

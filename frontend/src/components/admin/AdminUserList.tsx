@@ -117,7 +117,7 @@ export function AdminUserList({
               const isMe = storedEmail && user.email?.toLowerCase().trim() === storedEmail.toLowerCase().trim();
 
               return (
-                <Card key={user.id || user.email} className="border shadow-xs hover:bg-gray-50/50 transition-colors">
+                <Card key={user.id || user.email} className="border shadow-xs group hover:border-brand-blue/50 transition-all duration-300">
                   <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="space-y-2">
                       <div className="flex items-center gap-3">

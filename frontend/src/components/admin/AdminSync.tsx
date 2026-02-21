@@ -313,7 +313,7 @@ export function AdminSync() {
               {visibleLogs.map((log) => {
                 const durationText = formatDuration(log.data_start, log.data_final);
                 return (
-                  <div key={log.id} className="flex items-center justify-between p-4 bg-gray-50/30 rounded-xl border shadow-xs transition-colors">
+                  <div key={log.id} className="flex items-center justify-between p-4 rounded-xl border shadow-xs group hover:border-brand-blue/50 transition-all duration-300">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 flex-wrap text-[10px]">
                         <Badge className={cn(getStatusBadge(log.status))}>{log.status.toUpperCase()}</Badge>
