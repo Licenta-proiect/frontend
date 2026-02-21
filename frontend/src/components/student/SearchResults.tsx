@@ -136,13 +136,13 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
             <p className="font-medium">Nu există rezultate pentru filtrele selectate.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 w-full">
+          <div className="grid grid-cols-1 gap-6 w-full"> {/* Asigurăm lățime completă pentru lista de carduri */}
             {filteredAndSortedResults.map((result, idx) => (
-              <Card key={idx} className="group hover:border-brand-blue/40 transition-all duration-300 shadow-sm hover:shadow-md border-gray-100 overflow-hidden">
-                <CardContent className="p-0">
-                  <div className="flex flex-col">
-                    {/* Header-ul cardului cu fundal discret la hover */}
-                    <div className="p-5 pb-4 flex items-start justify-between">
+              <Card key={idx} className="group hover:border-brand-blue/40 transition-all duration-300 shadow-sm hover:shadow-md border-gray-100 overflow-hidden w-full">
+                <CardContent className="px-4">
+                  <div className="flex flex-col w-full">
+                    {/* Header-ul cardului */}
+                    <div className="p-5 pb-4 flex items-start justify-between w-full">
                       <div className="space-y-1">
                         <h4 className="font-bold text-gray-900 text-lg leading-tight tracking-tight">
                           {selectedSubject}
@@ -152,20 +152,20 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
                           {result.profesor}
                         </div>
                       </div>
-                      <Badge variant="outline" className={cn("font-bold uppercase tracking-widest text-[9px] px-2 py-0.5 shadow-sm", getTypeColor(selectedType))}>
+                      <Badge variant="outline" className={cn("font-bold uppercase tracking-widest text-[9px] px-2 py-0.5 shadow-sm shrink-0", getTypeColor(selectedType))}>
                         {selectedType}
                       </Badge>
                     </div>
 
-                    {/* Corpul cardului cu datele tehnice */}
-                    <div className="px-5 py-4 grid grid-cols-2 md:grid-cols-4 gap-y-5 gap-x-4">
+                    {/* Corpul cardului - Grid fixat pentru Desktop */}
+                    <div className="px-5 py-4 grid grid-cols-2 md:grid-cols-4 gap-y-5 gap-x-4 border-gray-50 w-full">
                       <div className="space-y-1.5">
                         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Zi & interval</span>
                         <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
                           <Calendar className="h-4 w-4 text-brand-blue/70" />
-                          <span>{result.zi}</span>
+                          <span className="whitespace-nowrap">{result.zi}</span>
                         </div>
-                        <div className="text-[13px] text-gray-600 font-medium ml-6">
+                        <div className="text-[13px] text-gray-600 font-medium ml-6 whitespace-nowrap">
                           {result.ora_start} — {result.ora_final}
                         </div>
                       </div>
@@ -174,7 +174,7 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
                         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Locație</span>
                         <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
                           <MapPin className="h-4 w-4 text-brand-red/70" />
-                          <span>Sala {result.sala}</span>
+                          <span className="truncate">Sala {result.sala}</span>
                         </div>
                       </div>
 
@@ -182,22 +182,23 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
                         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Grupă alternativă</span>
                         <div className="flex items-center gap-2 text-sm font-semibold text-gray-800">
                           <Users className="h-4 w-4 text-gray-400" />
-                          <span>{result.grupa}</span>
+                          <span className="truncate">{result.grupa}</span>
                         </div>
                       </div>
 
                       <div className="space-y-1.5">
                         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Săptămâni</span>
                         <div className="flex flex-wrap gap-1">
-                          <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-700 border-none text-[11px] font-bold px-2 py-0">
-                            {result.saptamani_grupate}
+                          <Badge className="bg-slate-100 text-slate-700 border-none text-xs font-bold px-2 py-0">
+                            Săpt: {result.saptamani_grupate}
                           </Badge>
                         </div>
                       </div>
                     </div>
 
-                    <div className="text-center md:text-left">
-                      <span className="text-gray-500 text-xs font-medium italic">
+                    {/* Footer-ul cardului */}
+                    <div className="px-5 py-3 bg-gray-50/30">
+                      <span className="text-gray-500 text-xs font-medium italic block">
                         * Verifică cu profesorul înainte de a merge la altă grupă.
                       </span>
                     </div>
