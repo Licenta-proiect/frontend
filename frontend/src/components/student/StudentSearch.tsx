@@ -57,6 +57,10 @@ export function StudentSearch() {
   const [hasSearched, setHasSearched] = useState(false);
   const [sortBy, setSortBy] = useState<string>("time");
 
+  // Filtrare
+  const [filterDay, setFilterDay] = useState<string>("all");
+  const [filterWeek, setFilterWeek] = useState<string>("all");
+
   const types = ["Seminar", "Laborator", "Proiect"];
 
   // Încărcăm grupele la montarea componentei
@@ -130,14 +134,26 @@ export function StudentSearch() {
     setAttendsCourse(false);
     setSearchResults([]);
     setHasSearched(false);
+    setFilterDay("all");
+    setFilterWeek("all");
   };
 
-  // Sortare rezultate
-  const sortedResults = [...searchResults].sort((a, b) => {
-    if (sortBy === "time") return a.ora_start.localeCompare(b.ora_start);
-    if (sortBy === "group") return a.grupa.localeCompare(b.grupa);
-    return 0;
-  });
+  // Sortare și filtrare rezultate
+  const filteredAndSortedResults = searchResults
+    .filter((result) => {
+      const matchDay = filterDay === "all" || result.zi === filterDay;
+      const matchWeek = filterWeek === "all" || result.saptamani_lista.includes(parseInt(filterWeek));
+      return matchDay && matchWeek;
+    })
+    .sort((a, b) => {
+      if (sortBy === "time") return a.ora_start.localeCompare(b.ora_start);
+      if (sortBy === "group") return a.grupa.localeCompare(b.grupa);
+      return 0;
+    });
+
+  const availableWeeks = Array.from(
+    new Set(searchResults.flatMap((r) => r.saptamani_lista))
+  ).sort((a, b) => a - b);
 
   const getTypeColor = (type: string) => {
     const t = type.toLowerCase();
@@ -317,45 +333,98 @@ export function StudentSearch() {
       </Card>
 
       {/* Rezultate */}
-      {hasSearched && (
+     {hasSearched && (
         <Card className="border-gray-200 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
           <CardHeader className="border-b border-gray-50 bg-gray-50/50">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <CardTitle className="text-lg">Opțiuni de recuperare găsite</CardTitle>
-                <CardDescription>
-                  {searchResults.length} {searchResults.length === 1 ? "slot compatibil" : "sloturi compatibile"} cu orarul tău
-                </CardDescription>
+            <div className="flex flex-col space-y-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <CardTitle className="text-lg">Opțiuni de recuperare găsite</CardTitle>
+                  <CardDescription>
+                    {filteredAndSortedResults.length} sloturi filtrate dintr-un total de {searchResults.length}
+                  </CardDescription>
+                </div>
+                
+                {/* SORTARE EXISTENTĂ */}
+                {searchResults.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-gray-400" />
+                    <Select value={sortBy} onValueChange={setSortBy}>
+                      <SelectTrigger className="w-40 h-8 text-xs bg-white">
+                        <SelectValue placeholder="Sortează" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="time">După oră</SelectItem>
+                        <SelectItem value="group">După grupă</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
-              
+
+              {/* FILTRE NOI: ZI ȘI SĂPTĂMÂNĂ */}
               {searchResults.length > 0 && (
-                <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4 text-gray-400" />
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-40 h-8 text-xs bg-white">
-                      <SelectValue placeholder="Sortează" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="time">După oră</SelectItem>
-                      <SelectItem value="group">După grupă</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="flex flex-wrap gap-3 p-3 bg-white rounded-md border border-gray-100 shadow-sm">
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase ml-1">Filtru Zi</span>
+                    <Select value={filterDay} onValueChange={setFilterDay}>
+                      <SelectTrigger className="w-32 h-9 text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Toate zilele</SelectItem>
+                        <SelectItem value="Luni">Luni</SelectItem>
+                        <SelectItem value="Marți">Marți</SelectItem>
+                        <SelectItem value="Miercuri">Miercuri</SelectItem>
+                        <SelectItem value="Joi">Joi</SelectItem>
+                        <SelectItem value="Vineri">Vineri</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase ml-1">Filtru Săptămână</span>
+                    <Select value={filterWeek} onValueChange={setFilterWeek}>
+                      <SelectTrigger className="w-32 h-9 text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Oricare</SelectItem>
+                        {availableWeeks.map((w) => (
+                          <SelectItem key={w} value={w.toString()}>
+                            Săptămâna {w}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="mt-6 h-9 text-xs text-gray-500 hover:text-brand-red"
+                    onClick={() => { setFilterDay("all"); setFilterWeek("all"); }}
+                  >
+                    Resetează filtrele
+                  </Button>
                 </div>
               )}
             </div>
           </CardHeader>
+
           <CardContent className="pt-6">
-            {searchResults.length === 0 ? (
+            {filteredAndSortedResults.length === 0 ? (
               <div className="text-center py-12 text-gray-500">
                 <Users className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                <p className="font-medium">Nu s-au găsit grupe paralele libere în acest interval.</p>
-                <p className="text-sm mt-1">Încearcă să debifezi &quot;Particip la cursuri&quot; dacă poți lipsi de la ele.</p>
+                <p className="font-medium">Nu există rezultate pentru filtrele selectate.</p>
+                <p className="text-sm mt-1">Încearcă să schimbi ziua sau săptămâna selectată.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-4">
-                {sortedResults.map((result, idx) => (
+                {filteredAndSortedResults.map((result, idx) => (
                   <Card key={idx} className="group hover:border-brand-blue/50 transition-all duration-300">
                     <CardContent className="p-5">
+                      {/* ... conținutul cardului rămâne identic cu cel din codul tău original ... */}
                       <div className="flex flex-col gap-4">
                         <div className="flex items-start justify-between">
                           <div className="space-y-1">
@@ -382,7 +451,7 @@ export function StudentSearch() {
                               {result.ora_start} - {result.ora_final}
                             </div>
                           </div>
-
+                          {/* ... restul grid-ului tău ... */}
                           <div className="space-y-1">
                             <span className="text-[10px] uppercase font-bold text-gray-400 block">Locație</span>
                             <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
@@ -406,7 +475,7 @@ export function StudentSearch() {
                             </Badge>
                           </div>
                         </div>
-
+                        {/* ... footer card ... */}
                         <div className="flex items-center justify-between text-xs pt-1">
                           <span className="text-gray-400 font-medium">
                             * Verifică cu profesorul înainte de a merge la altă grupă.
