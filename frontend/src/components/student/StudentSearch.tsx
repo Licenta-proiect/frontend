@@ -158,7 +158,7 @@ export function StudentSearch() {
                     aria-expanded={openGroups}
                     disabled={isLoadingGrupe}
                     className={cn(
-                      "w-full justify-between font-normal border-gray-200 hover:bg-transparent active:scale-100",
+                      "w-full justify-between font-normal focus-visible:ring-1 border-gray-200 hover:bg-transparent active:scale-100",
                       !selectedGroupId && "text-muted-foreground hover:text-muted-foreground"
                     )}
                   >
@@ -219,7 +219,7 @@ export function StudentSearch() {
                 <SelectTrigger 
                   id="search-subject" 
                   className={cn(
-                    "w-full border-gray-200 focus:ring-brand-blue/30 transition-all",
+                    "w-full border-gray-200 focus-visible:ring-1 focus:ring-brand-blue/30 transition-all",
                     (!selectedGroupId || isLoadingMaterii) && "opacity-50 cursor-not-allowed bg-gray-50"
                   )}
                 >
@@ -247,8 +247,8 @@ export function StudentSearch() {
               <Label htmlFor="search-type" className="text-sm font-semibold text-gray-900">
                 Tip activitate <span className="text-brand-red">*</span>
               </Label>
-              <Select value={selectedType} onValueChange={setSelectedType}>
-                <SelectTrigger id="search-type" className="w-full focus:ring-brand-blue/30 border-gray-200">
+              <Select value={selectedType} onValueChange={setSelectedType}> 
+                <SelectTrigger id="search-type" className="w-full focus-visible:ring-1 focus:ring-brand-blue/30 border-gray-200">
                   <SelectValue placeholder="Selectează tipul" />
                 </SelectTrigger>
                 <SelectContent>
@@ -263,6 +263,7 @@ export function StudentSearch() {
             <div className="flex items-end">
               <div className="flex items-center space-x-3 bg-gray-50 p-2.5 rounded-lg border border-gray-100 w-full h-10">
                 <Checkbox
+                  className="data-[state=checked]:bg-brand-blue data-[state=checked]:border-brand-blue"
                   id="attends-course"
                   checked={attendsCourse}
                   onCheckedChange={(checked) => setAttendsCourse(checked === true)}
