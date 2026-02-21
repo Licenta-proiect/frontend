@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, Users, Filter, ArrowUpDown } from "lucide-react";
+import { Calendar, MapPin, Users, Filter, ArrowUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Label } from "../ui/label";
 
@@ -140,17 +140,20 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
             {filteredAndSortedResults.map((result, idx) => (
               <Card key={idx} className="group hover:border-brand-blue/50 transition-all duration-300">
                 <CardContent className="p-5">
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-4">
                     <div className="flex items-start justify-between">
                       <div className="space-y-1">
-                        <h4 className="font-bold text-gray-900 leading-tight">{selectedSubject} - {result.profesor}</h4>
+                        <h4 className="font-bold text-gray-900 text-lg leading-tight">
+                          {selectedSubject}
+                        </h4>
+                        <p className="text-sm text-brand-blue font-medium">{result.profesor}</p>
                       </div>
-                      <Badge variant="outline" className={cn("font-semibold uppercase tracking-wider text-[10px]", getTypeColor(selectedType))}>
+                      <Badge variant="outline" className={cn("font-semibold uppercase tracking-wider text-[10px] px-2.5 py-0.5", getTypeColor(selectedType))}>
                         {selectedType}
                       </Badge>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-2 py-3 border-y border-gray-50">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-2 py-3 border-gray-50">
                       <div className="space-y-1">
                         <span className="text-xs font-semibold text-gray-500 block">Zi & oră</span>
                         <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
@@ -176,13 +179,13 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
 
                       <div className="space-y-1">
                         <span className="text-xs font-semibold text-gray-500 block">Săptămâni</span>
-                        <Badge className="bg-gray-100 text-sm text-gray-700 border-none hover:bg-gray-100">
+                        <Badge className="bg-gray-100 text-sm text-gray-800 border-none">
                           Săpt: {result.saptamani_grupate}
                         </Badge>
                       </div>
                     </div>
 
-                    <div className="pt-1 text-center md:text-left">
+                    <div className="text-center md:text-left">
                       <span className="text-gray-500 text-xs font-medium italic">
                         * Verifică cu profesorul înainte de a merge la altă grupă.
                       </span>

@@ -101,7 +101,12 @@ export function StudentSearch() {
       return;
     }
 
+    // GOLIM ZONA DE REZULTATE ÎNAINTE DE CĂUTARE
+    setSearchResults([]);
+    setHasSearched(false);
+    
     setIsSearching(true);
+
     try {
       const response = await api.post("/subgrupe/cauta-alternative", {
         selectedGroupId: parseInt(selectedGroupId),
@@ -111,11 +116,17 @@ export function StudentSearch() {
       });
       
       setSearchResults(response.data.optiuni);
+      // Afișăm zona de rezultate doar după un succes (200 OK)
       setHasSearched(true);
       toast.success(`Am găsit ${response.data.total_optiuni} opțiuni disponibile`);
     } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+      // Dacă eroarea este 400 (sau orice altă eroare), hasSearched rămâne false 
+      // zona de rezultate nu va fi randată, iar searchResults va fi listă goală.
       const msg = error.response?.data?.detail || "Eroare la căutare";
       toast.error(msg);
+      
+      // Opțional: ne asigurăm explicit că hasSearched este false în caz de eroare 400
+      setHasSearched(false);
     } finally {
       setIsSearching(false);
     }
