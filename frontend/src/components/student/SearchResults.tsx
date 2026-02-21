@@ -129,59 +129,70 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
         </div>
       </CardHeader>
       
-      <CardContent>
+      <CardContent className="pt-2">
         {filteredAndSortedResults.length === 0 ? (
-          <div className="text-center py-4 text-gray-500">
-            <Users className="h-12 w-12 mx-auto mb-4 opacity-20" />
-            <p className="font-medium">Nu există rezultate.</p>
+          <div className="text-center py-12 text-gray-500 bg-gray-50/50 rounded-lg border border-dashed">
+            <Users className="h-12 w-12 mx-auto mb-3 opacity-20" />
+            <p className="font-medium">Nu există rezultate pentru filtrele selectate.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 gap-4 w-full">
             {filteredAndSortedResults.map((result, idx) => (
-              <Card key={idx} className="group hover:border-brand-blue/50 transition-all duration-300">
-                <CardContent className="p-5">
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-start justify-between">
+              <Card key={idx} className="group hover:border-brand-blue/40 transition-all duration-300 shadow-sm hover:shadow-md border-gray-100 overflow-hidden">
+                <CardContent className="p-0">
+                  <div className="flex flex-col">
+                    {/* Header-ul cardului cu fundal discret la hover */}
+                    <div className="p-5 pb-4 flex items-start justify-between">
                       <div className="space-y-1">
-                        <h4 className="font-bold text-gray-900 text-lg leading-tight">
+                        <h4 className="font-bold text-gray-900 text-lg leading-tight tracking-tight">
                           {selectedSubject}
                         </h4>
-                        <p className="text-sm text-brand-blue font-medium">{result.profesor}</p>
+                        <div className="flex items-center gap-2 text-sm text-gray-500 font-medium">
+                          <span className="w-2 h-2 rounded-full bg-brand-blue/60" />
+                          {result.profesor}
+                        </div>
                       </div>
-                      <Badge variant="outline" className={cn("font-semibold uppercase tracking-wider text-[10px] px-2.5 py-0.5", getTypeColor(selectedType))}>
+                      <Badge variant="outline" className={cn("font-bold uppercase tracking-widest text-[9px] px-2 py-0.5 shadow-sm", getTypeColor(selectedType))}>
                         {selectedType}
                       </Badge>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-2 py-3 border-gray-50">
-                      <div className="space-y-1">
-                        <span className="text-xs font-semibold text-gray-500 block">Zi & oră</span>
-                        <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                          <Calendar className="h-4 w-4 text-brand-blue" />
-                          {result.zi} {result.ora_start} - {result.ora_final}
+                    {/* Corpul cardului cu datele tehnice */}
+                    <div className="px-5 py-4 grid grid-cols-2 md:grid-cols-4 gap-y-5 gap-x-4">
+                      <div className="space-y-1.5">
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Zi & interval</span>
+                        <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                          <Calendar className="h-4 w-4 text-brand-blue/70" />
+                          <span>{result.zi}</span>
+                        </div>
+                        <div className="text-[13px] text-gray-600 font-medium ml-6">
+                          {result.ora_start} — {result.ora_final}
                         </div>
                       </div>
 
-                      <div className="space-y-1">
-                        <span className="text-xs font-semibold text-gray-500 block">Locație</span>
-                        <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                          <MapPin className="h-4 w-4 text-brand-red" />
-                          Sala {result.sala}
+                      <div className="space-y-1.5">
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Locație</span>
+                        <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                          <MapPin className="h-4 w-4 text-brand-red/70" />
+                          <span>Sala {result.sala}</span>
                         </div>
                       </div>
 
-                      <div className="space-y-1">
-                        <span className="text-xs font-semibold text-gray-500 block">Grupă disponibilă</span>
-                        <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                          {result.grupa}
+                      <div className="space-y-1.5">
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Grupă alternativă</span>
+                        <div className="flex items-center gap-2 text-sm font-semibold text-gray-800">
+                          <Users className="h-4 w-4 text-gray-400" />
+                          <span>{result.grupa}</span>
                         </div>
                       </div>
 
-                      <div className="space-y-1">
-                        <span className="text-xs font-semibold text-gray-500 block">Săptămâni</span>
-                        <Badge className="bg-gray-100 text-sm text-gray-800 border-none">
-                          Săpt: {result.saptamani_grupate}
-                        </Badge>
+                      <div className="space-y-1.5">
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Săptămâni</span>
+                        <div className="flex flex-wrap gap-1">
+                          <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-700 border-none text-[11px] font-bold px-2 py-0">
+                            {result.saptamani_grupate}
+                          </Badge>
+                        </div>
                       </div>
                     </div>
 
