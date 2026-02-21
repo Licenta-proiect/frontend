@@ -5,8 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, Users, Filter } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Filter, ArrowUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Label } from "../ui/label";
 
 interface AlternativeOption {
   grupa: string;
@@ -64,76 +65,70 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
   return (
     <Card className="border-gray-200 shadow-sm">
       <CardHeader>
-        <div className="flex flex-col space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <CardTitle className="text-lg">Opțiuni de recuperare găsite</CardTitle>
-              <CardDescription>
-                {filteredAndSortedResults.length} sloturi găsite
-              </CardDescription>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-gray-400" />
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-40 h-8 text-xs bg-white">
-                  <SelectValue placeholder="Sortează" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="time">După oră</SelectItem>
-                  <SelectItem value="group">După grupă</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+          <div>
+            <CardTitle className="text-lg">Opțiuni de recuperare găsite</CardTitle>
+            <CardDescription>
+              {filteredAndSortedResults.length} sloturi disponibile pentru selecția curentă
+            </CardDescription>
+          </div>
+        </div>
+
+        {/* --- ZONA UNIFICATĂ DE FILTRARE ȘI SORTARE --- */}
+        <div className="flex flex-wrap items-end gap-4 p-4 w-fit">
+          {/* Filtru Zi */}
+          <div className="space-y-1.5 flex-1 min-w-35">
+            <Label className="text-sm font-medium text-gray-900 flex items-center gap-1"> Filtru zi</Label>
+            <Select value={filterDay} onValueChange={setFilterDay}>
+              <SelectTrigger className="h-10 text-sm border-gray-200 focus:ring-brand-blue/20">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toate zilele</SelectItem>
+                {availableDays.map((day) => (
+                  <SelectItem key={day} value={day}>{day}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          {/* Secțiune Filtre Dinamice */}
-          <div className="flex flex-wrap gap-3 p-3 bg-white rounded-md border border-gray-100 shadow-sm">
-            <div className="space-y-1.5">
-              <span className="text-[10px] font-bold text-gray-400 uppercase ml-1">Filtru Zi</span>
-              <Select value={filterDay} onValueChange={setFilterDay}>
-                <SelectTrigger className="w-32 h-9 text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Toate zilele</SelectItem>
-                  {availableDays.map((day) => (
-                    <SelectItem key={day} value={day}>{day}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Filtru Săptămână */}
+          <div className="space-y-1.5 flex-1 min-w-35">
+            <Label className="text-[10px] font-bold text-gray-400 uppercase flex items-center gap-1">
+              <Filter className="h-3 w-3" /> Săptămână
+            </Label>
+            <Select value={filterWeek} onValueChange={setFilterWeek}>
+              <SelectTrigger className="h-10 text-sm border-gray-200 focus:ring-brand-blue/20">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Oricare</SelectItem>
+                {availableWeeks.map((w) => (
+                  <SelectItem key={w} value={w.toString()}>Săptămâna {w}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-            <div className="space-y-1.5">
-              <span className="text-[10px] font-bold text-gray-400 uppercase ml-1">Filtru Săptămână</span>
-              <Select value={filterWeek} onValueChange={setFilterWeek}>
-                <SelectTrigger className="w-32 h-9 text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Oricare</SelectItem>
-                  {availableWeeks.map((w) => (
-                    <SelectItem key={w} value={w.toString()}>Săptămâna {w}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {(filterDay !== "all" || filterWeek !== "all") && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="mt-6 h-9 text-xs text-gray-500 hover:text-brand-red"
-                onClick={() => { setFilterDay("all"); setFilterWeek("all"); }}
-              >
-                Resetează filtrele
-              </Button>
-            )}
+          {/* Sortare */}
+          <div className="space-y-1.5 flex-1 min-w-35">
+            <Label className="text-[10px] font-bold text-gray-400 uppercase flex items-center gap-1">
+              <ArrowUpDown className="h-3 w-3" /> Sortează după
+            </Label>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="h-10 text-sm border-gray-200 focus:ring-brand-blue/20">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="time">Ora de start</SelectItem>
+                <SelectItem value="group">Nume grupă</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </CardHeader>
-
-      <CardContent className="pt-6">
+      
+      <CardContent>
         {filteredAndSortedResults.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <Users className="h-12 w-12 mx-auto mb-4 opacity-20" />
