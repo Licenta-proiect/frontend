@@ -43,6 +43,11 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
       return 0;
     });
 
+  // Extragem zilele unice disponibile în rezultate pentru filtru
+  const availableDays = Array.from(
+    new Set(results.map((r) => r.zi))
+  ).sort(); // Poți adăuga o logică de sortare custom dacă vrei ordinea Luni-Vineri
+
   // Extragem săptămânile unice disponibile în rezultate pentru filtru
   const availableWeeks = Array.from(
     new Set(results.flatMap((r) => r.saptamani_lista))
@@ -82,7 +87,7 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
             </div>
           </div>
 
-          {/* Secțiune Filtre */}
+          {/* Secțiune Filtre Dinamice */}
           <div className="flex flex-wrap gap-3 p-3 bg-white rounded-md border border-gray-100 shadow-sm">
             <div className="space-y-1.5">
               <span className="text-[10px] font-bold text-gray-400 uppercase ml-1">Filtru Zi</span>
@@ -92,7 +97,7 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Toate zilele</SelectItem>
-                  {["Luni", "Marți", "Miercuri", "Joi", "Vineri"].map(day => (
+                  {availableDays.map((day) => (
                     <SelectItem key={day} value={day}>{day}</SelectItem>
                   ))}
                 </SelectContent>
@@ -128,7 +133,7 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
         </div>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="pt-6">
         {filteredAndSortedResults.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <Users className="h-12 w-12 mx-auto mb-4 opacity-20" />
@@ -190,13 +195,10 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between text-xs pt-1">
-                      <span className="text-gray-400 font-medium">
+                    <div className="pt-1 text-center md:text-left">
+                      <span className="text-gray-400 text-[11px] font-medium italic">
                         * Verifică cu profesorul înainte de a merge la altă grupă.
                       </span>
-                      <Button variant="ghost" size="sm" className="h-7 text-brand-blue font-bold">
-                        Vezi detalii
-                      </Button>
                     </div>
                   </div>
                 </CardContent>
