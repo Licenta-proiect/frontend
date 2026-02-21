@@ -136,20 +136,20 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
             <p className="font-medium">Nu există rezultate pentru filtrele selectate.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 w-full"> {/* Asigurăm lățime completă pentru lista de carduri */}
+          <div className="grid grid-cols-1 gap-6 w-full">
             {filteredAndSortedResults.map((result, idx) => (
               <Card key={idx} className="group hover:border-brand-blue/40 transition-all duration-300 shadow-sm hover:shadow-md border-gray-100 overflow-hidden w-full">
-                <CardContent className="px-4">
+                <CardContent className="p-0">
                   <div className="flex flex-col w-full">
                     {/* Header-ul cardului */}
-                    <div className="p-5 pb-4 flex items-start justify-between w-full">
+                    <div className="p-5 pb-4 flex flex-col sm:flex-row items-start sm:justify-between w-full gap-3">
                       <div className="space-y-1">
-                        <h4 className="font-bold text-gray-900 text-lg leading-tight tracking-tight">
+                        <h4 className="font-bold text-gray-900 text-lg leading-tight tracking-tight break-words">
                           {selectedSubject}
                         </h4>
                         <div className="flex items-center gap-2 text-sm text-gray-500 font-medium">
-                          <span className="w-2 h-2 rounded-full bg-brand-blue/60" />
-                          {result.profesor}
+                          <span className="w-2 h-2 rounded-full bg-brand-blue/60 shrink-0" />
+                          <span className="break-words">{result.profesor}</span>
                         </div>
                       </div>
                       <Badge variant="outline" className={cn("font-bold uppercase tracking-widest text-[9px] px-2 py-0.5 shadow-sm shrink-0", getTypeColor(selectedType))}>
@@ -158,14 +158,14 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
                     </div>
 
                     {/* Corpul cardului - Grid fixat pentru Desktop */}
-                    <div className="px-5 py-4 grid grid-cols-2 md:grid-cols-4 gap-y-5 gap-x-4 border-gray-50 w-full">
+                    <div className="px-5 py-4 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-y-6 gap-x-4 border-gray-50 w-full">
                       <div className="space-y-1.5">
                         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Zi & interval</span>
                         <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                          <Calendar className="h-4 w-4 text-brand-blue/70" />
-                          <span className="whitespace-nowrap">{result.zi}</span>
+                          <Calendar className="h-4 w-4 text-brand-blue/70 shrink-0" />
+                          <span>{result.zi}</span>
                         </div>
-                        <div className="text-[13px] text-gray-600 font-medium ml-6 whitespace-nowrap">
+                        <div className="text-[13px] text-gray-600 font-medium ml-6">
                           {result.ora_start} — {result.ora_final}
                         </div>
                       </div>
@@ -173,16 +173,16 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
                       <div className="space-y-1.5">
                         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Locație</span>
                         <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                          <MapPin className="h-4 w-4 text-brand-red/70" />
-                          <span className="truncate">Sala {result.sala}</span>
+                          <MapPin className="h-4 w-4 text-brand-red/70 shrink-0" />
+                          <span className="break-words">Sala {result.sala}</span>
                         </div>
                       </div>
 
                       <div className="space-y-1.5">
                         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Grupă alternativă</span>
-                        <div className="flex items-center gap-2 text-sm font-semibold text-gray-800">
-                          <Users className="h-4 w-4 text-gray-400" />
-                          <span className="truncate">{result.grupa}</span>
+                        <div className="flex items-start gap-2 text-sm font-semibold text-gray-800">
+                          <Users className="h-4 w-4 text-gray-400 shrink-0 mt-0.5" />
+                          <span className="leading-snug">{result.grupa}</span>
                         </div>
                       </div>
 
@@ -190,7 +190,7 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
                         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Săptămâni</span>
                         <div className="flex flex-wrap gap-1">
                           <Badge className="bg-slate-100 text-slate-700 border-none text-xs font-bold px-2 py-0">
-                            Săpt: {result.saptamani_grupate}
+                            {result.saptamani_grupate}
                           </Badge>
                         </div>
                       </div>
