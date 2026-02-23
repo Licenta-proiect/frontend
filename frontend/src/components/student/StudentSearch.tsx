@@ -123,7 +123,7 @@ export function StudentSearch() {
       // Dacă eroarea este 400 (sau orice altă eroare), hasSearched rămâne false 
       // zona de rezultate nu va fi randată, iar searchResults va fi listă goală.
       const msg = error.response?.data?.detail || "Eroare la căutare";
-      toast.error(msg);
+      toast.error(msg, { duration: 6000});
       
       // Opțional: ne asigurăm explicit că hasSearched este false în caz de eroare 400
       setHasSearched(false);
