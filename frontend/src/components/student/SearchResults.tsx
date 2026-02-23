@@ -25,6 +25,16 @@ interface SearchResultsProps {
   selectedType: string;
 }
 
+const DAYS_ORDER: Record<string, number> = {
+  "Luni": 1,
+  "Marți": 2,
+  "Miercuri": 3,
+  "Joi": 4,
+  "Vineri": 5,
+  "Sâmbătă": 6,
+  "Duminică": 7
+};
+
 export function SearchResults({ results, selectedSubject, selectedType }: SearchResultsProps) {
   const [sortBy, setSortBy] = useState<string>("time");
   const [filterDay, setFilterDay] = useState<string>("all");
@@ -44,9 +54,8 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
     });
 
   // Extragem zilele unice disponibile în rezultate pentru filtru
-  const availableDays = Array.from(
-    new Set(results.map((r) => r.zi))
-  ).sort(); // Poți adăuga o logică de sortare custom dacă vrei ordinea Luni-Vineri
+  const availableDays = Array.from(new Set(results.map((r) => r.zi)))
+  .sort((a, b) => (DAYS_ORDER[a] || 99) - (DAYS_ORDER[b] || 99));
 
   // Extragem săptămânile unice disponibile în rezultate pentru filtru
   const availableWeeks = Array.from(
