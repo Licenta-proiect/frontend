@@ -187,7 +187,7 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
                       </div>
 
                       <div className="space-y-1.5">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Săptămâni</span>
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Săptămâni în care poți participa</span>
                         <div className="flex flex-wrap gap-1">
                           <Badge className="bg-slate-100 text-slate-700 border-none text-xs font-bold px-2 py-0">
                             {result.saptamani_grupate}
