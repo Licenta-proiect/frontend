@@ -116,14 +116,21 @@ export function StudentSearch() {
       });
       
       setSearchResults(response.data.optiuni);
-      // Afișăm zona de rezultate doar după un succes (200 OK)
-      setHasSearched(true);
-      toast.success(`Am găsit ${response.data.total_optiuni} opțiuni disponibile`);
+
+      const { info_message } = response.data;
+
+      if (info_message) {
+        toast.info(info_message, { duration: 7000 });
+      } else {
+        // Afișăm zona de rezultate doar după un succes (200 OK)
+        setHasSearched(true);
+        toast.success(`Am găsit ${response.data.total_optiuni} opțiuni disponibile`);
+      }
     } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       // Dacă eroarea este 400 (sau orice altă eroare), hasSearched rămâne false 
       // zona de rezultate nu va fi randată, iar searchResults va fi listă goală.
       const msg = error.response?.data?.detail || "Eroare la căutare";
-      toast.error(msg, { duration: 6000});
+      toast.error(msg, { duration: 7000});
       
       // Opțional: ne asigurăm explicit că hasSearched este false în caz de eroare 400
       setHasSearched(false);
