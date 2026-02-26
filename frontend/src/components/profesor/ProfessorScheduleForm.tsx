@@ -15,7 +15,6 @@ import { Grupa  as ApiGroup } from "@/components/student/StudentSearch";
 
 // Interfețe pentru tipizare
 interface ApiRoom { id: number; nume: string; }
-interface ApiProfessor { id: number; lastName: string; firstName: string; emailAddress: string; }
 
 // Definirea tipurilor pentru rezultate și filtre pentru a evita "any"
 export interface AvailableSlot {
@@ -42,14 +41,12 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
   const [subjects, setSubjects] = useState<string[]>([]);
   const [allGroups, setAllGroups] = useState<{ label: string; value: string }[]>([]);
   const [allRooms, setAllRooms] = useState<{ label: string; value: string }[]>([]);
-  const [allProfessors, setAllProfessors] = useState<{ label: string; value: string }[]>([]);
   
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
   const [duration, setDuration] = useState<string>("");
   const [studentCount, setStudentCount] = useState<string>("");
-  const [selectedProfessors, setSelectedProfessors] = useState<string[]>([]);
   const [selectedDay, setSelectedDay] = useState<string>("");
   const [startTime, setStartTime] = useState<string>("");
   
@@ -67,11 +64,10 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       const email = localStorage.getItem("userEmail");
       if (!email) return;
       try {
-        const [subResp, groupsResp, roomsResp, profsResp] = await Promise.all([
+        const [subResp, groupsResp, roomsResp] = await Promise.all([
           api.get(`/profesor/materii?email=${email}`),
           api.get("/data/grupe"),
-          api.get("/data/sali"),
-          api.get("/data/profesori")
+          api.get("/data/sali")
         ]);
 
         setSubjects(subResp.data.materii);
@@ -82,7 +78,6 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
           }))
         );
         setAllRooms(roomsResp.data.map((s: ApiRoom) => ({ label: s.nume, value: s.id.toString() })));
-        setAllProfessors(profsResp.data.filter((p: ApiProfessor) => p.emailAddress !== email).map((p: ApiProfessor) => ({ label: `${p.lastName} ${p.firstName}`, value: p.id.toString() })));
       } catch {
         toast.error("Eroare la încărcarea datelor inițiale");
       } finally {
@@ -153,7 +148,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
 
   const handleReset = () => {
     setSelectedSubject(""); setSelectedGroups([]); setSelectedRooms([]); setDuration("");
-    setStudentCount(""); setSelectedProfessors([]); setSelectedDay(""); setStartTime("");
+    setStudentCount(""); setSelectedDay(""); setStartTime("");
     lastSyncedSubject.current = "";
     onSearch(null, []);
   };
@@ -258,11 +253,6 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Număr persoane</Label>
             <Input type="number" step="1" onKeyDown={(e) => ["e", "E", ".", ",", "-"].includes(e.key) && e.preventDefault()} placeholder="Exemplu: 15" value={studentCount} onChange={(e) => (e.target.value === "" || /^\d+$/.test(e.target.value)) && setStudentCount(e.target.value)} className={cn(inputClasses, "px-3")} />
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold text-gray-900">Profesor asistent</Label>
-            <MultiSelect options={allProfessors} selected={selectedProfessors} onChange={setSelectedProfessors} placeholder="Selectează asistenții" className={inputClasses} />
           </div>
 
             {/*Ziua*/}
