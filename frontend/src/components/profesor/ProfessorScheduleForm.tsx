@@ -46,6 +46,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
   const [duration, setDuration] = useState<string>("");
+  const [selectedType, setSelectedType] = useState<string>("");
   const [studentCount, setStudentCount] = useState<string>("");
   const [selectedDay, setSelectedDay] = useState<string>("");
   const [startTime, setStartTime] = useState<string>("");
@@ -55,8 +56,18 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
   const lastSyncedSubject = useRef<string>("");
 
   const durations = ["1 oră", "2 ore", "3 ore", "4 ore"];
-  const days = ["Luni", "Marți", "Miercuri", "Joi", "Vineri", "Sâmbătă", "Duminică"];
+  const DAYS_MAP: Record<string, number> = {
+    "Luni": 1,
+    "Marți": 2,
+    "Miercuri": 3,
+    "Joi": 4,
+    "Vineri": 5,
+    "Sâmbătă": 6,
+    "Duminică": 7
+  };
   const timeSlots = Array.from({ length: 13 }, (_, i) => `${(i + 8).toString().padStart(2, "0")}:00`);
+  const types = ["Curs", "Seminar", "Laborator", "Proiect"];
+
 
   // date inițiale
   useEffect(() => {
@@ -132,19 +143,15 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       }
     }
 
-    const daysMap = {
-      "Luni": 1, "Marți": 2, "Miercuri": 3, "Joi": 4, 
-      "Vineri": 5, "Sâmbătă": 6, "Duminică": 7
-    };
-
     const searchPayload = {
       email: localStorage.getItem("userEmail"),
       materie: selectedSubject,
-      grupe_ids: selectedGroups,
-      sali_ids: selectedRooms,
+      grupe_ids: selectedGroups.map(id => parseInt(id)),
+      sali_ids: selectedRooms.map(id => parseInt(id)),
       durata: duration ? parseInt(duration.split(" ")[0]) : null,
+      tip_activitate: selectedType,
       numar_persoane: studentCount ? parseInt(studentCount) : null,
-      zi: selectedDay ? daysMap[selectedDay] : null,
+      zi: selectedDay ? DAYS_MAP[selectedDay] : null,
       ora_start: startTime ? parseInt(startTime.split(":")[0]) : null
     };
 
@@ -168,7 +175,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
   const handleReset = () => {
     setSelectedSubject(""); setSelectedGroups([]); setSelectedRooms([]); setDuration("");
     setStudentCount(""); setSelectedDay(""); setStartTime("");
-    lastSyncedSubject.current = "";
+    lastSyncedSubject.current = ""; setSelectedType("");
     onSearch(null, []);
   };
 
@@ -268,6 +275,23 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
             </Select>
           </div>
 
+          {/* Select Tip Activitate */}
+            <div className="space-y-2">
+              <Label htmlFor="search-type" className="text-sm font-semibold text-gray-900">
+                Tip activitate <span className="text-brand-red">*</span>
+              </Label>
+              <Select value={selectedType} onValueChange={setSelectedType}> 
+                <SelectTrigger id="search-type" className="w-full focus-visible:ring-1 focus:ring-brand-blue/30 border-gray-200">
+                  <SelectValue placeholder="Selectează tipul" />
+                </SelectTrigger>
+                <SelectContent>
+                  {types.map((type) => (
+                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             {/*Număr persoane*/}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Număr persoane</Label>
@@ -282,7 +306,11 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
                 <SelectValue placeholder="Selectează ziua" />
               </SelectTrigger>
               <SelectContent position="popper" className="max-h-64 text-sm">
-                {days.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                {Object.keys(DAYS_MAP).map((dayName) => (
+                  <SelectItem key={dayName} value={dayName}>
+                    {dayName}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
