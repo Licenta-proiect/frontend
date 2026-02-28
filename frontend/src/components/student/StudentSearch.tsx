@@ -120,7 +120,7 @@ export function StudentSearch() {
       const { info_message } = response.data;
 
       if (info_message) {
-        toast.info(info_message, { duration: 7000 });
+        toast.info(info_message, { duration: Infinity });
       } else {
         // Afișăm zona de rezultate doar după un succes (200 OK)
         setHasSearched(true);

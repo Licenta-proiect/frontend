@@ -132,6 +132,25 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       }
     }
 
+    const daysMap = {
+      "Luni": 1, "Marți": 2, "Miercuri": 3, "Joi": 4, 
+      "Vineri": 5, "Sâmbătă": 6, "Duminică": 7
+    };
+
+    const searchPayload = {
+      email: localStorage.getItem("userEmail"),
+      materie: selectedSubject,
+      grupe_ids: selectedGroups,
+      sali_ids: selectedRooms,
+      durata: duration ? parseInt(duration.split(" ")[0]) : null,
+      numar_persoane: studentCount ? parseInt(studentCount) : null,
+      zi: selectedDay ? daysMap[selectedDay] : null,
+      ora_start: startTime ? parseInt(startTime.split(":")[0]) : null
+    };
+
+    // Afișăm JSON-ul în consolă
+    console.log(JSON.stringify(searchPayload, null, 2));
+
     // Mock results (care vor fi trimise parintelui)
     const mockResults = [{ 
       id: "1", week: 3, date: new Date(2026, 1, 17, 14, 0), 
