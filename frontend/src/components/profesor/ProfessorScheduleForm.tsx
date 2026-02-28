@@ -129,7 +129,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
   }, [selectedSubject]);
 
   const handleSearch = () => {
-    if (!selectedSubject || selectedGroups.length === 0 || selectedRooms.length === 0 || !duration) {
+    if (!selectedSubject || selectedGroups.length === 0 || selectedRooms.length === 0 || !duration || !selectedType) {
       toast.error("Vă rugăm să completați toate câmpurile obligatorii");
       return;
     }
