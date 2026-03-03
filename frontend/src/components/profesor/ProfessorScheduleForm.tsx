@@ -75,19 +75,12 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       const email = localStorage.getItem("userEmail");
       if (!email) return;
       try {
-        const [subResp, groupsResp, roomsResp] = await Promise.all([
+        const [subResp, roomsResp] = await Promise.all([
           api.get(`/profesor/materii?email=${email}`),
-          api.get("/data/grupe"),
           api.get("/data/sali")
         ]);
 
         setSubjects(subResp.data.materii);
-        setAllGroups(
-          groupsResp.data.map((g: ApiGroup) => ({
-            label: `${g.specializationShortName} • an ${g.studyYear} • ${g.nume}${g.subgroupIndex ? `${g.subgroupIndex}` : ""}`,
-            value: g.id.toString(),
-          }))
-        );
         setAllRooms(roomsResp.data.map((s: ApiRoom) => ({ label: s.nume, value: s.id.toString() })));
       } catch {
         toast.error("Eroare la încărcarea datelor inițiale");
@@ -113,8 +106,17 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
           api.get(`/profesor/sali-materie?email=${email}&materie=${selectedSubject}`)
         ]);
 
-        setSelectedGroups(gResp.data.grupe.map((g: ApiGroup) => g.id.toString()));
-        setSelectedRooms(sResp.data.sali.map((s: ApiRoom) => s.id.toString()));
+        const grupeData = gResp.data.grupe || gResp.data; 
+        const saliData = sResp.data.sali || sResp.data;
+
+        const groupsOptions = grupeData.map((g: ApiGroup) => ({
+            label: `${g.specializationShortName} • an ${g.studyYear} • ${g.nume}${g.subgroupIndex ? `${g.subgroupIndex}` : ""}`,
+            value: g.id.toString(),
+        }));
+
+        setAllGroups(groupsOptions);
+        setSelectedGroups(grupeData.map((g: ApiGroup) => g.id.toString()));
+        setSelectedRooms(saliData.map((s: ApiRoom) => s.id.toString()));
         
         lastSyncedSubject.current = selectedSubject; // Memorăm ultima materie sincronizată
       } catch {
