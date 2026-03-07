@@ -55,6 +55,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false); 
   const lastSyncedSubject = useRef<string>("");
+  const hasShownStatusToast = useRef(false);
 
   const durations = ["1 oră", "2 ore", "3 ore", "4 ore"];
   const DAYS_MAP: Record<string, number> = {
@@ -83,12 +84,25 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
         setSubjects(subResp.data.materii);
         setAllRooms(roomsResp.data.map((s: ApiRoom) => ({ label: s.nume, value: s.id.toString() })));
       
-        if (weeksResp.data.active_weeks) {
-            const weekOptions = weeksResp.data.active_weeks.map((w: number) => ({
-                label: `Săptămâna ${w}`,
-                value: w.toString()
-            }));
-            setAllWeeks(weekOptions);
+        const activeWeeks = weeksResp.data.active_weeks || [];
+        
+        // Dacă nu sunt săptămâni active, afișăm statusul actual
+        if (activeWeeks.length === 0 && !hasShownStatusToast.current) {
+          const statusMessage = weeksResp.data.current_status || "Mesaj implicit";
+          
+          toast.info(statusMessage, { 
+            duration: Infinity,
+            description: "Nu mai există săptămâni de curs disponibile în acest semestru." 
+          });
+          
+          // Marcăm că am afișat deja mesajul
+          hasShownStatusToast.current = true;
+        } else {
+          const weekOptions = activeWeeks.map((w: number) => ({
+              label: `Săptămâna ${w}`,
+              value: w.toString()
+          }));
+          setAllWeeks(weekOptions);
         }
       } catch {
         toast.error("Eroare la încărcarea datelor inițiale");
@@ -330,7 +344,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
-          <Button onClick={handleSearch} className="bg-brand-blue hover:bg-brand-blue-dark text-white font-medium shadow-md transition-all active:scale-95 flex-1 sm:flex-none">
+          <Button onClick={handleSearch} disabled={allWeeks.length === 0} className="bg-brand-blue hover:bg-brand-blue-dark text-white font-medium shadow-md transition-all active:scale-95 flex-1 sm:flex-none">
             <Search className="h-4 w-4 mr-2" /> Caută
           </Button>
           <Button onClick={handleReset} variant="outline" className="border-gray-200 text-gray-700 font-medium hover:bg-gray-50 flex-1 sm:flex-none">
