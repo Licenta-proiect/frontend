@@ -88,7 +88,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
         
         // Dacă nu sunt săptămâni active, afișăm statusul actual
         if (activeWeeks.length === 0 && !hasShownStatusToast.current) {
-          const statusMessage = weeksResp.data.current_status || "Mesaj implicit";
+          const statusMessage = weeksResp.data.current_status || "Sesiune/Vacanță";
           
           toast.info(statusMessage, { 
             duration: Infinity,

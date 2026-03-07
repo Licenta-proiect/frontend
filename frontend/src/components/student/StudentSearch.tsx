@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -55,22 +55,42 @@ export function StudentSearch() {
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
+  const [allWeeks, setAllWeeks] = useState<number[]>([]);
+  const hasShownStatusToast = useRef(false);
+
   const types = ["Seminar", "Laborator", "Proiect"];
 
   // Încărcăm grupele la montarea componentei
   useEffect(() => {
-    const fetchGrupe = async () => {
-      setIsLoadingGrupe(true);
-      try {
-        const response = await api.get("/data/grupe");
-        setGrupe(response.data);
+    const fetchInitialData = async () => {
+    setIsLoadingGrupe(true);
+    try {
+      // Preluăm grupele și săptămânile în paralel
+      const [grupeResp, weeksResp] = await Promise.all([
+        api.get("/data/grupe"),
+        api.get("/data/weeks")
+      ]);
+
+      setGrupe(grupeResp.data);
+      
+      const activeWeeks = weeksResp.data.active_weeks || [];
+      setAllWeeks(activeWeeks);
+
+      if (activeWeeks.length === 0 && !hasShownStatusToast.current) {
+        const statusMessage = weeksResp.data.current_status || "Sesiune/Vacanță";
+        toast.info(statusMessage, { 
+          duration: Infinity,
+          description: "Nu mai există săptămâni de curs disponibile în acest semestru." 
+        });
+        hasShownStatusToast.current = true;
+      }
       } catch {
         toast.error("Nu s-au putut încărca grupele.");
       } finally {
         setIsLoadingGrupe(false);
       }
     };
-    fetchGrupe();
+    fetchInitialData();
   }, []);
 
   // Încărcăm materiile când se schimbă grupa selectată
@@ -307,7 +327,7 @@ export function StudentSearch() {
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <Button 
               onClick={handleSearch} 
-              disabled={isSearching}
+              disabled={isSearching || allWeeks.length === 0}
               className="bg-brand-blue hover:bg-brand-blue-dark text-white font-medium shadow-md transition-all active:scale-95 flex-1 sm:flex-none"
             >
               {isSearching ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Search className="h-4 w-4 mr-2" />}
