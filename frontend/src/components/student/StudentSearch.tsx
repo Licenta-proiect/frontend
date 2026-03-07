@@ -316,7 +316,7 @@ export function StudentSearch() {
             </div>
           </div>
 
-          {/* Mesaj Atenționare (Varianta Custom) */}
+          {/* Mesaj Atenționare*/}
           <div className="relative w-full rounded-lg border border-amber-200 bg-amber-50 p-4 [&>svg~*]:pl-7 [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-amber-600">
             <InfoIcon className="h-4 w-4" />
             <div className="text-xs sm:text-sm font-medium text-amber-800 leading-relaxed">

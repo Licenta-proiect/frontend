@@ -153,12 +153,12 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
                     {/* Header-ul cardului */}
                     <div className="p-5 pb-4 flex flex-col sm:flex-row items-start sm:justify-between w-full gap-3">
                       <div className="space-y-1">
-                        <h4 className="font-bold text-gray-900 text-lg leading-tight tracking-tight break-words">
+                        <h4 className="font-bold text-gray-900 text-lg leading-tight tracking-tight wrap-break-word">
                           {selectedSubject}
                         </h4>
                         <div className="flex items-center gap-2 text-sm text-gray-500 font-medium">
                           <span className="w-2 h-2 rounded-full bg-brand-blue/60 shrink-0" />
-                          <span className="break-words">{result.profesor}</span>
+                          <span className="wrap-break-word">{result.profesor}</span>
                         </div>
                       </div>
                       <Badge variant="outline" className={cn("font-bold uppercase tracking-widest text-[9px] px-2 py-0.5 shadow-sm shrink-0", getTypeColor(selectedType))}>
@@ -183,7 +183,7 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
                         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Locație</span>
                         <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
                           <MapPin className="h-4 w-4 text-brand-red/70 shrink-0" />
-                          <span className="break-words">Sala {result.sala}</span>
+                          <span className="wrap-break-word">Sala {result.sala}</span>
                         </div>
                       </div>
 
