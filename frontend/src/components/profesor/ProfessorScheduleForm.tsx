@@ -41,7 +41,9 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
   const [subjects, setSubjects] = useState<string[]>([]);
   const [allGroups, setAllGroups] = useState<{ label: string; value: string }[]>([]);
   const [allRooms, setAllRooms] = useState<{ label: string; value: string }[]>([]);
-  
+  const [allWeeks, setAllWeeks] = useState<{ label: string; value: string }[]>([]);
+  const [selectedWeeks, setSelectedWeeks] = useState<string[]>([]);
+
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
@@ -49,7 +51,6 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
   const [selectedType, setSelectedType] = useState<string>("");
   const [studentCount, setStudentCount] = useState<string>("");
   const [selectedDay, setSelectedDay] = useState<string>("");
-  const [startTime, setStartTime] = useState<string>("");
   
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false); 
@@ -65,9 +66,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     "Sâmbătă": 6,
     "Duminică": 7
   };
-  const timeSlots = Array.from({ length: 13 }, (_, i) => `${(i + 8).toString().padStart(2, "0")}:00`);
   const types = ["Curs", "Seminar", "Laborator", "Proiect"];
-
 
   // date inițiale
   useEffect(() => {
@@ -75,13 +74,22 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       const email = localStorage.getItem("userEmail");
       if (!email) return;
       try {
-        const [subResp, roomsResp] = await Promise.all([
+        const [subResp, roomsResp, weeksResp] = await Promise.all([
           api.get(`/profesor/materii?email=${email}`),
-          api.get("/data/sali")
+          api.get("/data/sali"),
+          api.get("/data/weeks") 
         ]);
 
         setSubjects(subResp.data.materii);
         setAllRooms(roomsResp.data.map((s: ApiRoom) => ({ label: s.nume, value: s.id.toString() })));
+      
+        if (weeksResp.data.active_weeks) {
+            const weekOptions = weeksResp.data.active_weeks.map((w: number) => ({
+                label: `Săptămâna ${w}`,
+                value: w.toString()
+            }));
+            setAllWeeks(weekOptions);
+        }
       } catch {
         toast.error("Eroare la încărcarea datelor inițiale");
       } finally {
@@ -131,18 +139,9 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
   }, [selectedSubject]);
 
   const handleSearch = () => {
-    if (!selectedSubject || selectedGroups.length === 0 || selectedRooms.length === 0 || !duration || !selectedType) {
+    if (!selectedSubject || selectedGroups.length === 0 || selectedRooms.length === 0 || !duration || !selectedType || selectedWeeks.length === 0) {
       toast.error("Vă rugăm să completați toate câmpurile obligatorii");
       return;
-    }
-
-    if (startTime) {
-      const startHour = parseInt(startTime.split(":")[0]);
-      const durationHours = parseInt(duration.split(" ")[0]);
-      if (startHour + durationHours > 22) {
-        toast.error(`Ora de sfârșit depășește limita sistemului (22:00).`);
-        return;
-      }
     }
 
     const searchPayload = {
@@ -154,7 +153,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       tip_activitate: selectedType,
       numar_persoane: studentCount ? parseInt(studentCount) : null,
       zi: selectedDay ? DAYS_MAP[selectedDay] : null,
-      ora_start: startTime ? parseInt(startTime.split(":")[0]) : null
+      saptamani: selectedWeeks.map(w => parseInt(w))
     };
 
     // Afișăm JSON-ul în consolă
@@ -162,9 +161,9 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
 
     // Mock results (care vor fi trimise parintelui)
     const mockResults = [{ 
-      id: "1", week: 3, date: new Date(2026, 1, 17, 14, 0), 
-      startTime: startTime || "08:00", 
-      endTime: startTime ? `${parseInt(startTime.split(":")[0]) + parseInt(duration.split(" ")[0])}:00` : "10:00",
+      id: "1", week: parseInt(selectedWeeks[0]), date: new Date(2026, 1, 17, 14, 0), 
+      startTime: "08:00", 
+      endTime: "10:00",
       room: allRooms.find(r => r.value === selectedRooms[0])?.label || "Sala nespecificata", 
       capacity: parseInt(studentCount) || 20, 
       availableGroups: selectedGroups.map(val => allGroups.find(g => g.value === val)?.label || val)
@@ -176,7 +175,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
 
   const handleReset = () => {
     setSelectedSubject(""); setSelectedGroups([]); setSelectedRooms([]); setDuration("");
-    setStudentCount(""); setSelectedDay(""); setStartTime("");
+    setStudentCount(""); setSelectedDay(""); setSelectedWeeks([]);
     lastSyncedSubject.current = ""; setSelectedType("");
     onSearch(null, []);
   };
@@ -294,6 +293,18 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
               </Select>
             </div>
 
+            {/* Săptămâni */}
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold text-gray-900">Săptămâni <span className="text-brand-red">*</span></Label>
+            <MultiSelect 
+              options={allWeeks} 
+              selected={selectedWeeks} 
+              onChange={setSelectedWeeks} 
+              placeholder="Selectează săptămânile" 
+              className={inputClasses} 
+            />
+          </div>
+
             {/*Număr persoane*/}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Număr persoane</Label>
@@ -313,19 +324,6 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
                     {dayName}
                   </SelectItem>
                 ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-            {/*Ora de start*/}
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold text-gray-900">Ora de start</Label>
-            <Select value={startTime} onValueChange={setStartTime}>
-              <SelectTrigger className={cn(inputClasses, !startTime && placeholderClasses)}>
-                <SelectValue placeholder="Selectează ora" />
-              </SelectTrigger>
-              <SelectContent position="popper" className="max-h-64 text-sm">
-                {timeSlots.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
