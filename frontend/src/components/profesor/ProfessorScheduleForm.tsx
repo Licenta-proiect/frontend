@@ -188,6 +188,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
   };
 
   const handleReset = () => {
+    toast.dismiss();
     setSelectedSubject(""); setSelectedGroups([]); setSelectedRooms([]); setDuration("");
     setStudentCount(""); setSelectedDay(""); setSelectedWeeks([]);
     lastSyncedSubject.current = ""; setSelectedType("");

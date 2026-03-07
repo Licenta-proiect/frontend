@@ -121,6 +121,9 @@ export function StudentSearch() {
       return;
     }
 
+    // ȘTERGEM TOATE TOAST-URILE VECHI
+    toast.dismiss();
+
     // GOLIM ZONA DE REZULTATE ÎNAINTE DE CĂUTARE
     setSearchResults([]);
     setHasSearched(false);
@@ -160,6 +163,7 @@ export function StudentSearch() {
   };
 
   const handleReset = () => {
+    toast.dismiss(); 
     setSelectedGroupId("");
     setSelectedSubject("");
     setSelectedType("");
