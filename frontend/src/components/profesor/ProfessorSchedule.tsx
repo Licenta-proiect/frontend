@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, MapPin, Users, CheckCircle2, Filter } from "lucide-react";
-import { ProfessorScheduleForm, AvailableSlot, SearchFilters } from "@/components/profesor/ProfessorScheduleForm";
+import { ProfessorScheduleForm, AvailableSlot, SearchFilters, SelectOption } from "@/components/profesor/ProfessorScheduleForm";
 import { toast } from "sonner";
 
 interface BackendSlot {
@@ -21,23 +21,24 @@ interface BackendDay {
   optiuni: BackendSlot[];
 }
 
+type RawSlotsResponse = Record<string, BackendDay[]>;
+
 export function ProfessorSchedule() {
   const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [sortBy, setSortBy] = useState<string>("week");
 
-  const transformBackendData = (filters: SearchFilters, slotsRaw: any): AvailableSlot[] => {
-    if (!slotsRaw || Array.isArray(slotsRaw) && slotsRaw.length === 0) return [];
+  const transformBackendData = (filters: SearchFilters, slotsRaw: RawSlotsResponse): AvailableSlot[] => {
+    if (!slotsRaw || (Array.isArray(slotsRaw) && slotsRaw.length === 0)) return [];
     
     const results: AvailableSlot[] = [];
     const { allRooms, allGroups, studentCount } = filters;
 
-    Object.entries(slotsRaw).forEach(([week, days]: [string, any]) => {
-      days.forEach((dayData: any) => {
-        dayData.optiuni.forEach((slot: any, index: number) => {
-          const roomName = allRooms?.find((r: any) => r.value === slot.sala_id.toString())?.label || `Sala ${slot.sala_id}`;
+    Object.entries(slotsRaw).forEach(([week, days]: [string, BackendDay[]]) => {
+      days.forEach((dayData: BackendDay) => {
+        dayData.optiuni.forEach((slot: BackendSlot, index: number) => {
+          const roomName = allRooms?.find((r: SelectOption) => r.value === slot.sala_id.toString())?.label || `Sala ${slot.sala_id}`;
           
-          // Corecție dată: evităm decalajul de fus orar prin setarea orei la prânz înainte de conversie
           const [day, month, year] = dayData.data.split('.');
           const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 12, 0, 0);
 
@@ -50,8 +51,8 @@ export function ProfessorSchedule() {
             room: roomName,
             capacity: parseInt(studentCount) || 0,
             availableGroups: allGroups
-              ?.filter((g: any) => filters.selectedGroups?.includes(g.value))
-              .map((g: any) => g.label) || []
+              ?.filter((g: SelectOption) => filters.selectedGroups?.includes(g.value))
+              .map((g: SelectOption) => g.label) || []
           });
         });
       });
