@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import api from "@/services/api";
 import { Grupa  as ApiGroup } from "@/components/student/StudentSearch";
+import { RawSlotsResponse } from "./ProfessorSchedule";
 
 // Interfețe pentru tipizare
 interface ApiRoom { id: number; nume: string; }
@@ -42,7 +43,7 @@ export interface SearchFilters {
 }
 
 interface ProfessorScheduleFormProps {
-  onSearch: (filters: SearchFilters | null, results: AvailableSlot[]) => void;
+  onSearch: (filters: SearchFilters | null, results: RawSlotsResponse) => void;
 }
 
 export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) {
@@ -184,7 +185,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       
       if (response.data.info) {
         toast.info(response.data.info);
-        onSearch({ selectedSubject, selectedGroups, allRooms, allGroups, studentCount }, []);
+        onSearch({ selectedSubject, selectedGroups, allRooms, allGroups, studentCount }, {});
         return;
       }
 
@@ -196,8 +197,15 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
         studentCount 
       }, response.data.slots);
 
-    } catch (error: any) {
-      toast.error(error.response?.data?.detail || "Eroare la căutare");
+    } catch (error: unknown) {
+      let errorMessage = "Eroare la căutare";
+      
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response: { data?: { detail?: string } } };
+        errorMessage = axiosError.response.data?.detail || errorMessage;
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -208,7 +216,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     setSelectedSubject(""); setSelectedGroups([]); setSelectedRooms([]); setDuration("");
     setStudentCount(""); setSelectedDay(""); setSelectedWeeks([]);
     lastSyncedSubject.current = ""; setSelectedType("");
-    onSearch(null, []);
+    onSearch(null, {});
   };
 
   const inputClasses = "min-h-10 w-full border-gray-200 text-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-brand-blue/30 focus-visible:border-brand-blue/50 transition-all duration-200 shadow-xs";
