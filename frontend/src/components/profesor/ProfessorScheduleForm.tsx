@@ -108,7 +108,9 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     }
     setIsValidatingWeeks(true);
     try {
-      const response = await api.post("/data/weeks-valide", groupIds.map(id => parseInt(id)));
+      const response = await api.post("/data/weeks-valide", { 
+        grupe_ids: groupIds.map(id => parseInt(id)) 
+      });
       const weeks = response.data.active_weeks || [];
       
       const options = weeks.map((w: number) => ({
