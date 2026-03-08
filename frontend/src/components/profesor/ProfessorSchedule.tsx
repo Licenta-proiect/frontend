@@ -31,6 +31,8 @@ export function ProfessorSchedule() {
 
   const [lastFilters, setLastFilters] = useState<SearchFilters | null>(null);
   const [isBooking, setIsBooking] = useState<string | null>(null);
+  
+  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
 
   const transformBackendData = (filters: SearchFilters, slotsRaw: RawSlotsResponse): AvailableSlot[] => {
     if (!slotsRaw || (Array.isArray(slotsRaw) && slotsRaw.length === 0)) return [];
@@ -89,6 +91,7 @@ export function ProfessorSchedule() {
   };
 
   const confirmBooking = async (slot: AvailableSlot) => {
+    // Validăm existența filtrelor folosite la căutare
     if (!lastFilters) return;
 
     try {
@@ -98,7 +101,7 @@ export function ProfessorSchedule() {
         sala_id: parseInt(slot.id.split('-')[0]),
         grupe_ids: lastFilters.selectedGroups.map(id => parseInt(id)),
         materie: lastFilters.selectedSubject,
-        tip_activitate: "Recuperare", 
+        tipActivitate: lastFilters.selectedType, 
         zi: slot.date.getDay() === 0 ? 7 : slot.date.getDay(),
         saptamana: slot.week,
         ora_start: parseInt(slot.startTime.split(':')[0]),
@@ -108,8 +111,8 @@ export function ProfessorSchedule() {
       });
 
       if (response.data.success) {
-        toast.success("Rezervare confirmată!");
-        setAvailableSlots(prev => prev.filter(s => s.id !== slot.id));
+        toast.success("Rezervare confirmată cu succes!");
+        setBookedSlots(prev => [...prev, slot.id]);
       }
     } catch (error: unknown) {
       const errorMessage = (error as { response?: { data?: { detail?: string } } }).response?.data?.detail || "Eroare la rezervare";
@@ -190,13 +193,27 @@ export function ProfessorSchedule() {
                             </div>
                           </div>
                         </div>
-                        <Button 
-                          onClick={() => confirmBooking(slot)}
-                          disabled={isBooking === slot.id}
-                          className="bg-brand-blue hover:bg-brand-blue-dark text-white font-bold"
-                        >
-                          {isBooking === slot.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Rezervă Slot"}
-                        </Button>
+                        
+                        {bookedSlots.includes(slot.id) ? (
+                          <Button 
+                            disabled 
+                            className="bg-green-600 hover:bg-green-600 text-white font-bold gap-2 opacity-100"
+                          >
+                            <CheckCircle2 className="h-4 w-4" /> Rezervat
+                          </Button>
+                        ) : (
+                          <Button 
+                            onClick={() => confirmBooking(slot)}
+                            disabled={isBooking === slot.id}
+                            className="bg-brand-blue hover:bg-brand-blue-dark text-white font-bold"
+                          >
+                            {isBooking === slot.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              "Rezervă Slot"
+                            )}
+                          </Button>
+                        )}
                       </div>
                     </CardContent>
                   </Card>

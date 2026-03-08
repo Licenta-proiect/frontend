@@ -37,6 +37,8 @@ export interface SelectOption {
 export interface SearchFilters {
   selectedSubject: string;
   selectedGroups: string[];
+  selectedType: string; 
+  duration: string;
   allRooms: SelectOption[];
   allGroups: SelectOption[];
   studentCount: string;
@@ -195,6 +197,8 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       onSearch({ 
         selectedSubject, 
         selectedGroups, 
+        selectedType,
+        duration,
         allRooms, 
         allGroups, 
         studentCount 
