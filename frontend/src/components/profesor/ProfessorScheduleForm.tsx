@@ -28,22 +28,6 @@ export interface AvailableSlot {
   availableGroups: string[];
 }
 
-interface BackendSlot {
-  sala_id: number;
-  sala_nume: string;
-  ora_start: number;
-  ora_final: number;
-}
-
-interface BackendDay {
-  zi_index: number;
-  zi_nume: string;
-  data: string;
-  optiuni: BackendSlot[];
-}
-
-type BackendResponseSlots = Record<string, BackendDay[]>;
-
 export interface SearchFilters {
   selectedSubject: string;
   [key: string]: unknown; 
@@ -187,71 +171,27 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     };
 
     try {
-      setIsLoading(true); // Folosim starea de loading existentă sau una locală pentru buton
+      setIsLoading(true);
       const response = await api.post("/rezervari/cauta-libere", searchPayload);
       
-      // Verificăm dacă există proprietatea 'info' (mesaj de la serviciu)
       if (response.data.info) {
         toast.info(response.data.info);
         onSearch({ selectedSubject }, []);
         return;
       }
 
-      const slots = response.data.slots || [];
-      
-      if (Object.keys(slots).length === 0 || (Array.isArray(slots) && slots.length === 0)) {
-        toast.info("Nu s-au găsit sloturi disponibile", {
-          description: "Încercați să selectați alte săli sau să reduceți numărul de grupe."
-        });
-        onSearch({ selectedSubject }, []);
-      } else {
-        const flattenedSlots = transformBackendSlots(slots);
-        onSearch({ selectedSubject }, flattenedSlots);
-        toast.success(`Am găsit ${flattenedSlots.length} sloturi disponibile`);
-      }
+      // Trimitem datele brute și contextul (pentru nume săli/grupe) către părinte
+      onSearch({ 
+        selectedSubject, 
+        allRooms, 
+        allGroups
+      }, response.data.slots || []);
+
     } catch (error: any) {
-      console.error("Search error:", error);
       toast.error(error.response?.data?.detail || "Eroare la căutarea sloturilor");
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Funcție utilitară pentru a converti formatul backend în AvailableSlot[]
-  const transformBackendSlots = (backendData: BackendResponseSlots): AvailableSlot[] => {
-    if (Array.isArray(backendData)) return backendData;
-
-    const results: AvailableSlot[] = [];
-    
-    Object.entries(backendData).forEach(([week, days]) => {
-      days.forEach((dayData) => {
-        dayData.optiuni.forEach((slot, index) => {
-          // Găsim numele sălii din lista allRooms dacă backend-ul nu îl trimite direct în slot
-          const roomName = slot.sala_nume || allRooms.find(r => r.value === slot.sala_id.toString())?.label || `Sala ${slot.sala_id}`;
-          
-          // Formatăm ora (ex: 16 -> "16:00")
-          const formattedStart = `${slot.ora_start}:00`;
-          const formattedEnd = `${slot.ora_final}:00`;
-
-          const uniqueId = `${slot.sala_id}-${slot.ora_start}-${week}-${dayData.data}-${index}`;
-
-          results.push({
-            id: uniqueId,
-            week: parseInt(week),
-            // Conversie DD.MM.YYYY -> Date object
-            date: new Date(dayData.data.split('.').reverse().join('-')), 
-            startTime: formattedStart,
-            endTime: formattedEnd,
-            room: roomName,
-            capacity: parseInt(studentCount) || 0,
-            availableGroups: selectedGroups.map(id => 
-              allGroups.find(g => g.value === id)?.label || id
-            )
-          });
-        });
-      });
-    });
-    return results;
   };
 
   const handleReset = () => {

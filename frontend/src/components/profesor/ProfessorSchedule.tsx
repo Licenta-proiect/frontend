@@ -7,15 +7,58 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, MapPin, Users, CheckCircle2, Filter } from "lucide-react";
 import { ProfessorScheduleForm, AvailableSlot, SearchFilters } from "@/components/profesor/ProfessorScheduleForm";
+import { toast } from "sonner";
 
 export function ProfessorSchedule() {
   const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [sortBy, setSortBy] = useState<string>("week");
 
-  const handleSearchResults = (filters: SearchFilters | null, results: AvailableSlot[]) => {
-    setAvailableSlots(results);
+  const transformBackendData = (filters: any, slotsRaw: any): AvailableSlot[] => {
+    if (!slotsRaw || Array.isArray(slotsRaw) && slotsRaw.length === 0) return [];
+    
+    const results: AvailableSlot[] = [];
+    const { allRooms, allGroups, studentCount } = filters;
+
+    Object.entries(slotsRaw).forEach(([week, days]: [string, any]) => {
+      days.forEach((dayData: any) => {
+        dayData.optiuni.forEach((slot: any, index: number) => {
+          const roomName = allRooms?.find((r: any) => r.value === slot.sala_id.toString())?.label || `Sala ${slot.sala_id}`;
+          
+          // Corecție dată: evităm decalajul de fus orar prin setarea orei la prânz înainte de conversie
+          const [day, month, year] = dayData.data.split('.');
+          const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 12, 0, 0);
+
+          results.push({
+            id: `${slot.sala_id}-${week}-${dayData.data}-${slot.ora_start}-${index}`,
+            week: parseInt(week),
+            date: dateObj,
+            startTime: `${slot.ora_start}:00`,
+            endTime: `${slot.ora_final}:00`,
+            room: roomName,
+            capacity: parseInt(studentCount) || 0,
+            availableGroups: allGroups
+              ?.filter((g: any) => filters.selectedGroups?.includes(g.value))
+              .map((g: any) => g.label) || []
+          });
+        });
+      });
+    });
+    return results;
+  };
+
+  const handleSearchResults = (filters: SearchFilters | null, rawResults: any) => {
     setHasSearched(!!filters);
+    if (!filters) {
+      setAvailableSlots([]);
+      return;
+    }
+    const formatted = transformBackendData(filters, rawResults);
+    setAvailableSlots(formatted);
+    
+    if (formatted.length > 0) {
+      toast.success(`Am găsit ${formatted.length} sloturi disponibile`);
+    }
   };
 
   const sortedSlots = [...availableSlots].sort((a, b) => {
