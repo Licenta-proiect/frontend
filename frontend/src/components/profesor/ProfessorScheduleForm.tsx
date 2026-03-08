@@ -162,6 +162,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
   }, [selectedSubject]);
 
   const handleSearch = async () => {
+    toast.dismiss();
     if (!selectedSubject || selectedGroups.length === 0 || selectedRooms.length === 0 || !duration || !selectedType || selectedWeeks.length === 0) {
       toast.error("Completați toate câmpurile obligatorii");
       return;
