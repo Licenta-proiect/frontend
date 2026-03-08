@@ -54,6 +54,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
   const [allRooms, setAllRooms] = useState<{ label: string; value: string }[]>([]);
   const [allWeeks, setAllWeeks] = useState<{ label: string; value: string }[]>([]);
   const [selectedWeeks, setSelectedWeeks] = useState<string[]>([]);
+  const [isValidatingWeeks, setIsValidatingWeeks] = useState(false);
 
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
@@ -66,7 +67,6 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false); 
   const lastSyncedSubject = useRef<string>("");
-  const hasShownStatusToast = useRef(false);
 
   const durations = ["1 oră", "2 ore", "3 ore", "4 ore"];
   const DAYS_MAP: Record<string, number> = {
@@ -86,35 +86,12 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       const email = localStorage.getItem("userEmail");
       if (!email) return;
       try {
-        const [subResp, roomsResp, weeksResp] = await Promise.all([
+        const [subResp, roomsResp] = await Promise.all([
           api.get(`/profesor/materii?email=${email}`),
           api.get("/data/sali"),
-          api.get("/data/weeks") 
         ]);
-
         setSubjects(subResp.data.materii);
         setAllRooms(roomsResp.data.map((s: ApiRoom) => ({ label: s.nume, value: s.id.toString() })));
-      
-        const activeWeeks = weeksResp.data.active_weeks || [];
-        
-        // Dacă nu sunt săptămâni active, afișăm statusul actual
-        if (activeWeeks.length === 0 && !hasShownStatusToast.current) {
-          const statusMessage = weeksResp.data.current_status || "Sesiune/Vacanță";
-          
-          toast.info(statusMessage, { 
-            duration: Infinity,
-            description: "Nu mai există săptămâni de curs disponibile în acest semestru." 
-          });
-          
-          // Marcăm că am afișat deja mesajul
-          hasShownStatusToast.current = true;
-        } else {
-          const weekOptions = activeWeeks.map((w: number) => ({
-              label: `Săptămâna ${w}`,
-              value: w.toString()
-          }));
-          setAllWeeks(weekOptions);
-        }
       } catch {
         toast.error("Eroare la încărcarea datelor inițiale");
       } finally {
@@ -124,15 +101,39 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     fetchInitialData();
   }, []);
 
+  const fetchValidWeeks = async (groupIds: string[]) => {
+    if (groupIds.length === 0) {
+      setAllWeeks([]);
+      return;
+    }
+    setIsValidatingWeeks(true);
+    try {
+      const response = await api.post("/data/weeks-valide", groupIds.map(id => parseInt(id)));
+      const weeks = response.data.active_weeks || [];
+      
+      const options = weeks.map((w: number) => ({
+        label: `Săptămâna ${w}`,
+        value: w.toString()
+      }));
+      
+      setAllWeeks(options);
+
+      setSelectedWeeks(prev => prev.filter(w => weeks.includes(parseInt(w))));
+    } catch (error) {
+      console.error("Eroare la validarea săptămânilor:", error);
+    } finally {
+      setIsValidatingWeeks(false);
+    }
+  };
+
   // Sincronizare Grupe și Săli
   useEffect(() => {
     const syncOptions = async () => {
       // Nu sincronizăm dacă nu avem materie sau dacă este aceeași materie ca ultima dată
       if (!selectedSubject || selectedSubject === lastSyncedSubject.current) return;
-
+      
       const email = localStorage.getItem("userEmail");
-      setIsSyncing(true); // Activăm starea de încărcare locală
-
+      setIsSyncing(true);
       try {
         const [gResp, sResp] = await Promise.all([
           api.get(`/profesor/grupe-materie?email=${email}&materie=${selectedSubject}`),
@@ -151,6 +152,8 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
         setSelectedGroups(grupeData.map((g: ApiGroup) => g.id.toString()));
         setSelectedRooms(saliData.map((s: ApiRoom) => s.id.toString()));
         
+        const ids = grupeData.map((g: ApiGroup) => g.id.toString());
+        await fetchValidWeeks(ids);
         lastSyncedSubject.current = selectedSubject; // Memorăm ultima materie sincronizată
       } catch {
         console.error("Eroare la sincronizarea opțiunilor");
@@ -162,6 +165,14 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
 
     syncOptions();
   }, [selectedSubject]);
+
+  useEffect(() => {
+    // Adăugăm isSyncing în check pentru a nu apela de două ori la rând când se schimbă materia
+    if (selectedSubject && !isSyncing) {
+        fetchValidWeeks(selectedGroups);
+    }
+    // Adăugăm dependențele cerute de ESLint pentru a asigura consistența datelor
+  }, [selectedGroups, selectedSubject, isSyncing]);
 
   const handleSearch = async () => {
     toast.dismiss();
@@ -325,32 +336,40 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
           </div>
 
           {/* Select Tip Activitate */}
-            <div className="space-y-2">
-              <Label htmlFor="search-type" className="text-sm font-semibold text-gray-900">
-                Tip activitate <span className="text-brand-red">*</span>
-              </Label>
-              <Select value={selectedType} onValueChange={setSelectedType}> 
-                <SelectTrigger id="search-type" className="w-full focus-visible:ring-1 focus:ring-brand-blue/30 border-gray-200">
-                  <SelectValue placeholder="Selectează tipul" />
-                </SelectTrigger>
-                <SelectContent>
-                  {types.map((type) => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="search-type" className="text-sm font-semibold text-gray-900">
+              Tip activitate <span className="text-brand-red">*</span>
+            </Label>
+            <Select value={selectedType} onValueChange={setSelectedType}> 
+              <SelectTrigger id="search-type" className="w-full focus-visible:ring-1 focus:ring-brand-blue/30 border-gray-200">
+                <SelectValue placeholder="Selectează tipul" />
+              </SelectTrigger>
+              <SelectContent>
+                {types.map((type) => (
+                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-            {/* Săptămâni */}
+            {/* Săptămâni - Acum depinde de selecția de mai sus */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Săptămâni <span className="text-brand-red">*</span></Label>
-            <MultiSelect 
-              options={allWeeks} 
-              selected={selectedWeeks} 
-              onChange={setSelectedWeeks} 
-              placeholder="Selectează săptămânile" 
-              className={inputClasses} 
-            />
+            <div className="relative">
+                <MultiSelect 
+                  options={allWeeks} 
+                  selected={selectedWeeks} 
+                  onChange={setSelectedWeeks} 
+                  disabled={!selectedSubject || isValidatingWeeks}
+                  placeholder={
+                    !selectedSubject 
+                    ? "Selectează materia mai întâi" 
+                    : isValidatingWeeks ? "Se verifică calendarul..." : "Selectează săptămânile"
+                  } 
+                  className={cn(inputClasses, (!selectedSubject || isValidatingWeeks) && "opacity-50 bg-gray-50")} 
+                />
+                {isValidatingWeeks && <Loader2 className="absolute right-8 top-3 h-4 w-4 animate-spin text-brand-blue" />}
+            </div>
           </div>
 
             {/*Număr persoane*/}
