@@ -28,9 +28,17 @@ export interface AvailableSlot {
   availableGroups: string[];
 }
 
+export interface SelectOption {
+  label: string;
+  value: string;
+}
+
 export interface SearchFilters {
   selectedSubject: string;
-  [key: string]: unknown; 
+  selectedGroups: string[];
+  allRooms: SelectOption[];
+  allGroups: SelectOption[];
+  studentCount: string;
 }
 
 interface ProfessorScheduleFormProps {
@@ -154,7 +162,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
 
   const handleSearch = async () => {
     if (!selectedSubject || selectedGroups.length === 0 || selectedRooms.length === 0 || !duration || !selectedType || selectedWeeks.length === 0) {
-      toast.error("Vă rugăm să completați toate câmpurile obligatorii");
+      toast.error("Completați toate câmpurile obligatorii");
       return;
     }
 
@@ -176,19 +184,20 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       
       if (response.data.info) {
         toast.info(response.data.info);
-        onSearch({ selectedSubject }, []);
+        onSearch({ selectedSubject, selectedGroups, allRooms, allGroups, studentCount }, []);
         return;
       }
 
-      // Trimitem datele brute și contextul (pentru nume săli/grupe) către părinte
       onSearch({ 
         selectedSubject, 
+        selectedGroups, 
         allRooms, 
-        allGroups
-      }, response.data.slots || []);
+        allGroups, 
+        studentCount 
+      }, response.data.slots);
 
     } catch (error: any) {
-      toast.error(error.response?.data?.detail || "Eroare la căutarea sloturilor");
+      toast.error(error.response?.data?.detail || "Eroare la căutare");
     } finally {
       setIsLoading(false);
     }

@@ -9,12 +9,24 @@ import { Calendar, Clock, MapPin, Users, CheckCircle2, Filter } from "lucide-rea
 import { ProfessorScheduleForm, AvailableSlot, SearchFilters } from "@/components/profesor/ProfessorScheduleForm";
 import { toast } from "sonner";
 
+interface BackendSlot {
+  sala_id: number;
+  ora_start: number;
+  ora_final: number;
+}
+
+interface BackendDay {
+  zi_nume: string;
+  data: string;
+  optiuni: BackendSlot[];
+}
+
 export function ProfessorSchedule() {
   const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [sortBy, setSortBy] = useState<string>("week");
 
-  const transformBackendData = (filters: any, slotsRaw: any): AvailableSlot[] => {
+  const transformBackendData = (filters: SearchFilters, slotsRaw: any): AvailableSlot[] => {
     if (!slotsRaw || Array.isArray(slotsRaw) && slotsRaw.length === 0) return [];
     
     const results: AvailableSlot[] = [];
