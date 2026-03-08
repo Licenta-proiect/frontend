@@ -61,15 +61,23 @@ export function ProfessorSchedule() {
   };
 
   const handleSearchResults = (filters: SearchFilters | null, rawResults: RawSlotsResponse) => {
-    setHasSearched(!!filters);
     if (!filters) {
+      setHasSearched(false);
       setAvailableSlots([]);
       return;
     }
+
     const formatted = transformBackendData(filters, rawResults);
-    setAvailableSlots(formatted);
     
-    if (formatted.length > 0) {
+    if (formatted.length === 0) {
+      // Dacă nu sunt rezultate, resetăm starea de căutare pentru a ascunde zona
+      setHasSearched(false);
+      setAvailableSlots([]);
+      toast.info("Nu s-au găsit sloturi disponibile pentru criteriile selectate.");
+    } else {
+      // Dacă avem rezultate, le afișăm
+      setHasSearched(true);
+      setAvailableSlots(formatted);
       toast.success(`Am găsit ${formatted.length} sloturi disponibile`);
     }
   };
@@ -86,7 +94,7 @@ export function ProfessorSchedule() {
       <ProfessorScheduleForm onSearch={handleSearchResults} />
 
       {/* Secțiunea de Rezultate */}
-      {hasSearched && (
+      {hasSearched && availableSlots.length > 0 && (
         <Card className="border-gray-200 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>

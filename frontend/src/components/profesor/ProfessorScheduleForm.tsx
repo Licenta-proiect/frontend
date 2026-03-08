@@ -167,6 +167,8 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       return;
     }
 
+    onSearch(null, {});
+
     const searchPayload = {
       email: localStorage.getItem("userEmail"),
       materie: selectedSubject,
@@ -184,8 +186,8 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       const response = await api.post("/rezervari/cauta-libere", searchPayload);
       
       if (response.data.info) {
-        toast.info(response.data.info);
-        onSearch({ selectedSubject, selectedGroups, allRooms, allGroups, studentCount }, {});
+        toast.info(response.data.info, { duration: 7000});
+        onSearch(null, {}); // Ascundem rezultatele
         return;
       }
 
@@ -205,6 +207,8 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
         errorMessage = axiosError.response.data?.detail || errorMessage;
       }
       
+      onSearch(null, {});
+  
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
