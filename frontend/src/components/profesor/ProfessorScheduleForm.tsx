@@ -31,10 +31,8 @@ export interface AvailableSlot {
 interface BackendSlot {
   sala_id: number;
   sala_nume: string;
-  ora_start_int: number;
-  ora_start_afisare: string;
-  ora_final_int: number;
-  ora_final_afisare: string;
+  ora_start: number;
+  ora_final: number;
 }
 
 interface BackendDay {
@@ -221,25 +219,34 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
 
   // Funcție utilitară pentru a converti formatul backend în AvailableSlot[]
   const transformBackendSlots = (backendData: BackendResponseSlots): AvailableSlot[] => {
-    // Dacă backend-ul trimite deja un array plan:
     if (Array.isArray(backendData)) return backendData;
 
-    // Dacă backend-ul trimite grupate pe săptămâni/zile (conform group_slots_for_ui):
     const results: AvailableSlot[] = [];
     
     Object.entries(backendData).forEach(([week, days]) => {
       days.forEach((dayData) => {
-        // 'dayData' conține 'data' (string) și 'optiuni' (sloturi)
-        dayData.optiuni.forEach((slot) => {
+        dayData.optiuni.forEach((slot, index) => {
+          // Găsim numele sălii din lista allRooms dacă backend-ul nu îl trimite direct în slot
+          const roomName = slot.sala_nume || allRooms.find(r => r.value === slot.sala_id.toString())?.label || `Sala ${slot.sala_id}`;
+          
+          // Formatăm ora (ex: 16 -> "16:00")
+          const formattedStart = `${slot.ora_start}:00`;
+          const formattedEnd = `${slot.ora_final}:00`;
+
+          const uniqueId = `${slot.sala_id}-${slot.ora_start}-${week}-${dayData.data}-${index}`;
+
           results.push({
-            id: `${slot.sala_id}-${slot.ora_start_int}-${week}-${dayData.zi_index}`,
+            id: uniqueId,
             week: parseInt(week),
-            date: new Date(dayData.data.split('.').reverse().join('-')), // Convertim DD.MM.YYYY în format acceptat de Date
-            startTime: slot.ora_start_afisare,
-            endTime: slot.ora_final_afisare,
-            room: slot.sala_nume,
+            // Conversie DD.MM.YYYY -> Date object
+            date: new Date(dayData.data.split('.').reverse().join('-')), 
+            startTime: formattedStart,
+            endTime: formattedEnd,
+            room: roomName,
             capacity: parseInt(studentCount) || 0,
-            availableGroups: selectedGroups.map(id => allGroups.find(g => g.value === id)?.label || id)
+            availableGroups: selectedGroups.map(id => 
+              allGroups.find(g => g.value === id)?.label || id
+            )
           });
         });
       });
