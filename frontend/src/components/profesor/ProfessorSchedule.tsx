@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, Users, CheckCircle2, Filter } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, CheckCircle2, Filter, Loader2 } from "lucide-react";
 import { ProfessorScheduleForm, AvailableSlot, SearchFilters, SelectOption } from "@/components/profesor/ProfessorScheduleForm";
 import { toast } from "sonner";
+import api from "@/services/api";
 
 export interface BackendSlot {
   sala_id: number;
@@ -27,6 +28,9 @@ export function ProfessorSchedule() {
   const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [sortBy, setSortBy] = useState<string>("week");
+
+  const [lastFilters, setLastFilters] = useState<SearchFilters | null>(null);
+  const [isBooking, setIsBooking] = useState<string | null>(null);
 
   const transformBackendData = (filters: SearchFilters, slotsRaw: RawSlotsResponse): AvailableSlot[] => {
     if (!slotsRaw || (Array.isArray(slotsRaw) && slotsRaw.length === 0)) return [];
@@ -61,6 +65,8 @@ export function ProfessorSchedule() {
   };
 
   const handleSearchResults = (filters: SearchFilters | null, rawResults: RawSlotsResponse) => {
+    setLastFilters(filters);
+    
     if (!filters) {
       setHasSearched(false);
       setAvailableSlots([]);
@@ -79,6 +85,37 @@ export function ProfessorSchedule() {
       setHasSearched(true);
       setAvailableSlots(formatted);
       toast.success(`Am găsit ${formatted.length} sloturi disponibile`);
+    }
+  };
+
+  const confirmBooking = async (slot: AvailableSlot) => {
+    if (!lastFilters) return;
+
+    try {
+      setIsBooking(slot.id);
+      const response = await api.post("/rezervari/confirma-rezervare", {
+        email: localStorage.getItem("userEmail"),
+        sala_id: parseInt(slot.id.split('-')[0]),
+        grupe_ids: lastFilters.selectedGroups.map(id => parseInt(id)),
+        materie: lastFilters.selectedSubject,
+        tip_activitate: "Recuperare", 
+        zi: slot.date.getDay() === 0 ? 7 : slot.date.getDay(),
+        saptamana: slot.week,
+        ora_start: parseInt(slot.startTime.split(':')[0]),
+        durata: parseInt(slot.endTime.split(':')[0]) - parseInt(slot.startTime.split(':')[0]),
+        data_rezervare: slot.date.toISOString().split('T')[0],
+        numar_persoane: parseInt(lastFilters.studentCount) || 0
+      });
+
+      if (response.data.success) {
+        toast.success("Rezervare confirmată!");
+        setAvailableSlots(prev => prev.filter(s => s.id !== slot.id));
+      }
+    } catch (error: unknown) {
+      const errorMessage = (error as { response?: { data?: { detail?: string } } }).response?.data?.detail || "Eroare la rezervare";
+      toast.error(errorMessage);
+    } finally {
+      setIsBooking(null);
     }
   };
 
@@ -153,7 +190,13 @@ export function ProfessorSchedule() {
                             </div>
                           </div>
                         </div>
-                        <Button className="bg-brand-blue hover:bg-brand-blue-dark text-white font-bold shadow-sm active:scale-95">Rezervă Slot</Button>
+                        <Button 
+                          onClick={() => confirmBooking(slot)}
+                          disabled={isBooking === slot.id}
+                          className="bg-brand-blue hover:bg-brand-blue-dark text-white font-bold"
+                        >
+                          {isBooking === slot.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Rezervă Slot"}
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
