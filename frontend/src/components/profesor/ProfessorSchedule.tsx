@@ -45,9 +45,8 @@ export function ProfessorSchedule() {
         dayData.optiuni.forEach((slot: BackendSlot, index: number) => {
           const roomName = allRooms?.find((r: SelectOption) => r.value === slot.sala_id.toString())?.label || `Sala ${slot.sala_id}`;
           
-          const [day, month, year] = dayData.data.split('.');
-          const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 12, 0, 0);
-
+          const dateObj = new Date(dayData.data);
+          
           results.push({
             id: `${slot.sala_id}-${week}-${dayData.data}-${slot.ora_start}-${index}`,
             week: parseInt(week),
@@ -68,7 +67,8 @@ export function ProfessorSchedule() {
 
   const handleSearchResults = (filters: SearchFilters | null, rawResults: RawSlotsResponse) => {
     setLastFilters(filters);
-    
+    setBookedSlots([]);
+
     if (!filters) {
       setHasSearched(false);
       setAvailableSlots([]);
