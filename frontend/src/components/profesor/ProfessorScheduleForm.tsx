@@ -28,6 +28,24 @@ export interface AvailableSlot {
   availableGroups: string[];
 }
 
+interface BackendSlot {
+  sala_id: number;
+  sala_nume: string;
+  ora_start_int: number;
+  ora_start_afisare: string;
+  ora_final_int: number;
+  ora_final_afisare: string;
+}
+
+interface BackendDay {
+  zi_index: number;
+  zi_nume: string;
+  data: string;
+  optiuni: BackendSlot[];
+}
+
+type BackendResponseSlots = Record<string, BackendDay[]>;
+
 export interface SearchFilters {
   selectedSubject: string;
   [key: string]: unknown; 
@@ -152,7 +170,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     syncOptions();
   }, [selectedSubject]);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!selectedSubject || selectedGroups.length === 0 || selectedRooms.length === 0 || !duration || !selectedType || selectedWeeks.length === 0) {
       toast.error("Vă rugăm să completați toate câmpurile obligatorii");
       return;
@@ -170,21 +188,63 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       saptamani: selectedWeeks.map(w => parseInt(w))
     };
 
-    // Afișăm JSON-ul în consolă
-    console.log(JSON.stringify(searchPayload, null, 2));
+    try {
+      setIsLoading(true); // Folosim starea de loading existentă sau una locală pentru buton
+      const response = await api.post("/rezervari/cauta-libere", searchPayload);
+      
+      // Verificăm dacă există proprietatea 'info' (mesaj de la serviciu)
+      if (response.data.info) {
+        toast.info(response.data.info);
+        onSearch({ selectedSubject }, []);
+        return;
+      }
 
-    // Mock results (care vor fi trimise parintelui)
-    const mockResults = [{ 
-      id: "1", week: parseInt(selectedWeeks[0]), date: new Date(2026, 1, 17, 14, 0), 
-      startTime: "08:00", 
-      endTime: "10:00",
-      room: allRooms.find(r => r.value === selectedRooms[0])?.label || "Sala nespecificata", 
-      capacity: parseInt(studentCount) || 20, 
-      availableGroups: selectedGroups.map(val => allGroups.find(g => g.value === val)?.label || val)
-    }];
+      const slots = response.data.slots || [];
+      
+      if (Object.keys(slots).length === 0 || (Array.isArray(slots) && slots.length === 0)) {
+        toast.info("Nu s-au găsit sloturi disponibile", {
+          description: "Încercați să selectați alte săli sau să reduceți numărul de grupe."
+        });
+        onSearch({ selectedSubject }, []);
+      } else {
+        const flattenedSlots = transformBackendSlots(slots);
+        onSearch({ selectedSubject }, flattenedSlots);
+        toast.success(`Am găsit ${flattenedSlots.length} sloturi disponibile`);
+      }
+    } catch (error: any) {
+      console.error("Search error:", error);
+      toast.error(error.response?.data?.detail || "Eroare la căutarea sloturilor");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    onSearch({ selectedSubject }, mockResults);
-    toast.success(`Am găsit ${mockResults.length} sloturi disponibile`);
+  // Funcție utilitară pentru a converti formatul backend în AvailableSlot[]
+  const transformBackendSlots = (backendData: BackendResponseSlots): AvailableSlot[] => {
+    // Dacă backend-ul trimite deja un array plan:
+    if (Array.isArray(backendData)) return backendData;
+
+    // Dacă backend-ul trimite grupate pe săptămâni/zile (conform group_slots_for_ui):
+    const results: AvailableSlot[] = [];
+    
+    Object.entries(backendData).forEach(([week, days]) => {
+      days.forEach((dayData) => {
+        // 'dayData' conține 'data' (string) și 'optiuni' (sloturi)
+        dayData.optiuni.forEach((slot) => {
+          results.push({
+            id: `${slot.sala_id}-${slot.ora_start_int}-${week}-${dayData.zi_index}`,
+            week: parseInt(week),
+            date: new Date(dayData.data.split('.').reverse().join('-')), // Convertim DD.MM.YYYY în format acceptat de Date
+            startTime: slot.ora_start_afisare,
+            endTime: slot.ora_final_afisare,
+            room: slot.sala_nume,
+            capacity: parseInt(studentCount) || 0,
+            availableGroups: selectedGroups.map(id => allGroups.find(g => g.value === id)?.label || id)
+          });
+        });
+      });
+    });
+    return results;
   };
 
   const handleReset = () => {
