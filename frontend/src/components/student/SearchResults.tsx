@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Users, Filter, ArrowUpDown, Clock } from "lucide-react";
+import { Calendar, MapPin, Users, Filter, ArrowUpDown, Clock, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Label } from "../ui/label";
 
@@ -145,49 +145,69 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
             <p className="font-medium">Nu există rezultate pentru filtrele selectate.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 w-full">
+          <div className="grid gap-4">
             {filteredAndSortedResults.map((result, idx) => (
-              <Card key={idx} className="border-l-4 border-l-brand-blue shadow-sm hover:bg-gray-50/50 transition-colors">
-                <CardContent className="pt-4 pb-4">
-                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <Card key={idx} className="border-l-4 border-l-brand-blue shadow-sm hover:bg-gray-50/50 transition-colors overflow-hidden">
+                <CardContent className="p-0">
+                  {/* Header Card: Nume Prof la stanga, Tip la dreapta */}
+                  <div className="px-5 py-3 flex items-center justify-between">
+                    <span className="font-bold text-gray-900 text-base">{result.profesor}</span>
+                    <Badge variant="outline" className={cn("font-bold text-[10px] uppercase px-2 py-0.5 shadow-sm", getTypeColor(selectedType))}>
+                      {selectedType}
+                    </Badge>
+                  </div>
+
+                  {/* Informatii principale - Grid layout */}
+                  <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     
-                    <div className="space-y-3 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <Badge variant="outline" className={cn("font-bold text-[10px] uppercase", getTypeColor(selectedType))}>
-                          {selectedType}
-                        </Badge>
-                        <Badge className="bg-blue-50 text-brand-blue border-blue-100 font-bold">
-                          {result.saptamani_grupate}
-                        </Badge>
-                        <span className="text-sm font-bold text-gray-800 ml-1">{result.profesor}</span>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-sm font-medium">
-                        <div className="flex items-center gap-2 text-gray-700">
-                          <Calendar className="h-4 w-4 text-brand-blue" />
-                          <span>{result.zi}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-gray-700">
-                          <Clock className="h-4 w-4 text-brand-blue" />
-                          <span>{result.ora_start} - {result.ora_final}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-gray-700">
-                          <MapPin className="h-4 w-4 text-brand-blue" />
-                          <span>Sala {result.sala}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-gray-700">
-                          <Users className="h-4 w-4 text-brand-blue" />
-                          <span>{result.grupa}</span>
-                        </div>
+                    {/*Zi*/}
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                        <Calendar className="h-4 w-4 text-brand-blue shrink-0" />
+                        <span>{result.zi}</span>
                       </div>
                     </div>
 
-                    <div className="text-right shrink-0">
-                       <p className="text-[11px] text-gray-400 italic">
-                         * Verifică cu profesorul <br/> înainte de participare
-                       </p>
+                    {/*Interval*/}
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                        <Clock className="h-4 w-4 text-brand-blue shrink-0" />
+                        <span>{result.ora_start} - {result.ora_final}</span>
+                      </div>
                     </div>
 
+                    {/*Sala*/}
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                        <MapPin className="h-4 w-4 text-brand-blue shrink-0" />
+                        <span>Sala {result.sala}</span>
+                      </div>
+                    </div>
+
+                    {/*Grupe*/}
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                        <Users className="h-4 w-4 text-brand-blue shrink-0" />
+                        <span>{result.grupa}</span>
+                      </div>
+                    </div>
+
+                    {/*Saptamani*/}
+                    <div className="space-y-1">
+                      <div className="flex flex-wrap gap-1">
+                        <Badge className="bg-blue-50 text-brand-blue border-none text-xs font-bold px-2 py-0">
+                          Săptămânile {result.saptamani_grupate}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Footer Card: Indicatia pe toata lungimea */}
+                  <div className="px-5 py-2.5 flex items-center gap-2">
+                    <Info className="h-3.5 w-3.5 text-gray-400" />
+                    <span className="text-gray-500 text-[11px] font-medium italic">
+                      Verifică cu profesorul înainte de merge cu altă grupă.
+                    </span>
                   </div>
                 </CardContent>
               </Card>
