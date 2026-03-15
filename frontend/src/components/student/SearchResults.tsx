@@ -217,7 +217,8 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
                     {/*Saptamani*/}
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                        <span>Săptămânile {result.saptamani_grupate}</span>
+                        {result.saptamani_lista.length === 1 ? "Săptămâna" : "Săptămânile"}{" "}
+                        {result.saptamani_grupate}
                       </div>
                     </div>
                   </div>
