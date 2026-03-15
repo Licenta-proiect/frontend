@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Users, Filter, ArrowUpDown } from "lucide-react";
+import { Calendar, MapPin, Users, Filter, ArrowUpDown, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Label } from "../ui/label";
 
@@ -147,70 +147,47 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
         ) : (
           <div className="grid grid-cols-1 gap-6 w-full">
             {filteredAndSortedResults.map((result, idx) => (
-              <Card key={idx} className="group hover:border-brand-blue/40 transition-all duration-300 shadow-sm hover:shadow-md border-gray-100 overflow-hidden w-full">
-                <CardContent className="p-0">
-                  <div className="flex flex-col w-full">
-                    {/* Header-ul cardului */}
-                    <div className="p-5 pb-4 flex flex-col sm:flex-row items-start sm:justify-between w-full gap-3">
-                      <div className="space-y-1">
-                        <h4 className="font-bold text-gray-900 text-lg leading-tight tracking-tight wrap-break-word">
-                          {selectedSubject}
-                        </h4>
-                        <div className="flex items-center gap-2 text-sm text-gray-500 font-medium">
-                          <span className="w-2 h-2 rounded-full bg-brand-blue/60 shrink-0" />
-                          <span className="wrap-break-word">{result.profesor}</span>
-                        </div>
+              <Card key={idx} className="border-l-4 border-l-brand-blue shadow-sm hover:bg-gray-50/50 transition-colors">
+                <CardContent className="pt-4 pb-4">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    
+                    <div className="space-y-3 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge variant="outline" className={cn("font-bold text-[10px] uppercase", getTypeColor(selectedType))}>
+                          {selectedType}
+                        </Badge>
+                        <Badge className="bg-blue-50 text-brand-blue border-blue-100 font-bold">
+                          {result.saptamani_grupate}
+                        </Badge>
+                        <span className="text-sm font-bold text-gray-800 ml-1">{result.profesor}</span>
                       </div>
-                      <Badge variant="outline" className={cn("font-bold uppercase tracking-widest text-[9px] px-2 py-0.5 shadow-sm shrink-0", getTypeColor(selectedType))}>
-                        {selectedType}
-                      </Badge>
-                    </div>
 
-                    {/* Corpul cardului - Grid fixat pentru Desktop */}
-                    <div className="px-5 py-4 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-y-6 gap-x-4 border-gray-50 w-full">
-                      <div className="space-y-1.5">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Zi & interval</span>
-                        <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                          <Calendar className="h-4 w-4 text-brand-blue/70 shrink-0" />
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-sm font-medium">
+                        <div className="flex items-center gap-2 text-gray-700">
+                          <Calendar className="h-4 w-4 text-brand-blue" />
                           <span>{result.zi}</span>
                         </div>
-                        <div className="text-[13px] text-gray-600 font-medium ml-6">
-                          {result.ora_start} — {result.ora_final}
+                        <div className="flex items-center gap-2 text-gray-700">
+                          <Clock className="h-4 w-4 text-brand-blue" />
+                          <span>{result.ora_start} - {result.ora_final}</span>
                         </div>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Locație</span>
-                        <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                          <MapPin className="h-4 w-4 text-brand-red/70 shrink-0" />
-                          <span className="wrap-break-word">Sala {result.sala}</span>
+                        <div className="flex items-center gap-2 text-gray-700">
+                          <MapPin className="h-4 w-4 text-brand-blue" />
+                          <span>Sala {result.sala}</span>
                         </div>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Grupă alternativă</span>
-                        <div className="flex items-start gap-2 text-sm font-semibold text-gray-800">
-                          <Users className="h-4 w-4 text-gray-400 shrink-0 mt-0.5" />
-                          <span className="leading-snug">{result.grupa}</span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Săptămâni în care poți participa</span>
-                        <div className="flex flex-wrap gap-1">
-                          <Badge className="bg-slate-100 text-slate-700 border-none text-xs font-bold px-2 py-0">
-                            {result.saptamani_grupate}
-                          </Badge>
+                        <div className="flex items-center gap-2 text-gray-700">
+                          <Users className="h-4 w-4 text-brand-blue" />
+                          <span>{result.grupa}</span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Footer-ul cardului */}
-                    <div className="px-5 py-3 bg-gray-50/30">
-                      <span className="text-gray-500 text-xs font-medium italic block">
-                        * Verifică cu profesorul înainte de a merge la altă grupă.
-                      </span>
+                    <div className="text-right shrink-0">
+                       <p className="text-[11px] text-gray-400 italic">
+                         * Verifică cu profesorul <br/> înainte de participare
+                       </p>
                     </div>
+
                   </div>
                 </CardContent>
               </Card>
