@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -66,8 +66,8 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
   const [selectedDay, setSelectedDay] = useState<string>("");
   
   const [isLoading, setIsLoading] = useState(true);
-  const [isSyncing, setIsSyncing] = useState(false); 
-  const lastSyncedSubject = useRef<string>("");
+  const [isSyncingTypes, setIsSyncingTypes] = useState(false);
+  const [isSyncingGroups, setIsSyncingGroups] = useState(false);
 
   const durations = ["1 oră", "2 ore", "3 ore", "4 ore"];
   const DAYS_MAP: Record<string, number> = {
@@ -101,6 +101,82 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     fetchInitialData();
   }, []);
 
+  // 2. Când se schimbă MATERIA: Resetăm selecțiile inferioare și aducem TIPURILE de activitate
+  useEffect(() => {
+    const fetchTypes = async () => {
+      if (!selectedSubject) {
+        setActivityTypes([]);
+        setSelectedType("");
+        return;
+      }
+      const email = localStorage.getItem("userEmail");
+      setIsSyncingTypes(true);
+      // Resetăm tot ce depinde de materie
+      setSelectedType("");
+      setAllGroups([]);
+      setSelectedGroups([]);
+      setSelectedWeeks([]);
+
+      try {
+        const tResp = await api.get(`/data/tipuri-activitate-profesor?email=${email}&materie=${selectedSubject}`);
+        setActivityTypes(tResp.data);
+        if (tResp.data.length >= 1) setSelectedType(tResp.data[0]);
+      } catch {
+        toast.error("Eroare la preluarea tipurilor de activitate");
+      } finally {
+        setIsSyncingTypes(false);
+      }
+    };
+    fetchTypes();
+  }, [selectedSubject]);
+
+  // 3. Când se schimbă MATERIA sau TIPUL: Aducem GRUPELE și SĂLILE specifice
+  useEffect(() => {
+    const syncGroupsAndRooms = async () => {
+      // Grupele depind acum de ambii factori
+      if (!selectedSubject || !selectedType) {
+        setAllGroups([]);
+        setSelectedGroups([]);
+        return;
+      }
+
+      const email = localStorage.getItem("userEmail");
+      setIsSyncingGroups(true);
+
+      try {
+        // Dacă e curs, trimitem parametrul tip către backend pentru logica de comasare
+        const tipParam = selectedType.toLowerCase().includes("curs") ? `&tip=${selectedType}` : "";
+        
+        const [gResp, sResp] = await Promise.all([
+          api.get(`/profesor/grupe-materie?email=${email}&materie=${selectedSubject}${tipParam}`),
+          api.get(`/profesor/sali-materie?email=${email}&materie=${selectedSubject}`)
+        ]);
+
+        const grupeData = gResp.data.grupe || [];
+        const saliData = sResp.data.sali || [];
+
+        const groupsOptions = grupeData.map((g: ApiGroup) => ({
+          label: `${g.specializationShortName} • an ${g.studyYear} • ${g.nume}${g.subgroupIndex ? `${g.subgroupIndex}` : ""}`,
+          value: g.id.toString(),
+        }));
+
+        setAllGroups(groupsOptions);
+        setSelectedGroups(grupeData.map((g: ApiGroup) => g.id.toString()));
+        setSelectedRooms(saliData.map((s: ApiRoom) => s.id.toString()));
+        
+        if (grupeData.length > 0) {
+            await fetchValidWeeks(grupeData.map((g: ApiGroup) => g.id.toString()));
+        }
+      } catch {
+        toast.error("Eroare la sincronizarea grupelor");
+      } finally {
+        setIsSyncingGroups(false);
+      }
+    };
+
+    syncGroupsAndRooms();
+  }, [selectedSubject, selectedType]);
+
   const fetchValidWeeks = async (groupIds: string[]) => {
     if (groupIds.length === 0) {
       setAllWeeks([]);
@@ -127,69 +203,6 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       setIsValidatingWeeks(false);
     }
   };
-
-  // Sincronizare Grupe și Săli
-  useEffect(() => {
-    const syncOptions = async () => {
-      // Nu sincronizăm dacă nu avem materie sau dacă este aceeași materie ca ultima dată
-      if (!selectedSubject || selectedSubject === lastSyncedSubject.current) return;
-      
-      const email = localStorage.getItem("userEmail");
-      setIsSyncing(true);
-      setSelectedGroups([]); // Resetăm grupele vechi
-      setSelectedRooms([]);  // Resetăm sălile vechi
-      setSelectedWeeks([]);  // Resetăm săptămânile vechi
-
-      try {
-        const [gResp, sResp, tResp] = await Promise.all([
-          api.get(`/profesor/grupe-materie?email=${email}&materie=${selectedSubject}`),
-          api.get(`/profesor/sali-materie?email=${email}&materie=${selectedSubject}`),
-          api.get(`/data/tipuri-activitate-profesor?email=${email}&materie=${selectedSubject}`)
-        ]);
-
-        const grupeData = gResp.data.grupe || gResp.data; 
-        const saliData = sResp.data.sali || sResp.data;
-        const tipuriData = tResp.data; 
-
-        const groupsOptions = grupeData.map((g: ApiGroup) => ({
-            label: `${g.specializationShortName} • an ${g.studyYear} • ${g.nume}${g.subgroupIndex ? `${g.subgroupIndex}` : ""}`,
-            value: g.id.toString(),
-        }));
-
-        setAllGroups(groupsOptions);
-        setActivityTypes(tipuriData); // Actualizăm state-ul pentru select-ul de activități
-        
-        // Auto-selectăm primul tip de activitate dacă există doar unul
-        if (tipuriData.length >= 1) {
-          setSelectedType(tipuriData[0]);
-        } else {
-          setSelectedType(""); // Resetăm selecția dacă se schimbă materia
-        }
-
-        setSelectedGroups(grupeData.map((g: ApiGroup) => g.id.toString()));
-        setSelectedRooms(saliData.map((s: ApiRoom) => s.id.toString()));
-        
-        const ids = grupeData.map((g: ApiGroup) => g.id.toString());
-        await fetchValidWeeks(ids);
-        lastSyncedSubject.current = selectedSubject; // Memorăm ultima materie sincronizată
-      } catch {
-        console.error("Eroare la sincronizarea opțiunilor");
-        toast.error("Nu s-au putut prelua grupele specifice materiei");
-      } finally {
-        setIsSyncing(false); // Dezactivăm starea de încărcare
-      }
-    };
-
-    syncOptions();
-  }, [selectedSubject]);
-
-  useEffect(() => {
-    // Adăugăm isSyncing în check pentru a nu apela de două ori la rând când se schimbă materia
-    if (selectedSubject && !isSyncing) {
-        fetchValidWeeks(selectedGroups);
-    }
-    // Adăugăm dependențele cerute de ESLint pentru a asigura consistența datelor
-  }, [selectedGroups, selectedSubject, isSyncing]);
 
   const handleSearch = async () => {
     toast.dismiss();
@@ -252,9 +265,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     toast.dismiss();
     setSelectedSubject(""); setSelectedGroups([]); setSelectedRooms([]); setDuration("");
     setStudentCount(""); setSelectedDay(""); setSelectedWeeks([]);
-    lastSyncedSubject.current = ""; setSelectedType("");
-    onSearch(null, {});
-    setActivityTypes([]);
+    setSelectedType(""); setActivityTypes([]); onSearch(null, {});
   };
 
   const inputClasses = "min-h-10 w-full border-gray-200 text-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-brand-blue/30 focus-visible:border-brand-blue/50 transition-all duration-200 shadow-xs";
@@ -297,14 +308,14 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
               <Select 
                 value={selectedType} 
                 onValueChange={setSelectedType}
-                disabled={!selectedSubject || isSyncing || activityTypes.length === 0}
+                disabled={!selectedSubject || isSyncingTypes || activityTypes.length === 0}
               > 
                 <SelectTrigger id="search-type" className={cn(inputClasses, !selectedType && placeholderClasses)}>
                   <SelectValue 
                     placeholder={
                       !selectedSubject 
                         ? "Selectează materia mai întâi" 
-                        : isSyncing 
+                        : isSyncingTypes 
                           ? "Se încarcă..." 
                           : activityTypes.length === 0 
                             ? "Niciun tip de activitate disponibil" 
@@ -324,7 +335,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
                   )}
                 </SelectContent>
               </Select>
-              {isSyncing && (
+              {isSyncingTypes && (
                 <Loader2 className="absolute right-8 top-3 h-4 w-4 animate-spin text-brand-blue" />
               )}
             </div>
@@ -339,20 +350,20 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
                 selected={selectedGroups} 
                 onChange={setSelectedGroups} 
                 // Dezactivat dacă nu e selectată materia SAU dacă se sincronizează
-                disabled={!selectedSubject || isSyncing}
+                disabled={!selectedSubject || isSyncingGroups}
                 placeholder={
                     !selectedSubject 
                     ? "Selectează materia mai întâi" 
-                    : isSyncing 
+                    : isSyncingGroups 
                         ? "Se încarcă grupele..." 
                         : "Selectează grupele"
                 } 
                 className={cn(
                     inputClasses, 
-                    (!selectedSubject || isSyncing) && "opacity-50 cursor-not-allowed bg-gray-50"
+                    (!selectedSubject || isSyncingGroups) && "opacity-50 cursor-not-allowed bg-gray-50"
                 )} 
                 />
-                {isSyncing && <Loader2 className="absolute right-8 top-3 h-4 w-4 animate-spin text-brand-blue" />}
+                {isSyncingGroups && <Loader2 className="absolute right-8 top-3 h-4 w-4 animate-spin text-brand-blue" />}
             </div>
           </div>
 
@@ -365,20 +376,20 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
                 selected={selectedRooms} 
                 onChange={setSelectedRooms} 
                 // Dezactivat dacă nu e selectată materia SAU dacă se sincronizează
-                disabled={!selectedSubject || isSyncing}
+                disabled={!selectedSubject || isSyncingGroups}
                 placeholder={
                     !selectedSubject 
                     ? "Selectează materia mai întâi" 
-                    : isSyncing 
+                    : isSyncingGroups 
                         ? "Se încarcă sălile..." 
                         : "Selectează sălile"
                 } 
                 className={cn(
                     inputClasses, 
-                    (!selectedSubject || isSyncing) && "opacity-50 cursor-not-allowed bg-gray-50"
+                    (!selectedSubject || isSyncingGroups) && "opacity-50 cursor-not-allowed bg-gray-50"
                 )} 
                 />
-                {isSyncing && <Loader2 className="absolute right-8 top-3 h-4 w-4 animate-spin text-brand-blue" />}
+                {isSyncingGroups && <Loader2 className="absolute right-8 top-3 h-4 w-4 animate-spin text-brand-blue" />}
             </div>
           </div>
 
