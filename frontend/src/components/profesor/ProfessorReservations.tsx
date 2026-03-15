@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Calendar, History, Loader2, Search, Inbox, AlertCircle } from "lucide-react";
+import { Calendar, History, Loader2, Search, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/services/api";
 import { ReservationCard } from "./ReservationCard";
@@ -30,7 +29,6 @@ export interface Reservation {
   week: number;
   status: "upcoming" | "completed" | "canceled";
   tip: string;
-  studentCount: number;
 }
 
 export function ProfessorReservations() {
@@ -44,20 +42,34 @@ export function ProfessorReservations() {
     try {
       setLoading(true);
       const response = await api.get("/profesor/rezervari");
-      const mappedData = response.data.map((r: any) => ({
-        id: r.id,
-        subject: r.materie,
-        groups: r.grupe || [],
-        room: r.sala,
-        date: new Date(r.data),
-        startTime: `${String(r.ora_start).padStart(2, '0')}:00`,
-        endTime: `${String(r.ora_start + r.durata).padStart(2, '0')}:00`,
-        week: r.saptamana,
-        status: r.status === "anulată" ? "canceled" : 
-                (new Date(r.data) < new Date() ? "completed" : "upcoming"),
-        tip: r.tip,
-        studentCount: r.numar_persoane || 0
-      }));
+      
+      const mappedData = response.data.map((r: any) => {
+        const resDate = new Date(r.data);
+        const isPast = resDate < new Date();
+        
+        // Mapare status bazată pe JSON-ul tău: "rezervat" sau "anulat"
+        let status: "upcoming" | "completed" | "canceled" = "upcoming";
+        if (r.status === "anulat") {
+          status = "canceled";
+        } else if (isPast) {
+          status = "completed";
+        } else {
+          status = "upcoming";
+        }
+
+        return {
+          id: r.id.toString(),
+          subject: r.materie,
+          groups: r.grupe || [],
+          room: r.sala,
+          date: resDate,
+          startTime: `${String(r.ora_start).padStart(2, '0')}:00`,
+          endTime: `${String(r.ora_start + r.durata).padStart(2, '0')}:00`,
+          week: r.saptamana,
+          status: status,
+          tip: r.tip
+        };
+      });
       setReservations(mappedData);
     } catch (error) {
       toast.error("Eroare la încărcarea rezervărilor");
@@ -69,44 +81,34 @@ export function ProfessorReservations() {
   useEffect(() => { fetchReservations(); }, []);
 
   const handleCancelConfirm = async () => {
-  if (!reservationToCancel) return;
+    if (!reservationToCancel) return;
+    const userEmail = localStorage.getItem("userEmail");
+    const token = localStorage.getItem("access_token");
 
-  // 1. Extragem datele exact așa cum le salvează AuthCallback
-  const userEmail = localStorage.getItem("userEmail");
-  const token = localStorage.getItem("access_token");
+    try {
+      await api.post("/rezervari/anuleaza-rezervare", {
+        rezervare_id: reservationToCancel,
+        email: userEmail,
+        motiv: "Anulare profesor"
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
-  // 2. Verificare de siguranță
-  if (!userEmail || !token) {
-    toast.error("Sesiune invalidă. Te rugăm să te reconectezi.");
-    return;
-  }
-
-  try {
-    // 3. Apelul către backend
-    await api.post("/rezervari/anuleaza-rezervare", {
-      rezervare_id: reservationToCancel,
-      email: userEmail, // Acum userEmail va avea valoarea corectă
-      motiv: "Anulare profesor"
-    }, {
-      headers: {
-        Authorization: `Bearer ${token}` // Trimitem și token-ul pentru Depends(get_current_user)
-      }
-    });
-
-    toast.success("Rezervarea a fost anulată cu succes");
-    setCancelDialogOpen(false);
-    fetchReservations(); 
-  } catch (error: any) {
-    // Gestionare erori...
-    const detail = error.response?.data?.detail;
-    toast.error(typeof detail === "string" ? detail : "Eroare la anulare");
-  }
-};
+      toast.success("Rezervarea a fost anulată");
+      setCancelDialogOpen(false);
+      fetchReservations(); 
+    } catch (error: any) {
+      toast.error("Eroare la anulare");
+    }
+  };
 
   const filtered = reservations.filter(r => 
     r.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
     r.room.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const activeReservations = filtered.filter(r => r.status === "upcoming");
+  const historyReservations = filtered.filter(r => r.status !== "upcoming");
 
   if (loading) {
     return (
@@ -118,62 +120,73 @@ export function ProfessorReservations() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto pb-10">
+    <div className="max-w-6xl mx-auto pb-10 space-y-6">
+      <div className="flex justify-end">
+        <div className="relative w-full sm:w-64">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input 
+            placeholder="Caută..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 h-10 border-gray-200 shadow-xs text-sm"
+          />
+        </div>
+      </div>
+
+      {/* CARD 1: ACTIVE */}
       <Card className="border-gray-200 shadow-sm">
         <CardHeader>
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
-                <Calendar className="h-5 w-5 text-brand-blue" /> Lista rezervări
-              </CardTitle>
-              <CardDescription className="font-medium text-gray-600">
-                {filtered.length} rezervări găsite în total
-              </CardDescription>
-            </div>
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input 
-                placeholder="Caută după materie sau sală..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-10 focus-visible:ring-1 border-gray-200 shadow-xs text-sm"
-              />
-            </div>
-          </div>
+          <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
+            <Calendar className="h-5 w-5 text-brand-blue" /> Rezervări Active
+          </CardTitle>
+          <CardDescription>Urmează să aibă loc</CardDescription>
         </CardHeader>
-        
-        <CardContent className="space-y-6">
-          {filtered.length === 0 ? (
-            <p className="text-center py-10 text-gray-500 italic">Nicio rezervare găsită</p>
+        <CardContent className="space-y-4">
+          {activeReservations.length === 0 ? (
+            <p className="text-center py-6 text-gray-500 italic text-sm">Nicio rezervare activă</p>
           ) : (
-            <div className="grid gap-4">
-              {filtered.map((res) => (
-                <ReservationCard 
-                  key={res.id} 
-                  reservation={res} 
-                  onCancel={(id) => { setReservationToCancel(id); setCancelDialogOpen(true); }} 
-                />
-              ))}
-            </div>
+            activeReservations.map((res) => (
+              <ReservationCard 
+                key={res.id} 
+                reservation={res} 
+                onCancel={(id) => { setReservationToCancel(id); setCancelDialogOpen(true); }} 
+              />
+            ))
           )}
         </CardContent>
       </Card>
 
-      {/* Reutilizăm AlertDialog-ul stilizat */}
+      {/* CARD 2: ISTORIC */}
+      <Card className="border-gray-200 shadow-sm bg-gray-50/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-gray-600 font-semibold text-xl">
+            <History className="h-5 w-5 text-gray-400" /> Istoric și Anulări
+          </CardTitle>
+          <CardDescription>Finalizate sau anulate</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {historyReservations.length === 0 ? (
+            <p className="text-center py-6 text-gray-500 italic text-sm">Istoric gol</p>
+          ) : (
+            historyReservations.map((res) => (
+              <ReservationCard key={res.id} reservation={res} />
+            ))
+          )}
+        </CardContent>
+      </Card>
+
       <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
-        <AlertDialogContent className="rounded-xl border-gray-200">
+        <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-red-600 font-bold">
+            <AlertDialogTitle className="text-red-600 flex items-center gap-2">
               <AlertCircle className="h-5 w-5" /> Confirmare Anulare
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              Sigur doriți să anulați rezervarea? Acțiunea este ireversibilă.
-            </AlertDialogDescription>
+            <AlertDialogDescription>Sigur doriți să anulați?</AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2">
-            <AlertDialogCancel className="font-bold rounded-lg">ÎNAPOI</AlertDialogCancel>
-            <AlertDialogAction onClick={handleCancelConfirm} className="bg-red-600 hover:bg-red-700 font-bold text-white rounded-lg uppercase">
-              Confirmă Anularea
+          <AlertDialogFooter>
+            <AlertDialogCancel>ÎNAPOI</AlertDialogCancel>
+            <AlertDialogAction onClick={handleCancelConfirm} className="bg-red-600 hover:bg-red-700">
+              CONFIRMĂ ANULAREA
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
