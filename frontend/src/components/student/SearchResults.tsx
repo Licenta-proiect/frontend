@@ -64,9 +64,9 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
 
   const getTypeColor = (type: string) => {
     const t = type.toLowerCase();
-    if (t.includes("lab")) return "font-bold bg-blue-100 text-blue-700 border-blue-200";
-    if (t.includes("sem")) return "font-bold bg-green-100 text-green-700 border-green-200";
-    if (t.includes("pro")) return "font-bold bg-purple-100 text-purple-700 border-purple-200";
+    if (t.includes("lab")) return "font-bold bg-blue-50 text-brand-blue border-blue-100 ";
+    if (t.includes("sem")) return "font-bold bg-green-50 text-green-700 border-green-100";
+    if (t.includes("pro")) return "font-bold bg-purple-50 text-purple-700 border-purple-100";
     return "font-bold bg-gray-100 text-gray-700";
   };
 
@@ -152,7 +152,7 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
                   {/* Header Card: Nume Prof la stanga, Tip la dreapta */}
                   <div className="px-5 py-3 flex items-center justify-between">
                     <span className="font-bold text-gray-900 text-base">{result.profesor}</span>
-                    <Badge variant="outline" className={cn("font-bold text-[10px] uppercase px-2 py-0.5 shadow-sm", getTypeColor(selectedType))}>
+                    <Badge variant="outline" className={cn("font-bold text-[10px] uppercase px-2 py-0.5", getTypeColor(selectedType))}>
                       {selectedType}
                     </Badge>
                   </div>
