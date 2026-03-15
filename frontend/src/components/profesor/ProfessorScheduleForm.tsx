@@ -272,6 +272,23 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
             </Select>
           </div>
 
+            {/* Select Tip Activitate */}
+          <div className="space-y-2">
+            <Label htmlFor="search-type" className="text-sm font-semibold text-gray-900">
+              Tip activitate <span className="text-brand-red">*</span>
+            </Label>
+            <Select value={selectedType} onValueChange={setSelectedType}> 
+              <SelectTrigger id="search-type" className="w-full focus-visible:ring-1 focus:ring-brand-blue/30 border-gray-200">
+                <SelectValue placeholder="Selectează tipul" />
+              </SelectTrigger>
+              <SelectContent>
+                {types.map((type) => (
+                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
             {/* Grupe - Blocat până la selectarea materiei */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Grupe <span className="text-brand-red">*</span></Label>
@@ -333,23 +350,6 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
               </SelectTrigger>
               <SelectContent position="popper" className="max-h-64 text-sm">
                 {durations.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Select Tip Activitate */}
-          <div className="space-y-2">
-            <Label htmlFor="search-type" className="text-sm font-semibold text-gray-900">
-              Tip activitate <span className="text-brand-red">*</span>
-            </Label>
-            <Select value={selectedType} onValueChange={setSelectedType}> 
-              <SelectTrigger id="search-type" className="w-full focus-visible:ring-1 focus:ring-brand-blue/30 border-gray-200">
-                <SelectValue placeholder="Selectează tipul" />
-              </SelectTrigger>
-              <SelectContent>
-                {types.map((type) => (
-                  <SelectItem key={type} value={type}>{type}</SelectItem>
-                ))}
               </SelectContent>
             </Select>
           </div>
