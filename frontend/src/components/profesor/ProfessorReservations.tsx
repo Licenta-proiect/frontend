@@ -91,7 +91,7 @@ export function ProfessorReservations() {
       await api.post("/rezervari/anuleaza-rezervare", {
         rezervare_id: reservationToCancel,
         email: userEmail,
-        motiv: cancelReason || "Anulare profesor"
+        motiv: cancelReason || ""
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -182,51 +182,45 @@ export function ProfessorReservations() {
         </CardContent>
       </Card>
 
-      <AlertDialog 
-        open={cancelDialogOpen} 
-        onOpenChange={(open) => {
-          setCancelDialogOpen(open);
-          if (!open) setCancelReason(""); // Reset la închidere
-        }}
-      >
-        <AlertDialogContent className="rounded-xl border-gray-200 shadow-xl max-w-md">
+      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <AlertDialogContent className="rounded-xl border-gray-200 shadow-xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-semibold text-xl text-gray-900 flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-red-600" />
-              Confirmare anulare
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-600">
-              Sunteți sigur că doriți să anulați această rezervare? Această acțiune va elibera slotul pentru alți profesori.
+            <AlertDialogTitle className="font-semibold text-xl text-gray-900">Confirmare anulare rezervare</AlertDialogTitle>
+            <AlertDialogDescription>
+              Sunteți sigur că doriți să anulați? Această acțiune va elibera sala pentru alți colegi.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
-          <div className="py-4 space-y-2">
-            <label className="text-sm font-semibold text-gray-700 ml-1">
-              Motivul anulării (opțional)
-            </label>
-            <textarea
-              value={cancelReason}
-              onChange={(e) => setCancelReason(e.target.value)}
-              placeholder="Ex: Modificare program, urgență medicală..."
-              className="w-full min-h-[100px] p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none text-sm transition-all resize-none"
-            />
+          {/* Zona de Input */}
+          <div className="py-2">
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700 ml-1">
+                Motivul anulării (opțional)
+              </label>
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Exemplu: Modificare orar..."
+                className="w-full p-4 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white text-sm transition-all resize-none placeholder:text-gray-400"
+              />
+            </div>
           </div>
 
-          <AlertDialogFooter className="gap-2 sm:gap-0">
+          <AlertDialogFooter>
             <AlertDialogCancel asChild>
               <Button 
                 variant="ghost" 
                 className="font-semibold rounded-lg border-gray-200 text-gray-600 hover:bg-gray-100"
               >
-                Înapoi
+                Anulează
               </Button>
             </AlertDialogCancel>
             <AlertDialogAction asChild>
               <Button 
                 onClick={handleCancelConfirm} 
-                className="bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-md transition-all active:scale-95"
+                className="bg-brand-red hover:bg-red-700 text-white font-semibold rounded-lg shadow-md transition-all active:scale-95"
               >
-                Confirmă Anularea
+                Confirmă
               </Button>
             </AlertDialogAction>
           </AlertDialogFooter>
