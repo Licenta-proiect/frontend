@@ -50,6 +50,7 @@ interface ProfessorScheduleFormProps {
 
 export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) {
   const [subjects, setSubjects] = useState<string[]>([]);
+  const [activityTypes, setActivityTypes] = useState<string[]>([]);
   const [allGroups, setAllGroups] = useState<{ label: string; value: string }[]>([]);
   const [allRooms, setAllRooms] = useState<{ label: string; value: string }[]>([]);
   const [allWeeks, setAllWeeks] = useState<{ label: string; value: string }[]>([]);
@@ -78,7 +79,6 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     "Sâmbătă": 6,
     "Duminică": 7
   };
-  const types = ["Curs", "Seminar", "Laborator", "Proiect"];
 
   // date inițiale
   useEffect(() => {
@@ -136,14 +136,20 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       
       const email = localStorage.getItem("userEmail");
       setIsSyncing(true);
+      setSelectedGroups([]); // Resetăm grupele vechi
+      setSelectedRooms([]);  // Resetăm sălile vechi
+      setSelectedWeeks([]);  // Resetăm săptămânile vechi
+
       try {
-        const [gResp, sResp] = await Promise.all([
+        const [gResp, sResp, tResp] = await Promise.all([
           api.get(`/profesor/grupe-materie?email=${email}&materie=${selectedSubject}`),
-          api.get(`/profesor/sali-materie?email=${email}&materie=${selectedSubject}`)
+          api.get(`/profesor/sali-materie?email=${email}&materie=${selectedSubject}`),
+          api.get(`/data/tipuri-activitate-profesor?email=${email}&materie=${selectedSubject}`)
         ]);
 
         const grupeData = gResp.data.grupe || gResp.data; 
         const saliData = sResp.data.sali || sResp.data;
+        const tipuriData = tResp.data; 
 
         const groupsOptions = grupeData.map((g: ApiGroup) => ({
             label: `${g.specializationShortName} • an ${g.studyYear} • ${g.nume}${g.subgroupIndex ? `${g.subgroupIndex}` : ""}`,
@@ -151,6 +157,15 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
         }));
 
         setAllGroups(groupsOptions);
+        setActivityTypes(tipuriData); // Actualizăm state-ul pentru select-ul de activități
+        
+        // Auto-selectăm primul tip de activitate dacă există doar unul
+        if (tipuriData.length >= 1) {
+          setSelectedType(tipuriData[0]);
+        } else {
+          setSelectedType(""); // Resetăm selecția dacă se schimbă materia
+        }
+
         setSelectedGroups(grupeData.map((g: ApiGroup) => g.id.toString()));
         setSelectedRooms(saliData.map((s: ApiRoom) => s.id.toString()));
         
@@ -239,6 +254,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     setStudentCount(""); setSelectedDay(""); setSelectedWeeks([]);
     lastSyncedSubject.current = ""; setSelectedType("");
     onSearch(null, {});
+    setActivityTypes([]);
   };
 
   const inputClasses = "min-h-10 w-full border-gray-200 text-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-brand-blue/30 focus-visible:border-brand-blue/50 transition-all duration-200 shadow-xs";
@@ -277,14 +293,24 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
             <Label htmlFor="search-type" className="text-sm font-semibold text-gray-900">
               Tip activitate <span className="text-brand-red">*</span>
             </Label>
-            <Select value={selectedType} onValueChange={setSelectedType}> 
-              <SelectTrigger id="search-type" className="w-full focus-visible:ring-1 focus:ring-brand-blue/30 border-gray-200">
-                <SelectValue placeholder="Selectează tipul" />
+            <Select 
+              value={selectedType} 
+              onValueChange={setSelectedType}
+              disabled={!selectedSubject || isSyncing} // Blocat până avem materie
+            > 
+              <SelectTrigger id="search-type" className={cn(inputClasses, !selectedType && placeholderClasses)}>
+                <SelectValue placeholder={isSyncing ? "Se încarcă..." : "Selectează tipul"} />
               </SelectTrigger>
               <SelectContent>
-                {types.map((type) => (
-                  <SelectItem key={type} value={type}>{type}</SelectItem>
-                ))}
+                {activityTypes.length > 0 ? (
+                  activityTypes.map((type) => (
+                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  ))
+                ) : (
+                  <div className="p-2 text-xs text-muted-foreground text-center">
+                    Niciun tip de activitate găsit
+                  </div>
+                )}
               </SelectContent>
             </Select>
           </div>
