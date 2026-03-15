@@ -5,8 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import { ClipboardList, FileText } from "lucide-react";
 import { ProfessorSchedule } from "@/components/profesor/ProfessorSchedule";
-
-const ProfessorReservations = () => <div className="p-6 bg-white rounded-lg shadow">Lista Rezervărilor Mele</div>;
+import { ProfessorReservations } from "@/components/profesor/ProfessorReservations";
 
 const emptySubscribe = () => () => {};
 function useIsClient() {
