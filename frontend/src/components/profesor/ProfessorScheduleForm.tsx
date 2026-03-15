@@ -293,26 +293,41 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
             <Label htmlFor="search-type" className="text-sm font-semibold text-gray-900">
               Tip activitate <span className="text-brand-red">*</span>
             </Label>
-            <Select 
-              value={selectedType} 
-              onValueChange={setSelectedType}
-              disabled={!selectedSubject || isSyncing} // Blocat până avem materie
-            > 
-              <SelectTrigger id="search-type" className={cn(inputClasses, !selectedType && placeholderClasses)}>
-                <SelectValue placeholder={isSyncing ? "Se încarcă..." : "Selectează tipul"} />
-              </SelectTrigger>
-              <SelectContent>
-                {activityTypes.length > 0 ? (
-                  activityTypes.map((type) => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
-                  ))
-                ) : (
-                  <div className="p-2 text-xs text-muted-foreground text-center">
-                    Niciun tip de activitate găsit
-                  </div>
-                )}
-              </SelectContent>
-            </Select>
+            <div className="relative">
+              <Select 
+                value={selectedType} 
+                onValueChange={setSelectedType}
+                disabled={!selectedSubject || isSyncing || activityTypes.length === 0}
+              > 
+                <SelectTrigger id="search-type" className={cn(inputClasses, !selectedType && placeholderClasses)}>
+                  <SelectValue 
+                    placeholder={
+                      !selectedSubject 
+                        ? "Selectează materia mai întâi" 
+                        : isSyncing 
+                          ? "Se încarcă..." 
+                          : activityTypes.length === 0 
+                            ? "Niciun tip de activitate disponibil" 
+                            : "Selectează tipul"
+                    } 
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {activityTypes.length > 0 ? (
+                    activityTypes.map((type) => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))
+                  ) : (
+                    <div className="p-2 text-xs text-muted-foreground text-center italic">
+                      Nu s-au găsit activități pentru această materie
+                    </div>
+                  )}
+                </SelectContent>
+              </Select>
+              {isSyncing && (
+                <Loader2 className="absolute right-8 top-3 h-4 w-4 animate-spin text-brand-blue" />
+              )}
+            </div>
           </div>
 
             {/* Grupe - Blocat până la selectarea materiei */}
