@@ -108,6 +108,10 @@ export function ProfessorSchedule() {
     setLastFilters(filters);
     setBookedSlots([]);
 
+    setFilterDay("all");
+    setFilterWeek("all");
+    setFilterRoom("all");
+
     if (!filters) {
       setHasSearched(false);
       setAvailableSlots([]);
@@ -161,6 +165,12 @@ export function ProfessorSchedule() {
     }
   };
 
+  const resetLocalFilters = () => {
+    setFilterDay("all");
+    setFilterWeek("all");
+    setFilterRoom("all");
+  };
+
   return (
     <div className="space-y-6">
       {/* Randarea formularului extras */}
@@ -180,6 +190,8 @@ export function ProfessorSchedule() {
             </div>
 
             <div className="flex flex-wrap items-end gap-4 mt-4 p-4 w-fit">
+              
+              {/* Filtrul Ziua */}
               <div className="space-y-1.5 min-w-35">
                 <Label className="text-xs font-semibold text-gray-500 flex items-center gap-1.5 ml-0.5">
                   <Calendar className="h-3.5 w-3.5" /> Ziua
@@ -195,6 +207,7 @@ export function ProfessorSchedule() {
                 </Select>
               </div>
 
+              {/* Filtrul Săptămâna */}
               <div className="space-y-1.5 min-w-35">
                 <Label className="text-xs font-semibold text-gray-500 flex items-center gap-1.5 ml-0.5">
                   <Filter className="h-3.5 w-3.5" /> Săptămâna
@@ -210,6 +223,7 @@ export function ProfessorSchedule() {
                 </Select>
               </div>
 
+              {/* Filtrul Sala */}
               <div className="space-y-1.5 min-w-35">
                 <Label className="text-xs font-semibold text-gray-500 flex items-center gap-1.5 ml-0.5">
                   <MapPin className="h-3.5 w-3.5" /> Sala
@@ -224,6 +238,21 @@ export function ProfessorSchedule() {
                   </SelectContent>
                 </Select>
               </div>
+
+
+              {/* Butonul de Resetare*/}
+              {(filterDay !== "all" || filterWeek !== "all" || filterRoom !== "all") && (
+                <div className="h-9 flex items-center"> 
+                  <Button 
+                    variant="outline" 
+                    onClick={resetLocalFilters}
+                    className="h-9 text-sm px-4 gap-2 border-gray-200 text-gray-700  hover:bg-gray-50"
+                  >
+                    <Filter className="h-3.5 w-3.5" />
+                    Resetează filtrele
+                  </Button>
+                </div>
+              )}
             </div>
           </CardHeader>
           
@@ -261,7 +290,7 @@ export function ProfessorSchedule() {
                         {bookedSlots.includes(slot.id) ? (
                           <Button 
                             disabled 
-                            className="bg-green-600 hover:bg-green-600 text-white font-bold gap-2 opacity-100"
+                            className="bg-green-600 hover:bg-green-600 text-white font-semibold gap-2 opacity-100"
                           >
                             <CheckCircle2 className="h-4 w-4" /> Rezervat
                           </Button>
@@ -269,12 +298,12 @@ export function ProfessorSchedule() {
                           <Button 
                             onClick={() => confirmBooking(slot)}
                             disabled={isBooking === slot.id}
-                            className="bg-brand-blue hover:bg-brand-blue-dark text-white font-bold"
+                            className="bg-brand-blue hover:bg-brand-blue-dark text-white font-semibold"
                           >
                             {isBooking === slot.id ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
-                              "Rezervă Slot"
+                              "Rezervă slot"
                             )}
                           </Button>
                         )}
