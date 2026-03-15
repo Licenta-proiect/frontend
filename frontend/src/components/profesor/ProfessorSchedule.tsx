@@ -239,7 +239,6 @@ export function ProfessorSchedule() {
                 </Select>
               </div>
 
-
               {/* Butonul de Resetare*/}
               {(filterDay !== "all" || filterWeek !== "all" || filterRoom !== "all") && (
                 <div className="h-9 flex items-center"> 
@@ -257,11 +256,19 @@ export function ProfessorSchedule() {
           </CardHeader>
           
           <CardContent className="space-y-4">
+            {/* CAZ 1: Căutarea inițială nu a returnat nimic de la server */}
             {availableSlots.length === 0 ? (
               <div className="text-center py-12 text-gray-500">
                 <p className="font-medium">Nu s-au găsit sloturi disponibile</p>
               </div>
-            ) : (
+            ) : /* CAZ 2: Avem date de la server, dar filtrele de sus (Zi, Săptămână, Sală) au eliminat tot */
+              filteredSlots.length === 0 ? (
+                <div className="text-center py-12 bg-gray-50/50 rounded-lg border border-dashed">
+                  <Filter className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                  <p className="font-medium text-gray-600">Nu există rezultate pentru filtrele selectate.</p>
+                </div>
+              ) : (
+                /* CAZ 3: Avem rezultate care trec de filtre */
               <div className="grid gap-4">
                 {filteredSlots.map((slot) => (
                   <Card key={slot.id} className="border-l-4 border-l-brand-blue shadow-sm hover:bg-gray-50/50 transition-colors">
