@@ -17,6 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "../ui/button";
 
 export interface Reservation {
   id: string;
@@ -37,6 +38,7 @@ export function ProfessorReservations() {
   const [searchQuery, setSearchQuery] = useState("");
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [reservationToCancel, setReservationToCancel] = useState<string | null>(null);
+  const [cancelReason, setCancelReason] = useState("");
 
   const fetchReservations = async () => {
     try {
@@ -89,13 +91,14 @@ export function ProfessorReservations() {
       await api.post("/rezervari/anuleaza-rezervare", {
         rezervare_id: reservationToCancel,
         email: userEmail,
-        motiv: "Anulare profesor"
+        motiv: cancelReason || "Anulare profesor"
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
       toast.success("Rezervarea a fost anulată");
       setCancelDialogOpen(false);
+      setCancelReason("");
       fetchReservations(); 
     } catch (error: any) {
       toast.error("Eroare la anulare");
@@ -179,18 +182,52 @@ export function ProfessorReservations() {
         </CardContent>
       </Card>
 
-      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
-        <AlertDialogContent>
+      <AlertDialog 
+        open={cancelDialogOpen} 
+        onOpenChange={(open) => {
+          setCancelDialogOpen(open);
+          if (!open) setCancelReason(""); // Reset la închidere
+        }}
+      >
+        <AlertDialogContent className="rounded-xl border-gray-200 shadow-xl max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-red-600 flex items-center gap-2">
-              <AlertCircle className="h-5 w-5" /> Confirmare Anulare
+            <AlertDialogTitle className="font-semibold text-xl text-gray-900 flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-red-600" />
+              Confirmare anulare
             </AlertDialogTitle>
-            <AlertDialogDescription>Sigur doriți să anulați?</AlertDialogDescription>
+            <AlertDialogDescription className="text-gray-600">
+              Sunteți sigur că doriți să anulați această rezervare? Această acțiune va elibera slotul pentru alți profesori.
+            </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>ÎNAPOI</AlertDialogCancel>
-            <AlertDialogAction onClick={handleCancelConfirm} className="bg-red-600 hover:bg-red-700">
-              CONFIRMĂ ANULAREA
+
+          <div className="py-4 space-y-2">
+            <label className="text-sm font-semibold text-gray-700 ml-1">
+              Motivul anulării (opțional)
+            </label>
+            <textarea
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              placeholder="Ex: Modificare program, urgență medicală..."
+              className="w-full min-h-[100px] p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none text-sm transition-all resize-none"
+            />
+          </div>
+
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel asChild>
+              <Button 
+                variant="ghost" 
+                className="font-semibold rounded-lg border-gray-200 text-gray-600 hover:bg-gray-100"
+              >
+                Înapoi
+              </Button>
+            </AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button 
+                onClick={handleCancelConfirm} 
+                className="bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-md transition-all active:scale-95"
+              >
+                Confirmă Anularea
+              </Button>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
