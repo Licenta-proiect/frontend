@@ -79,7 +79,6 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     "Joi": 4,
     "Vineri": 5,
     "Sâmbătă": 6,
-    "Duminică": 7
   };
 
   // date inițiale
