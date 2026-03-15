@@ -130,10 +130,29 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     fetchTypes();
   }, [selectedSubject]);
 
-  // 3. Când se schimbă MATERIA sau TIPUL: Aducem GRUPELE și SĂLILE specifice
+  // 3. Când se schimbă MATERIA: Aducem SĂLILE (o singură dată per materie)
   useEffect(() => {
-    const syncGroupsAndRooms = async () => {
-      // Grupele depind acum de ambii factori
+    const fetchRooms = async () => {
+      if (!selectedSubject) {
+        setSelectedRooms([]);
+        return;
+      }
+      const email = localStorage.getItem("userEmail");
+      try {
+        const sResp = await api.get(`/profesor/sali-materie?email=${email}&materie=${selectedSubject}`);
+        const saliData = sResp.data.sali || [];
+        // Setăm sălile DOAR când se schimbă materia
+        setSelectedRooms(saliData.map((s: ApiRoom) => s.id.toString()));
+      } catch {
+        toast.error("Eroare la încărcarea sălilor");
+      }
+    };
+    fetchRooms();
+  }, [selectedSubject]); // Rulăm DOAR la schimbarea materiei
+
+  // 4. Când se schimbă MATERIA sau TIPUL: Aducem doar GRUPELE
+  useEffect(() => {
+    const syncGroups = async () => {
       if (!selectedSubject || !selectedType) {
         setAllGroups([]);
         setSelectedGroups([]);
@@ -144,17 +163,10 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       setIsSyncingGroups(true);
 
       try {
-        // Dacă e curs, trimitem parametrul tip către backend pentru logica de comasare
         const tipParam = selectedType.toLowerCase().includes("curs") ? `&tip=${selectedType}` : "";
-        
-        const [gResp, sResp] = await Promise.all([
-          api.get(`/profesor/grupe-materie?email=${email}&materie=${selectedSubject}${tipParam}`),
-          api.get(`/profesor/sali-materie?email=${email}&materie=${selectedSubject}`)
-        ]);
+        const gResp = await api.get(`/profesor/grupe-materie?email=${email}&materie=${selectedSubject}${tipParam}`);
 
         const grupeData = gResp.data.grupe || [];
-        const saliData = sResp.data.sali || [];
-
         const groupsOptions = grupeData.map((g: ApiGroup) => ({
           label: `${g.specializationShortName} • an ${g.studyYear} • ${g.nume}${g.subgroupIndex ? `${g.subgroupIndex}` : ""}`,
           value: g.id.toString(),
@@ -162,10 +174,9 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
 
         setAllGroups(groupsOptions);
         setSelectedGroups(grupeData.map((g: ApiGroup) => g.id.toString()));
-        setSelectedRooms(saliData.map((s: ApiRoom) => s.id.toString()));
         
         if (grupeData.length > 0) {
-            await fetchValidWeeks(grupeData.map((g: ApiGroup) => g.id.toString()));
+          await fetchValidWeeks(grupeData.map((g: ApiGroup) => g.id.toString()));
         }
       } catch {
         toast.error("Eroare la sincronizarea grupelor");
@@ -174,8 +185,8 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       }
     };
 
-    syncGroupsAndRooms();
-  }, [selectedSubject, selectedType]);
+    syncGroups();
+  }, [selectedSubject, selectedType]); // Grupele se schimbă la tip, dar sălile nu
 
   const fetchValidWeeks = async (groupIds: string[]) => {
     if (groupIds.length === 0) {
