@@ -137,13 +137,15 @@ export function ProfessorReservations() {
       <Card className="border-gray-200 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
-            <Calendar className="h-5 w-5 text-brand-blue" /> Rezervări Active
+            <Calendar className="h-5 w-5 text-brand-blue" /> Rezervări viitoare
           </CardTitle>
-          <CardDescription>Urmează să aibă loc</CardDescription>
+          <CardDescription>{activeReservations.length} rezervări programate</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {activeReservations.length === 0 ? (
-            <p className="text-center py-6 text-gray-500 italic text-sm">Nicio rezervare activă</p>
+            <div className="text-center py-12 bg-gray-50/50 rounded-lg border border-dashed">
+              <p className="font-medium text-gray-600 italic">Nicio rezervare activă</p>
+            </div>
           ) : (
             activeReservations.map((res) => (
               <ReservationCard 
@@ -157,16 +159,18 @@ export function ProfessorReservations() {
       </Card>
 
       {/* CARD 2: ISTORIC */}
-      <Card className="border-gray-200 shadow-sm bg-gray-50/20">
+      <Card className="border-gray-200 shadow-sm">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-gray-600 font-semibold text-xl">
-            <History className="h-5 w-5 text-gray-400" /> Istoric și Anulări
+          <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
+            <History className="h-5 w-5 text-brand-blue" /> Istoric rezervări
           </CardTitle>
-          <CardDescription>Finalizate sau anulate</CardDescription>
+          <CardDescription>Rezervări finalizate sau trecute</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {historyReservations.length === 0 ? (
-            <p className="text-center py-6 text-gray-500 italic text-sm">Istoric gol</p>
+            <div className="text-center py-12 bg-gray-50/50 rounded-lg border border-dashed">
+              <p className="font-medium text-gray-600 italic">Istoric gol</p>
+            </div>
           ) : (
             historyReservations.map((res) => (
               <ReservationCard key={res.id} reservation={res} />
