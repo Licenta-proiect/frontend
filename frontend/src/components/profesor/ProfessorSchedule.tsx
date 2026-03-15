@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, CheckCircle2, Filter, Loader2 } from "lucide-react";
+import { Calendar, Clock, MapPin, CheckCircle2, Filter, Loader2, RotateCcw } from "lucide-react";
 import { ProfessorScheduleForm, AvailableSlot, SearchFilters, SelectOption } from "@/components/profesor/ProfessorScheduleForm";
 import { toast } from "sonner";
 import api from "@/services/api";
@@ -247,7 +247,7 @@ export function ProfessorSchedule() {
                     onClick={resetLocalFilters}
                     className="h-9 text-sm px-4 gap-2 border-gray-200 text-gray-700  hover:bg-gray-50"
                   >
-                    <Filter className="h-3.5 w-3.5" />
+                    <RotateCcw className="h-4 w-4" />
                     Resetează filtrele
                   </Button>
                 </div>

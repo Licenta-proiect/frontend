@@ -4,9 +4,10 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Users, Filter, ArrowUpDown, Clock, Info } from "lucide-react";
+import { Calendar, MapPin, Users, Filter, ArrowUpDown, Clock, Info, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Label } from "../ui/label";
+import { Button } from "../ui/button";
 
 interface AlternativeOption {
   grupa: string;
@@ -39,6 +40,12 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
   const [sortBy, setSortBy] = useState<string>("time");
   const [filterDay, setFilterDay] = useState<string>("all");
   const [filterWeek, setFilterWeek] = useState<string>("all");
+
+  const resetLocalFilters = () => {
+    setFilterDay("all");
+    setFilterWeek("all");
+    setSortBy("time");
+  };
 
   // Logica de filtrare și sortare
   const filteredAndSortedResults = results
@@ -135,6 +142,21 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
               </SelectContent>
             </Select>
           </div>
+
+          {/* Butonul de Resetare - Apare doar dacă există filtre active */}
+          {(filterDay !== "all" || filterWeek !== "all" ) && (
+            <div className="h-9 flex items-center">
+              <Button 
+                variant="outline" 
+                onClick={resetLocalFilters}
+                className="h-9 text-sm px-4 gap-2 border-gray-200 text-gray-700  hover:bg-gray-50"
+              >
+                <RotateCcw className="h-4 w-4" />
+                Resetează filtrele
+              </Button>
+            </div>
+          )}
+
         </div>
       </CardHeader>
       
