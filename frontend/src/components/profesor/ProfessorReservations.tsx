@@ -3,20 +3,11 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Calendar, History, Loader2, Search, AlertCircle } from "lucide-react";
+import { Calendar, History, Loader2, Search } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/services/api";
 import { ReservationCard } from "./ReservationCard";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "../ui/button";
 
 export interface Reservation {
@@ -46,17 +37,17 @@ export function ProfessorReservations() {
       const response = await api.get("/profesor/rezervari");
       
       const mappedData = response.data.map((r: any) => {
-        const resDate = new Date(r.data);
-        const isPast = resDate < new Date();
-        
-        // Mapare status bazată pe JSON-ul tău: "rezervat" sau "anulat"
+        // Mapăm statusurile din limba română (din backend) către cele din frontend
         let status: "upcoming" | "completed" | "canceled" = "upcoming";
-        if (r.status === "anulat") {
+        
+        const backendStatus = r.status.toLowerCase();
+        
+        if (backendStatus === "anulat") {
           status = "canceled";
-        } else if (isPast) {
+        } else if (backendStatus === "efectuată" || backendStatus === "efectuata") {
           status = "completed";
         } else {
-          status = "upcoming";
+          status = "upcoming"; // Corespunde statusului "rezervat" din DB
         }
 
         return {
@@ -64,14 +55,16 @@ export function ProfessorReservations() {
           subject: r.materie,
           groups: r.grupe || [],
           room: r.sala,
-          date: resDate,
+          date: new Date(r.data),
           startTime: `${String(r.ora_start).padStart(2, '0')}:00`,
           endTime: `${String(r.ora_start + r.durata).padStart(2, '0')}:00`,
           week: r.saptamana,
           status: status,
-          tip: r.tip
+          tip: r.tip,
+          motiv_anulare: r.motiv_anulare
         };
       });
+
       setReservations(mappedData);
     } catch (error) {
       toast.error("Eroare la încărcarea rezervărilor");
