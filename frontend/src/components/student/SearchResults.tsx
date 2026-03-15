@@ -193,11 +193,9 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
                     </div>
 
                     {/*Saptamani*/}
-                    <div className="space-y-1">
-                      <div className="flex flex-wrap gap-1">
-                        <Badge className="bg-blue-50 text-brand-blue border-none text-xs font-bold px-2 py-0">
-                          Săptămânile {result.saptamani_grupate}
-                        </Badge>
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                        <span>Săptămânile {result.saptamani_grupate}</span>
                       </div>
                     </div>
                   </div>
@@ -205,7 +203,7 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
                   {/* Footer Card: Indicatia pe toata lungimea */}
                   <div className="px-5 py-2.5 flex items-center gap-2">
                     <Info className="h-3.5 w-3.5 text-gray-400" />
-                    <span className="text-gray-500 text-[11px] font-medium italic">
+                    <span className="text-gray-500 text-xs font-medium italic">
                       Verifică cu profesorul înainte de merge cu altă grupă.
                     </span>
                   </div>
