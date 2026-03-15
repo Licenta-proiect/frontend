@@ -140,7 +140,7 @@ export function ProfessorSchedule() {
         sala_id: parseInt(slot.id.split('-')[0]),
         grupe_ids: lastFilters.selectedGroups.map(id => parseInt(id)),
         materie: lastFilters.selectedSubject,
-        tipActivitate: lastFilters.selectedType, 
+        tip_activitate: lastFilters.selectedType, 
         zi: slot.date.getDay() === 0 ? 7 : slot.date.getDay(),
         saptamana: slot.week,
         ora_start: parseInt(slot.startTime.split(':')[0]),
@@ -179,7 +179,7 @@ export function ProfessorSchedule() {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-end gap-4 mt-4 p-4 bg-gray-50/50 rounded-lg border border-gray-100 w-fit">
+            <div className="flex flex-wrap items-end gap-4 mt-4 p-4 w-fit">
               <div className="space-y-1.5 min-w-35">
                 <Label className="text-xs font-semibold text-gray-500 flex items-center gap-1.5 ml-0.5">
                   <Calendar className="h-3.5 w-3.5" /> Ziua
@@ -236,7 +236,7 @@ export function ProfessorSchedule() {
               <div className="grid gap-4">
                 {filteredSlots.map((slot) => (
                   <Card key={slot.id} className="border-l-4 border-l-brand-blue shadow-sm hover:bg-gray-50/50 transition-colors">
-                    <CardContent className="pt-6">
+                    <CardContent className="pt-3">
                       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                         <div className="space-y-3">
                           <div className="flex items-center gap-2">
