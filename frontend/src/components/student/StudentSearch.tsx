@@ -324,7 +324,10 @@ export function StudentSearch() {
           <div className="relative w-full rounded-lg border border-amber-200 bg-amber-50 p-4 [&>svg~*]:pl-7 [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-amber-600">
             <InfoIcon className="h-4 w-4" />
             <div className="text-xs sm:text-sm font-medium text-amber-800 leading-relaxed">
-              Rezultatele sunt generate pe baza disponibilității orarului general, însă este esențial să le verificați. Se ia în calcul și Modulul Psihopedagogic la căutarea soluțiilor.
+              Rezultatele sunt bazate pe orarul general și includ opțiuni din Modulul Psihopedagogic.
+              <span className="block">
+                Notă: Modificările punctuale sau recuperările programate separat nu sunt reflectate aici.
+              </span>
             </div>
           </div>
 
