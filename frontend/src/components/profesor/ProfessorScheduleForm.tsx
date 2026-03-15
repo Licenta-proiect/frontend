@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -69,6 +69,8 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
   const [isSyncingTypes, setIsSyncingTypes] = useState(false);
   const [isSyncingGroups, setIsSyncingGroups] = useState(false);
 
+  const hasShownStatusToast = useRef(false); 
+
   const durations = ["1 oră", "2 ore", "3 ore", "4 ore"];
   const DAYS_MAP: Record<string, number> = {
     "Luni": 1,
@@ -86,12 +88,23 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       const email = localStorage.getItem("userEmail");
       if (!email) return;
       try {
-        const [subResp, roomsResp] = await Promise.all([
+        const [subResp, roomsResp, weeksResp] = await Promise.all([
           api.get(`/profesor/materii?email=${email}`),
           api.get("/data/sali"),
+          api.get("/data/weeks") // Endpoint-ul care returnează statusul semestrului
         ]);
         setSubjects(subResp.data.materii);
         setAllRooms(roomsResp.data.map((s: ApiRoom) => ({ label: s.nume, value: s.id.toString() })));
+      
+        const activeWeeks = weeksResp.data.active_weeks || [];
+        if (activeWeeks.length === 0 && !hasShownStatusToast.current) {
+          const statusMessage = weeksResp.data.current_status || "Sesiune/Vacanță";
+          toast.info(statusMessage, { 
+            duration: Infinity, // Mesajul nu dispare automat
+            description: "Nu mai există săptămâni de curs disponibile în acest semestru." 
+          });
+          hasShownStatusToast.current = true;
+        }
       } catch {
         toast.error("Eroare la încărcarea datelor inițiale");
       } finally {
@@ -195,11 +208,17 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     }
     setIsValidatingWeeks(true);
     try {
-      const response = await api.post("/data/weeks-valide", { 
-        grupe_ids: groupIds.map(id => parseInt(id)) 
+      const response = await api.get("/data/weeks-valide", { 
+        params: { 
+          grupe_ids: groupIds.map(id => parseInt(id)) 
+        },
+        // Această configurare asigură formatul grupe_ids=1&grupe_ids=2
+        paramsSerializer: {
+          indexes: null 
+        }
       });
-      const weeks = response.data.active_weeks || [];
       
+      const weeks = response.data.active_weeks || [];
       const options = weeks.map((w: number) => ({
         label: `Săptămâna ${w}`,
         value: w.toString()
