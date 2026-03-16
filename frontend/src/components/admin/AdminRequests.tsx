@@ -114,8 +114,8 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
           {allPending.length === 0 ? (
             <div className="text-center py-12 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
               <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <p className="font-medium text-gray-500">Nu există cereri în așteptare</p>
-            </div>
+              <p className="font-medium text-gray-600 italic">Nu există cereri în așteptare</p>
+            </div> 
           ) : (
             <>
               {visiblePending.map((request) => (
@@ -200,7 +200,7 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
         </CardHeader>
         <CardContent className="space-y-3">
           {allProcessed.length === 0 ? (
-            <p className="text-center py-6 text-gray-500 font-medium text-sm italic">Nicio cerere găsită</p>
+            <p className="text-center py-12 bg-gray-50/50 rounded-lg border border-dashed font-medium text-gray-600 italic">Nicio cerere găsită</p>
           ) : (
             <>
             {visibleProcessed.map((request) => (

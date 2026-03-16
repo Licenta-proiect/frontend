@@ -164,7 +164,7 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
         {filteredAndSortedResults.length === 0 ? (
           <div className="text-center py-12 text-gray-500 bg-gray-50/50 rounded-lg border border-dashed">
             <Users className="h-12 w-12 mx-auto mb-3 opacity-20" />
-            <p className="font-medium">Nu există rezultate pentru filtrele selectate.</p>
+            <p className="font-medium text-gray-600 italic">Nu există rezultate pentru filtrele selectate.</p>
           </div>
         ) : (
           <div className="grid gap-4">

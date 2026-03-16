@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, MapPin, Trash2, Hash } from "lucide-react";
+import { AlertCircle, Calendar, Clock, MapPin, Trash2, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Reservation } from "./ProfessorReservations";
 
@@ -14,6 +14,7 @@ interface ReservationCardProps {
 
 export function ReservationCard({ reservation, onCancel }: ReservationCardProps) {
   const isUpcoming = reservation.status === "upcoming";
+  const isCanceled = reservation.status === "canceled";
 
   const dateObj = new Date(reservation.data);
   const dayName = new Intl.DateTimeFormat('ro-RO', { weekday: 'long' }).format(dateObj);
@@ -36,21 +37,20 @@ export function ReservationCard({ reservation, onCancel }: ReservationCardProps)
         <div className="space-y-3">
           {/* Materie + Status + Tip */}
           <div className="flex flex-wrap items-center gap-3">
-            <div className="font-bold text-md text-gray-900 tracking-tight">{reservation.materie}</div>
+            <div className="font-semibold text-md text-gray-900">{reservation.materie}</div>
             <Badge variant="outline" className={cn(getStatusColor(reservation.status), "text-[10px]")}>
               {reservation.status === "upcoming" ? "PROGRAMATĂ" : 
                reservation.status === "completed" ? "FINALIZATĂ" : "ANULATĂ"}
             </Badge>
-            <Badge variant="secondary" className="bg-gray-100 text-gray-600 border-none font-bold text-[10px]">
+            <Badge variant="secondary" className="bg-gray-100 text-gray-700 border-gray-200 font-bold text-[10px]">
               {reservation.tip.toUpperCase()}
             </Badge>
           </div>
           
           {/* Informații Detaliate */}
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium text-gray-600">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium text-gray-700">
             {/* Săptămâna */}
             <div className="flex items-center gap-1.5">
-              <Hash className="h-4 w-4 text-brand-blue" />
               <span>Săptămâna {reservation.saptamana}</span>
             </div>
 
@@ -71,17 +71,14 @@ export function ReservationCard({ reservation, onCancel }: ReservationCardProps)
             {/* Sala */}
             <div className="flex items-center gap-1.5">
               <MapPin className="h-4 w-4 text-brand-blue" />
-              <span className="text-gray-900 font-semibold">Sala {reservation.sala}</span>
+              <span>{reservation.sala}</span>
             </div>
-          </div>
 
-          {/* Grupe */}
-          <div className="flex flex-wrap gap-1.5 pt-1">
-            {reservation.grupe.map(g => (
-              <span key={g} className="text-[10px] bg-white border border-gray-200 px-2 py-0.5 rounded text-gray-500 font-bold uppercase tracking-wider">
-                {g}
-              </span>
-            ))}
+            {/* Grupe */}
+            <div className="flex items-center gap-1.5">
+              <Users className="h-4 w-4 text-brand-blue" />
+              <span>{reservation.grupe.join(", ")}</span>
+            </div>
           </div>
         </div>
 
@@ -98,6 +95,19 @@ export function ReservationCard({ reservation, onCancel }: ReservationCardProps)
             </Button>
           )}
         </div>
+
+        {/* Motiv Anulare (Apare dedesubt pe toată lățimea) */}
+        {isCanceled && reservation.motiv_anulare && (
+          <div className="border-red-100">
+            <div className="text-xs p-3 rounded-lg bg-red-50/50 border border-red-50 flex items-start gap-2">
+              <AlertCircle className="h-3.5 w-3.5 text-brand-red shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold text-brand-red mr-2">Motiv anulare:</span>
+                <span className="text-gray-700 italic">&quot;{reservation.motiv_anulare}&quot;</span>
+              </div>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -157,7 +157,7 @@ export function ProfessorReservations() {
           <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
             <History className="h-5 w-5 text-brand-blue" /> Istoric rezervări
           </CardTitle>
-          <CardDescription>Rezervări finalizate, trecute sau anulate</CardDescription>
+          <CardDescription>Rezervări finalizate sau anulate</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {historyReservations.length === 0 ? (

@@ -265,7 +265,7 @@ export function ProfessorSchedule() {
               filteredSlots.length === 0 ? (
                 <div className="text-center py-12 bg-gray-50/50 rounded-lg border border-dashed">
                   <Filter className="h-12 w-12 mx-auto mb-3 opacity-20" />
-                  <p className="font-medium text-gray-600">Nu există rezultate pentru filtrele selectate.</p>
+                  <p className="font-medium text-gray-600 italic">Nu există rezultate pentru filtrele selectate.</p>
                 </div>
               ) : (
                 /* CAZ 3: Avem rezultate care trec de filtre */
