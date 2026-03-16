@@ -110,7 +110,6 @@ export function StudentCalendar() {
             
             <div className="flex flex-col space-y-2">
               <Label className="text-sm font-medium">Filtrare Subgrupă</Label>
-              {/* AICI AM ÎNLOCUIT SMARTSELECT CU SEARCHSELECT */}
               <SearchSelect
                 options={groupOptions}
                 value={selectedGroupId}
@@ -176,7 +175,7 @@ export function StudentCalendar() {
                   <p className="text-slate-500 font-medium">Nu există nicio activitate programată.</p>
                 </div>
               ) : (
-                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="space-y-4 max-h-150 overflow-y-auto pr-2 custom-scrollbar">
                   {sessionsOnSelectedDate.map((session) => (
                     <Card key={session.id} className="overflow-hidden hover:shadow-md transition-shadow border-l-4 border-l-primary">
                       <CardContent className="p-5">

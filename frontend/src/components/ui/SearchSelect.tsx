@@ -93,7 +93,7 @@ export function SearchSelect({ options, value, onChange, placeholder = "Selectea
 
   return (
     <div 
-      className="relative w-full md:min-w-[250px]" 
+      className="relative w-full md:min-w-62.5" 
       ref={containerRef}
       onKeyDown={handleKeyDown}
     >
@@ -125,7 +125,7 @@ export function SearchSelect({ options, value, onChange, placeholder = "Selectea
 
           <ul 
             ref={listRef}
-            className="max-h-[280px] overflow-y-auto py-1 custom-scrollbar"
+            className="max-h-70 overflow-y-auto py-1 custom-scrollbar"
           >
             {filteredOptions.map((option, index) => (
               <li
