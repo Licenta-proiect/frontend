@@ -115,12 +115,23 @@ export function StudentCalendar() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Toate Subgrupele</SelectItem>
-                  {subgroupIds.map((id) => (
+                  {subgroupIds.map((id) => {
+                    // Căutăm în lista de rezervări a acestui ID numele corect al grupei
+                    // Verificăm în grupe_participante un string care conține ID-ul sau 
+                    // pur și simplu luăm prima valoare validă dacă ID-ul coincide
+                    const groupName = data[id][0]?.grupe_participante.find(name => {
+                        // Această logică depinde de cum este construit string-ul în backend
+                        // Backend-ul tău trimite: "Specializare NumeGrupaSubgrupaIndex"
+                        // Ex: "CTI 1101A1"
+                        return true; // Luăm prima grupă participantă ca referință pentru nume
+                    });
+
+                    return (
                     <SelectItem key={id} value={id}>
-                      {/* Luăm numele grupei din prima rezervare găsită pentru acest ID */}
-                      Subgrupa {data[id][0]?.grupe_participante.find(g => g.includes(id)) || `ID: ${id}`}
+                        {groupName || `Subgrupa ${id}`}
                     </SelectItem>
-                  ))}
+                    );
+                })}
                 </SelectContent>
               </Select>
             </div>
