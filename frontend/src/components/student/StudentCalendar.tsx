@@ -55,11 +55,24 @@ export function StudentCalendar() {
 
   const groupOptions = useMemo(() => {
     const subgroupIds = Object.keys(data);
+    
     const options = subgroupIds.map((id) => {
-      const groupName = data[id][0]?.grupe_participante.find(name => name.length > 0) || `Subgrupa ${id}`;
-      return { label: groupName, value: id };
+      const fullName = data[id][0]?.grupe_participante.find(name => name.length > 0) || "";
+  
+      let label = `Subgrupa ${id}`;
+      if (fullName) {
+        const match = fullName.match(/(.*an\s\d+)/i);
+        if (match && match[1]) {
+          label = match[1].trim();
+        }
+      }
+
+      return { label: label, value: id };
     });
-    return [{ label: "Toate Subgrupele", value: "all" }, ...options];
+
+    const uniqueOptions = Array.from(new Map(options.map(item => [item.label, item])).values());
+
+    return [{ label: "Toate Subgrupele", value: "all" }, ...uniqueOptions];
   }, [data]);
 
   const allUniqueReservations = useMemo(() => {
@@ -69,8 +82,18 @@ export function StudentCalendar() {
 
   const filteredSessions = useMemo(() => {
     if (selectedGroupId === "all") return allUniqueReservations;
-    return data[selectedGroupId] || [];
-  }, [selectedGroupId, data, allUniqueReservations]);
+
+    const selectedOption = groupOptions.find(opt => opt.value === selectedGroupId);
+    if (!selectedOption) return [];
+
+    const matchingSubgroupIds = Object.keys(data).filter(id => {
+      const fullName = data[id][0]?.grupe_participante[0] || "";
+      return fullName.startsWith(selectedOption.label);
+    });
+
+    const combined = matchingSubgroupIds.flatMap(id => data[id]);
+    return Array.from(new Map(combined.map(item => [item.id, item])).values());
+  }, [selectedGroupId, data, allUniqueReservations, groupOptions]);
 
   const sessionsOnSelectedDate = useMemo(() => {
     if (!selectedDate) return [];
