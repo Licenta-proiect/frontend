@@ -76,7 +76,7 @@ export function StudentCalendar() {
       a.label.localeCompare(b.label, 'ro', { sensitivity: 'base' })
     );
 
-    return [{ label: "Toate Subgrupele", value: "all" }, ...sortedOptions];
+    return [{ label: "Toate subgrupele", value: "all" }, ...sortedOptions];
   }, [data]);
 
   const allUniqueReservations = useMemo(() => {
@@ -202,52 +202,60 @@ export function StudentCalendar() {
                   <p className="text-slate-500 font-medium">Nu există nicio activitate programată.</p>
                 </div>
               ) : (
-                <div className="space-y-4 max-h-150 overflow-y-auto pr-2 custom-scrollbar">
+                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                   {sessionsOnSelectedDate.map((session) => (
-                    <Card key={session.id} className="overflow-hidden hover:shadow-md transition-shadow border-l-4 border-l-primary">
+                    <Card 
+                      key={session.id} 
+                      className="border-l-4 border-l-brand-blue shadow-sm hover:bg-gray-50/50 transition-colors overflow-hidden"
+                    >
                       <CardContent className="p-5">
-                        <div className="flex justify-between items-start mb-4">
-                          <div>
-                            <h4 className="font-bold text-lg text-slate-900">{session.materie}</h4>
-                            <p className="text-primary font-medium">{session.profesor}</p>
+                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                          
+                          {/* Informații Materie și Profesor */}
+                          <div className="space-y-3 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h4 className="font-bold text-lg text-slate-900">{session.materie}</h4>
+                              <Badge className={`${getStatusStyle(session.status)} border shadow-none font-bold uppercase text-[10px]`}>
+                                {session.status}
+                              </Badge>
+                            </div>
+                            
+                            <p className="text-sm font-semibold text-brand-blue -mt-2">
+                              {session.profesor}
+                            </p>
+
+                            {/* Detalii Logistice (Grid orizontal similar cu cardul 2) */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm font-medium">
+                              <div className="flex items-center gap-2 text-gray-700">
+                                <Clock className="h-4 w-4 text-brand-blue" />
+                                <span>{session.ora_start}:00 - {session.ora_start + session.durata}:00</span>
+                              </div>
+                              
+                              <div className="flex items-center gap-2 text-gray-700">
+                                <MapPin className="h-4 w-4 text-brand-blue" />
+                                <span>Sala {session.sala}</span>
+                              </div>
+
+                              <div className="flex items-center gap-2 text-gray-700">
+                                <Users className="h-4 w-4 text-brand-blue" />
+                                <div className="flex items-center gap-2">
+                                  <span className="truncate">{session.grupe_participante.join(", ")}</span>
+                                  {/* Badge pentru tipul materiei lângă grupă */}
+                                  <Badge variant="secondary" className="bg-blue-50 text-brand-blue border-blue-100 text-[11px] h-5 px-1.5">
+                                    {session.tip}
+                                  </Badge>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          <Badge className={`${getStatusStyle(session.status)} border shadow-sm`}>
-                            {session.status.toUpperCase()}
-                          </Badge>
+
+                          {/* Opțional: Motiv anulare (dacă există) */}
+                          {session.status === "anulat" && session.motiv_anulare && (
+                            <div className="lg:max-w-[200px] p-2 bg-red-50 text-red-700 text-[11px] rounded border border-red-100 italic">
+                              <strong>Motiv:</strong> {session.motiv_anulare}
+                            </div>
+                          )}
                         </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="flex items-center gap-3 text-slate-600">
-                            <div className="p-2 bg-slate-100 rounded-lg">
-                              <Clock className="h-4 w-4" />
-                            </div>
-                            <span className="text-sm font-medium">
-                              {session.ora_start}:00 - {session.ora_start + session.durata}:00
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-3 text-slate-600">
-                            <div className="p-2 bg-slate-100 rounded-lg">
-                              <MapPin className="h-4 w-4" />
-                            </div>
-                            <span className="text-sm font-medium">Sala {session.sala}</span>
-                          </div>
-
-                          <div className="flex items-center gap-3 text-slate-600">
-                            <div className="p-2 bg-slate-100 rounded-lg">
-                              <Users className="h-4 w-4" />
-                            </div>
-                            <span className="text-sm font-medium">
-                              {session.tip} • {session.grupe_participante.join(", ")}
-                            </span>
-                          </div>
-                        </div>
-
-                        {session.status === "anulat" && session.motiv_anulare && (
-                          <div className="mt-4 p-3 bg-red-50 text-red-700 text-sm rounded-md border border-red-100">
-                            <strong>Motiv anulare:</strong> {session.motiv_anulare}
-                          </div>
-                        )}
                       </CardContent>
                     </Card>
                   ))}
