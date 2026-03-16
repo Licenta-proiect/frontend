@@ -9,18 +9,21 @@ import api from "@/services/api";
 import { ReservationCard } from "./ReservationCard";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "../ui/button";
+import { AxiosError } from "axios";
 
 export interface Reservation {
-  id: string;
-  subject: string;
-  groups: string[];
-  room: string;
-  date: Date;
-  startTime: string;
-  endTime: string;
-  week: number;
-  status: "upcoming" | "completed" | "canceled";
-  tip: string;
+  id: number;           // Din backend (r.id)
+  materie: string;      // Din backend (r.materie)
+  tip: string;          // Din backend (r.tip)
+  sala: string;         // Din backend (r.sala)
+  grupe: string[];      // Din backend (r.grupe)
+  saptamana: number;    // Din backend (r.saptamana)
+  zi: string;           // Din backend (r.zi)
+  data: string;         // Din backend (r.data_calendaristica)
+  ora_start: number;    // Din backend (r.oraInceput // 60)
+  durata: number;       // Din backend (r.durata // 60)
+  status: string;       // Din backend (status_final)
+  motiv_anulare: string | null;
 }
 
 export function ProfessorReservations() {
@@ -34,40 +37,31 @@ export function ProfessorReservations() {
   const fetchReservations = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/profesor/rezervari");
-      
-      const mappedData = response.data.map((r: any) => {
-        // Mapăm statusurile din limba română (din backend) către cele din frontend
-        let status: "upcoming" | "completed" | "canceled" = "upcoming";
-        
-        const backendStatus = r.status.toLowerCase();
-        
+      const response = await api.get<Reservation[]>("/profesor/rezervari");
+
+      const mappedData = response.data.map((r): Reservation => {
+        let finalStatus = "upcoming";
+        const backendStatus = r.status?.toLowerCase() || "";
+
         if (backendStatus === "anulat") {
-          status = "canceled";
-        } else if (backendStatus === "efectuată" || backendStatus === "efectuata") {
-          status = "completed";
+          finalStatus = "canceled";
+        } else if (backendStatus === "efectuată" || backendStatus === "efectuata" || backendStatus === "completed") {
+          finalStatus = "completed";
         } else {
-          status = "upcoming"; // Corespunde statusului "rezervat" din DB
+          finalStatus = "upcoming"; // implicit pentru "rezervat"
         }
 
         return {
-          id: r.id.toString(),
-          subject: r.materie,
-          groups: r.grupe || [],
-          room: r.sala,
-          date: new Date(r.data),
-          startTime: `${String(r.ora_start).padStart(2, '0')}:00`,
-          endTime: `${String(r.ora_start + r.durata).padStart(2, '0')}:00`,
-          week: r.saptamana,
-          status: status,
-          tip: r.tip,
-          motiv_anulare: r.motiv_anulare
+          ...r,
+          status: finalStatus
         };
       });
 
       setReservations(mappedData);
     } catch (error) {
-      toast.error("Eroare la încărcarea rezervărilor");
+      const axiosError = error as AxiosError<{ detail?: string }>;
+      const message = axiosError.response?.data?.detail || "Eroare la încărcarea rezervărilor";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -93,14 +87,16 @@ export function ProfessorReservations() {
       setCancelDialogOpen(false);
       setCancelReason("");
       fetchReservations(); 
-    } catch (error: any) {
-      toast.error("Eroare la anulare");
+    } catch (error) {
+      const axiosError = error as AxiosError<{ detail?: string }>;
+      const message = axiosError.response?.data?.detail || "Eroare la anulare";
+      toast.error(message);
     }
   };
 
   const filtered = reservations.filter(r => 
-    r.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    r.room.toLowerCase().includes(searchQuery.toLowerCase())
+    r.materie.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    r.sala.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const activeReservations = filtered.filter(r => r.status === "upcoming");
@@ -146,7 +142,7 @@ export function ProfessorReservations() {
             activeReservations.map((res) => (
               <ReservationCard 
                 key={res.id} 
-                reservation={res} 
+                reservation={res}
                 onCancel={(id) => { setReservationToCancel(id); setCancelDialogOpen(true); }} 
               />
             ))
@@ -160,7 +156,7 @@ export function ProfessorReservations() {
           <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
             <History className="h-5 w-5 text-brand-blue" /> Istoric rezervări
           </CardTitle>
-          <CardDescription>Rezervări finalizate sau trecute</CardDescription>
+          <CardDescription>Rezervări finalizate, trecute sau anulate</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {historyReservations.length === 0 ? (

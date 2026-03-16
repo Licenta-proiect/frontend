@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 interface ReservationCardProps {
   reservation: {
-    id: string;
+    id: number;
     subject: string;
     groups: string[];
     room: string;
