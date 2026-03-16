@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Label } from "../ui/label";
 import { Badge } from "../ui/badge";
 import { Calendar } from "../ui/calendar";
@@ -11,6 +10,7 @@ import { format, parseISO } from "date-fns";
 import { ro } from "date-fns/locale";
 import api from "@/services/api";
 import { toast } from "sonner";
+import { SearchSelect } from "../ui/SearchSelect"; // Importă noua componentă
 
 interface Reservation {
   id: number;
@@ -53,23 +53,25 @@ export function StudentCalendar() {
     fetchReservations();
   }, []);
 
-  // Extragem toate subgrupele unice din cheile obiectului primit
-  const subgroupIds = useMemo(() => Object.keys(data), [data]);
+  const groupOptions = useMemo(() => {
+    const subgroupIds = Object.keys(data);
+    const options = subgroupIds.map((id) => {
+      const groupName = data[id][0]?.grupe_participante.find(name => name.length > 0) || `Subgrupa ${id}`;
+      return { label: groupName, value: id };
+    });
+    return [{ label: "Toate Subgrupele", value: "all" }, ...options];
+  }, [data]);
 
-  // Lista plată a tuturor rezervărilor unice (pentru marcarea calendarului)
   const allUniqueReservations = useMemo(() => {
     const all = Object.values(data).flat();
-    // Eliminăm duplicatele deoarece aceeași rezervare poate apărea la mai multe subgrupe
     return Array.from(new Map(all.map(item => [item.id, item])).values());
   }, [data]);
 
-  // Filtrare rezervări în funcție de grupa selectată
   const filteredSessions = useMemo(() => {
     if (selectedGroupId === "all") return allUniqueReservations;
     return data[selectedGroupId] || [];
   }, [selectedGroupId, data, allUniqueReservations]);
 
-  // Sesiuni pentru data selectată
   const sessionsOnSelectedDate = useMemo(() => {
     if (!selectedDate) return [];
     return filteredSessions.filter((session) => {
@@ -78,7 +80,6 @@ export function StudentCalendar() {
     });
   }, [selectedDate, filteredSessions]);
 
-  // Datele care au evenimente (pentru highlighting în calendar)
   const eventDates = useMemo(() => {
     return filteredSessions.map(s => parseISO(s.data));
   }, [filteredSessions]);
@@ -108,39 +109,20 @@ export function StudentCalendar() {
             </div>
             
             <div className="flex flex-col space-y-2">
-              <Label htmlFor="group-filter" className="text-sm font-medium">Filtrare Subgrupă</Label>
-              <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
-                <SelectTrigger id="group-filter" className="w-62.5 bg-white">
-                  <SelectValue placeholder="Toate subgrupele" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Toate Subgrupele</SelectItem>
-                  {subgroupIds.map((id) => {
-                    // Căutăm în lista de rezervări a acestui ID numele corect al grupei
-                    // Verificăm în grupe_participante un string care conține ID-ul sau 
-                    // pur și simplu luăm prima valoare validă dacă ID-ul coincide
-                    const groupName = data[id][0]?.grupe_participante.find(name => {
-                        // Această logică depinde de cum este construit string-ul în backend
-                        // Backend-ul tău trimite: "Specializare NumeGrupaSubgrupaIndex"
-                        // Ex: "CTI 1101A1"
-                        return true; // Luăm prima grupă participantă ca referință pentru nume
-                    });
-
-                    return (
-                    <SelectItem key={id} value={id}>
-                        {groupName || `Subgrupa ${id}`}
-                    </SelectItem>
-                    );
-                })}
-                </SelectContent>
-              </Select>
+              <Label className="text-sm font-medium">Filtrare Subgrupă</Label>
+              {/* AICI AM ÎNLOCUIT SMARTSELECT CU SEARCHSELECT */}
+              <SearchSelect
+                options={groupOptions}
+                value={selectedGroupId}
+                onChange={setSelectedGroupId}
+                placeholder="Alege subgrupa..."
+              />
             </div>
           </div>
         </CardHeader>
 
         <CardContent>
           <div className="grid lg:grid-cols-12 gap-8">
-            {/* Secțiunea Calendar */}
             <div className="lg:col-span-5 flex flex-col items-center">
               <div className="p-4 bg-white rounded-xl shadow-sm border w-full flex justify-center">
                 <Calendar
@@ -165,13 +147,12 @@ export function StudentCalendar() {
                   <Info className="h-5 w-5 text-blue-500 mt-0.5" />
                   <div className="text-sm text-blue-800">
                     <p className="font-semibold">Legendă</p>
-                    <p>Zilele marcate cu cerc albastru indică prezența unor recuperări programate pentru selecția curentă.</p>
+                    <p>Zilele marcate cu cerc albastru indică prezența unor recuperări programate.</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Secțiunea Detalii Sesiuni */}
             <div className="lg:col-span-7 space-y-4">
               <div className="flex items-center justify-between border-b pb-2">
                 <h3 className="font-bold text-xl text-slate-800">
@@ -186,16 +167,16 @@ export function StudentCalendar() {
 
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-20">
-                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+                   <div className="animate-spin rounded-full h-8 w-8 border-primary border-b-2 mb-4"></div>
                    <p className="text-slate-500">Se încarcă recuperările...</p>
                 </div>
               ) : sessionsOnSelectedDate.length === 0 ? (
                 <div className="text-center py-20 bg-slate-50 rounded-xl border-2 border-dashed">
                   <Clock className="h-12 w-12 mx-auto mb-4 text-slate-300" />
-                  <p className="text-slate-500 font-medium">Nu există nicio activitate programată pentru această zi.</p>
+                  <p className="text-slate-500 font-medium">Nu există nicio activitate programată.</p>
                 </div>
               ) : (
-                <div className="space-y-4 max-h-150 overflow-y-auto pr-2 custom-scrollbar">
+                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                   {sessionsOnSelectedDate.map((session) => (
                     <Card key={session.id} className="overflow-hidden hover:shadow-md transition-shadow border-l-4 border-l-primary">
                       <CardContent className="p-5">
