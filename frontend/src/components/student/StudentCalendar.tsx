@@ -129,7 +129,7 @@ export function StudentCalendar() {
             <div>
               <CardTitle className="text-2xl flex items-center gap-2">
                 <CalendarIcon className="h-6 w-6 text-primary" />
-                Calendar Recuperări
+                Calendar recuperări
               </CardTitle>
               <CardDescription className="text-base">
                 Monitorizarea activităților didactice programate în afara orarului normal
@@ -169,6 +169,7 @@ export function StudentCalendar() {
                   }}
                 />
               </div>
+
               <div className="mt-6 p-4 bg-blue-50/50 rounded-lg border border-blue-100 w-full">
                 <div className="flex items-start gap-3">
                   <Info className="h-5 w-5 text-blue-500 mt-0.5" />
@@ -182,13 +183,13 @@ export function StudentCalendar() {
 
             <div className="lg:col-span-7 space-y-4">
               <div className="flex items-center justify-between border-b pb-2">
-                <h3 className="font-bold text-xl text-slate-800">
+                <h3 className="font-bold text-md text-slate-900">
                   {selectedDate 
                     ? format(selectedDate, "eeee, d MMMM yyyy", { locale: ro })
                     : "Selectați o zi"}
                 </h3>
                 <Badge variant="secondary" className="px-3 py-1 text-sm">
-                  {sessionsOnSelectedDate.length} Activități
+                  {sessionsOnSelectedDate.length} {sessionsOnSelectedDate.length === 1 ? "activitate" : "activități"}                
                 </Badge>
               </div>
 
@@ -200,7 +201,7 @@ export function StudentCalendar() {
               ) : sessionsOnSelectedDate.length === 0 ? (
                 <div className="text-center py-20 bg-slate-50 rounded-xl border-2 border-dashed">
                   <Clock className="h-12 w-12 mx-auto mb-4 text-slate-300" />
-                  <p className="text-slate-500 font-medium">Nu există nicio activitate programată.</p>
+                  <p className="text-slate-500 font-medium italic">Nu există nicio activitate programată.</p>
                 </div>
               ) : (
                 <div className="space-y-4 max-h-150 overflow-y-auto pr-2 custom-scrollbar">
@@ -222,7 +223,7 @@ export function StudentCalendar() {
                               {/* Materie + Profesor + Badge-uri pe același rând */}
                               <div className="space-y-1">
                                 <div className="flex items-center justify-between gap-4">
-                                  <div className="font-semibold text-md text-gray-900 leading-none">
+                                  <div className="font-semibold text-md text-gray-800 leading-none">
                                     {session.materie}
                                   </div>
                                   
@@ -232,7 +233,8 @@ export function StudentCalendar() {
                                       variant="outline" 
                                       className={cn(getStatusStyle(session.status), "text-[10px] font-bold uppercase whitespace-nowrap")}
                                     >
-                                      {session.status}
+                                      {session.status.toLowerCase() === "rezervat" ? "PROGRAMATĂ" : 
+                                      session.status.toLowerCase() === "efectuată" ? "FINALIZATĂ" : "ANULATĂ"}
                                     </Badge>
                                     <Badge 
                                       variant="secondary" 
@@ -265,9 +267,11 @@ export function StudentCalendar() {
                                 </div>
 
                                 {/* Grupe */}
-                                <div className="flex items-center gap-1.5">
-                                  <Users className="h-4 w-4 text-brand-blue" />
-                                  <span className="text-gray-600">{session.grupe_participante.join(", ")}</span>
+                                <div className="flex items-start gap-1.5">
+                                  <Users className="h-4 w-4 text-brand-blue shrink-0 mt-0.5" />
+                                  <span className="leading-tight">
+                                    {session.grupe_participante.join(", ")}
+                                  </span>
                                 </div>
                               </div>
                             </div>
