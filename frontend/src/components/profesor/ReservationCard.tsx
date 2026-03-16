@@ -5,28 +5,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, MapPin, Trash2, Hash } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Reservation } from "./ProfessorReservations";
 
 interface ReservationCardProps {
-  reservation: {
-    id: number;
-    subject: string;
-    groups: string[];
-    room: string;
-    date: Date;
-    startTime: string;
-    endTime: string;
-    status: "upcoming" | "completed" | "canceled";
-    tip: string;
-    week: number;
-  };
+  reservation: Reservation;
   onCancel?: (id: string) => void;
 }
 
 export function ReservationCard({ reservation, onCancel }: ReservationCardProps) {
   const isUpcoming = reservation.status === "upcoming";
 
-  // Formatăm ziua săptămânii (ex: Luni)
-  const dayName = new Intl.DateTimeFormat('ro-RO', { weekday: 'long' }).format(reservation.date);
+  const dateObj = new Date(reservation.data);
+  const dayName = new Intl.DateTimeFormat('ro-RO', { weekday: 'long' }).format(dateObj);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -46,7 +36,7 @@ export function ReservationCard({ reservation, onCancel }: ReservationCardProps)
         <div className="space-y-3">
           {/* Materie + Status + Tip */}
           <div className="flex flex-wrap items-center gap-3">
-            <div className="font-bold text-md text-gray-900 tracking-tight">{reservation.subject}</div>
+            <div className="font-bold text-md text-gray-900 tracking-tight">{reservation.materie}</div>
             <Badge variant="outline" className={cn(getStatusColor(reservation.status), "text-[10px]")}>
               {reservation.status === "upcoming" ? "PROGRAMATĂ" : 
                reservation.status === "completed" ? "FINALIZATĂ" : "ANULATĂ"}
@@ -61,31 +51,33 @@ export function ReservationCard({ reservation, onCancel }: ReservationCardProps)
             {/* Săptămâna */}
             <div className="flex items-center gap-1.5">
               <Hash className="h-4 w-4 text-brand-blue" />
-              <span>Săptămâna {reservation.week}</span>
+              <span>Săptămâna {reservation.saptamana}</span>
             </div>
 
             {/* Ziua și Data */}
             <div className="flex items-center gap-1.5">
               <Calendar className="h-4 w-4 text-brand-blue" />
-              <span className="capitalize">{dayName}, {reservation.date.toLocaleDateString("ro-RO")}</span>
+              <span className="capitalize">{dayName}, {dateObj.toLocaleDateString("ro-RO")}</span>
             </div>
 
             {/* Interval Orar */}
             <div className="flex items-center gap-1.5">
               <Clock className="h-4 w-4 text-brand-blue" />
-              <span>{reservation.startTime} - {reservation.endTime}</span>
+              <span>
+                {String(reservation.ora_start).padStart(2, '0')}:00 - {String(reservation.ora_start + reservation.durata).padStart(2, '0')}:00
+              </span>
             </div>
 
             {/* Sala */}
             <div className="flex items-center gap-1.5">
               <MapPin className="h-4 w-4 text-brand-blue" />
-              <span className="text-gray-900 font-semibold">Sala {reservation.room}</span>
+              <span className="text-gray-900 font-semibold">Sala {reservation.sala}</span>
             </div>
           </div>
 
           {/* Grupe */}
           <div className="flex flex-wrap gap-1.5 pt-1">
-            {reservation.groups.map(g => (
+            {reservation.grupe.map(g => (
               <span key={g} className="text-[10px] bg-white border border-gray-200 px-2 py-0.5 rounded text-gray-500 font-bold uppercase tracking-wider">
                 {g}
               </span>

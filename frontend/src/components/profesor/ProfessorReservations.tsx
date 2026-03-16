@@ -12,17 +12,17 @@ import { Button } from "../ui/button";
 import { AxiosError } from "axios";
 
 export interface Reservation {
-  id: number;           // Din backend (r.id)
-  materie: string;      // Din backend (r.materie)
-  tip: string;          // Din backend (r.tip)
-  sala: string;         // Din backend (r.sala)
-  grupe: string[];      // Din backend (r.grupe)
-  saptamana: number;    // Din backend (r.saptamana)
-  zi: string;           // Din backend (r.zi)
-  data: string;         // Din backend (r.data_calendaristica)
-  ora_start: number;    // Din backend (r.oraInceput // 60)
-  durata: number;       // Din backend (r.durata // 60)
-  status: string;       // Din backend (status_final)
+  id: string;          
+  materie: string;      
+  tip: string;          
+  sala: string;         
+  grupe: string[];      
+  saptamana: number;    
+  zi: string;           
+  data: string;         
+  ora_start: number;    
+  durata: number;      
+  status: string;       
   motiv_anulare: string | null;
 }
 
@@ -53,6 +53,7 @@ export function ProfessorReservations() {
 
         return {
           ...r,
+          id: r.id.toString(),
           status: finalStatus
         };
       });
@@ -117,7 +118,7 @@ export function ProfessorReservations() {
         <div className="relative w-full sm:w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input 
-            placeholder="Caută..." 
+            placeholder="Caută după materie sau sală..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 h-10 border-gray-200 shadow-xs text-sm"
