@@ -33,73 +33,76 @@ export function ReservationCard({ reservation, onCancel }: ReservationCardProps)
       "border shadow-xs group transition-all duration-300",
       isUpcoming ? "hover:border-brand-blue/50" : "opacity-85 grayscale-[0.2]"
     )}>
-      <CardContent className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5">
-        <div className="space-y-3">
-          {/* Materie + Status + Tip */}
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="font-semibold text-md text-gray-900">{reservation.materie}</div>
-            <Badge variant="outline" className={cn(getStatusColor(reservation.status), "text-[10px]")}>
-              {reservation.status === "upcoming" ? "PROGRAMATĂ" : 
-               reservation.status === "completed" ? "FINALIZATĂ" : "ANULATĂ"}
-            </Badge>
-            <Badge variant="secondary" className="bg-gray-100 text-gray-700 border-gray-200 font-bold text-[10px]">
-              {reservation.tip.toUpperCase()}
-            </Badge>
+      <CardContent className="p-5 space-y-4"> 
+        {/* Container pentru Info + Buton (aliniate orizontal) */}
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+          <div className="space-y-3">
+            {/* Materie + Status + Tip */}
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="font-semibold text-md text-gray-900">{reservation.materie}</div>
+              <Badge variant="outline" className={cn(getStatusColor(reservation.status), "text-[10px]")}>
+                {reservation.status === "upcoming" ? "PROGRAMATĂ" : 
+                 reservation.status === "completed" ? "FINALIZATĂ" : "ANULATĂ"}
+              </Badge>
+              <Badge variant="secondary" className="bg-gray-100 text-gray-700 border-gray-200 font-bold text-[10px]">
+                {reservation.tip.toUpperCase()}
+              </Badge>
+            </div>
+            
+            {/* Informații Detaliate */}
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium text-gray-700">
+              {/* Săptămâna */}
+              <div className="flex items-center gap-1.5">
+                <span>Săptămâna {reservation.saptamana}</span>
+              </div>
+
+              {/* Ziua și Data */}
+              <div className="flex items-center gap-1.5">
+                <Calendar className="h-4 w-4 text-brand-blue" />
+                <span className="capitalize">{dayName}, {dateObj.toLocaleDateString("ro-RO")}</span>
+              </div>
+
+              {/* Interval Orar */}
+              <div className="flex items-center gap-1.5">
+                <Clock className="h-4 w-4 text-brand-blue" />
+                <span>
+                  {String(reservation.ora_start).padStart(2, '0')}:00 - {String(reservation.ora_start + reservation.durata).padStart(2, '0')}:00
+                </span>
+              </div>
+
+              {/* Sala */}
+              <div className="flex items-center gap-1.5">
+                <MapPin className="h-4 w-4 text-brand-blue" />
+                <span>{reservation.sala}</span>
+              </div>
+
+              {/* Grupe */} 
+              <div className="flex items-center gap-1.5">
+                <Users className="h-4 w-4 text-brand-blue" />
+                <span className="text-gray-600">{reservation.grupe.join(", ")}</span>
+              </div>
+            </div>
           </div>
-          
-          {/* Informații Detaliate */}
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium text-gray-700">
-            {/* Săptămâna */}
-            <div className="flex items-center gap-1.5">
-              <span>Săptămâna {reservation.saptamana}</span>
-            </div>
 
-            {/* Ziua și Data */}
-            <div className="flex items-center gap-1.5">
-              <Calendar className="h-4 w-4 text-brand-blue" />
-              <span className="capitalize">{dayName}, {dateObj.toLocaleDateString("ro-RO")}</span>
-            </div>
-
-            {/* Interval Orar */}
-            <div className="flex items-center gap-1.5">
-              <Clock className="h-4 w-4 text-brand-blue" />
-              <span>
-                {String(reservation.ora_start).padStart(2, '0')}:00 - {String(reservation.ora_start + reservation.durata).padStart(2, '0')}:00
-              </span>
-            </div>
-
-            {/* Sala */}
-            <div className="flex items-center gap-1.5">
-              <MapPin className="h-4 w-4 text-brand-blue" />
-              <span>{reservation.sala}</span>
-            </div>
-
-            {/* Grupe */}
-            <div className="flex items-center gap-1.5">
-              <Users className="h-4 w-4 text-brand-blue" />
-              <span>{reservation.grupe.join(", ")}</span>
-            </div>
+          {/* Buton Anulare */}
+          <div className="flex gap-2 shrink-0">
+            {isUpcoming && onCancel && (
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={() => onCancel(reservation.id)} 
+                className="text-brand-red shadow-xs border-red-100 hover:bg-red-50 hover:text-brand-red font-bold uppercase text-[11px]"
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-2" /> Anulează
+              </Button>
+            )}
           </div>
-        </div>
-
-        {/* Buton Anulare (doar pentru active) */}
-        <div className="flex gap-2 shrink-0">
-          {isUpcoming && onCancel && (
-            <Button 
-              size="sm" 
-              variant="outline" 
-              onClick={() => onCancel(reservation.id)} 
-              className="text-brand-red shadow-xs border-red-100 hover:bg-red-50 hover:text-brand-red font-bold uppercase text-[11px]"
-            >
-              <Trash2 className="h-3.5 w-3.5 mr-2" /> Anulează
-            </Button>
-          )}
         </div>
 
         {/* Motiv Anulare (Apare dedesubt pe toată lățimea) */}
         {isCanceled && reservation.motiv_anulare && (
-          <div className="border-red-100">
-            <div className="text-xs p-3 rounded-lg bg-red-50/50 border border-red-50 flex items-start gap-2">
+          <div className="border-red-50">
+            <div className="text-xs p-3 rounded-lg bg-red-50/50 border border-red-100 flex items-start gap-2">
               <AlertCircle className="h-3.5 w-3.5 text-brand-red shrink-0 mt-0.5" />
               <div>
                 <span className="font-bold text-brand-red mr-2">Motiv anulare:</span>
