@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useSyncExternalStore, Suspense } from "react";
+import { useMemo, useSyncExternalStore, Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import { ClipboardList, FileText } from "lucide-react";
 import { ProfessorSchedule } from "@/components/profesor/ProfessorSchedule";
 import { ProfessorReservations } from "@/components/profesor/ProfessorReservations";
+import { toast } from "sonner";
 
 const emptySubscribe = () => () => {};
 function useIsClient() {
@@ -22,6 +23,10 @@ function ProfessorDashboardContent() {
   const handleTabChange = (tabId: string) => {
     router.push(`/profesor?tab=${tabId}`, { scroll: false });
   };
+
+  useEffect(() => {
+    toast.dismiss();
+  }, [activeTab]);
 
   const user = useMemo(() => {
     if (!isClient) return { name: "Utilizator", email: "", role: "professor" as const };

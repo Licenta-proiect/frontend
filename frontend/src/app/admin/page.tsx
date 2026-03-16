@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useSyncExternalStore, Suspense } from "react";
+import { useMemo, useSyncExternalStore, Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Database, FileText, UserCog } from "lucide-react";
 import { AdminUsers } from "@/components/admin/AdminUsers";
 import { AdminSync } from "@/components/admin/AdminSync";
+import { toast } from "sonner";
 
 const AdminHistory = () => <div className="p-6 bg-white rounded-lg shadow">Istoric Rezervări Sistem</div>;
 
@@ -26,6 +27,10 @@ function AdminDashboardContent() {
   const handleTabChange = (tabId: string) => {
     router.push(`/admin?tab=${tabId}`, { scroll: false });
   };
+
+  useEffect(() => {
+    toast.dismiss();
+  }, [activeTab]);
 
   const user = useMemo(() => {
     if (!isClient) return { name: "Utilizator", email: "", role: "admin" as const };

@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useSyncExternalStore, Suspense } from "react";
+import { useMemo, useSyncExternalStore, Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Calendar, Search } from "lucide-react";
 import { StudentSearch } from "@/components/student/StudentSearch";
+import { toast } from "sonner";
 
 const StudentCalendar = () => <div className="p-6 bg-white rounded-lg shadow">Calendar Interactiv Recuperări</div>;
 
@@ -23,6 +24,10 @@ function StudentDashboardContent() {
   const handleTabChange = (tabId: string) => {
     router.push(`/student?tab=${tabId}`, { scroll: false });
   };
+
+  useEffect(() => {
+    toast.dismiss();
+  }, [activeTab]);
 
   const user = useMemo(() => {
     if (!isClient) return { name: "Utilizator", email: "", role: "student" as const };
