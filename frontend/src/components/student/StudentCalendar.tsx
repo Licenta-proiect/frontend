@@ -123,21 +123,21 @@ export function StudentCalendar() {
 
   return (
     <div className="space-y-6">
-      <Card className="border-none shadow-md">
-        <CardHeader className="bg-slate-50/50 border-b mb-6">
+      <Card className="border-gray-200 shadow-sm">
+        <CardHeader>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <CardTitle className="text-2xl flex items-center gap-2">
-                <CalendarIcon className="h-6 w-6 text-primary" />
+            <div className="space-y-1"> 
+              <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
+                <CalendarIcon className="h-5 w-5 text-brand-blue" />
                 Calendar recuperări
               </CardTitle>
-              <CardDescription className="text-base">
+              <CardDescription className="text-gray-600 font-medium pt-0.5">
                 Monitorizarea activităților didactice programate în afara orarului normal
               </CardDescription>
             </div>
             
-            <div className="flex flex-col space-y-2">
-              <Label className="text-sm font-medium">Filtrare Subgrupă</Label>
+            <div className="flex flex-col space-y-4">
+              <Label className="text-sm font-medium">Filtrare subgrupă</Label>
               <SearchSelect
                 options={groupOptions}
                 value={selectedGroupId}

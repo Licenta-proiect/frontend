@@ -132,7 +132,7 @@ export function ProfessorReservations() {
           <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
             <Calendar className="h-5 w-5 text-brand-blue" /> Rezervări viitoare
           </CardTitle>
-          <CardDescription>{activeReservations.length} rezervări programate</CardDescription>
+          <CardDescription className="text-gray-600 font-medium">{activeReservations.length} rezervări programate</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {activeReservations.length === 0 ? (
@@ -157,7 +157,7 @@ export function ProfessorReservations() {
           <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
             <History className="h-5 w-5 text-brand-blue" /> Istoric rezervări
           </CardTitle>
-          <CardDescription>Rezervări finalizate sau anulate</CardDescription>
+          <CardDescription className="text-gray-600 font-medium">Rezervări finalizate sau anulate</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {historyReservations.length === 0 ? (
