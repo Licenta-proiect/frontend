@@ -5,9 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Calendar, Search } from "lucide-react";
 import { StudentSearch } from "@/components/student/StudentSearch";
+import { StudentCalendar } from "@/components/student/StudentCalendar";
 import { toast } from "sonner";
-
-const StudentCalendar = () => <div className="p-6 bg-white rounded-lg shadow">Calendar Interactiv Recuperări</div>;
 
 const emptySubscribe = () => () => {};
 function useIsClient() {
