@@ -72,7 +72,11 @@ export function StudentCalendar() {
 
     const uniqueOptions = Array.from(new Map(options.map(item => [item.label, item])).values());
 
-    return [{ label: "Toate Subgrupele", value: "all" }, ...uniqueOptions];
+    const sortedOptions = uniqueOptions.sort((a, b) => 
+      a.label.localeCompare(b.label, 'ro', { sensitivity: 'base' })
+    );
+
+    return [{ label: "Toate Subgrupele", value: "all" }, ...sortedOptions];
   }, [data]);
 
   const allUniqueReservations = useMemo(() => {
