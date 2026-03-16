@@ -207,14 +207,8 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     }
     setIsValidatingWeeks(true);
     try {
-      const response = await api.get("/data/weeks-valide", { 
-        params: { 
-          grupe_ids: groupIds.map(id => parseInt(id)) 
-        },
-        // Această configurare asigură formatul grupe_ids=1&grupe_ids=2
-        paramsSerializer: {
-          indexes: null 
-        }
+      const response = await api.post("/data/weeks-valide", { 
+        grupe_ids: groupIds.map(id => parseInt(id)) 
       });
       
       const weeks = response.data.active_weeks || [];
