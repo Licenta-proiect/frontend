@@ -219,11 +219,30 @@ export function StudentCalendar() {
                           <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                             
                             <div className="space-y-3 flex-1">
-                              {/* Materie + Profesor */}
+                              {/* Materie + Profesor + Badge-uri pe același rând */}
                               <div className="space-y-1">
-                                <div className="font-semibold text-md text-gray-900 leading-none">
-                                  {session.materie}
+                                <div className="flex items-center justify-between gap-4">
+                                  <div className="font-semibold text-md text-gray-900 leading-none">
+                                    {session.materie}
+                                  </div>
+                                  
+                                  {/* Badge-urile mutate aici pentru a fi pe linie cu materia */}
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    <Badge 
+                                      variant="outline" 
+                                      className={cn(getStatusStyle(session.status), "text-[10px] font-bold uppercase whitespace-nowrap")}
+                                    >
+                                      {session.status}
+                                    </Badge>
+                                    <Badge 
+                                      variant="secondary" 
+                                      className="bg-gray-100 text-gray-700 border-gray-200 font-bold text-[10px] uppercase whitespace-nowrap"
+                                    >
+                                      {session.tip}
+                                    </Badge>
+                                  </div>
                                 </div>
+
                                 <p className="text-sm font-semibold text-brand-blue">
                                   {session.profesor}
                                 </p>
@@ -252,25 +271,17 @@ export function StudentCalendar() {
                                 </div>
                               </div>
                             </div>
-
-                            {/* Badge-uri în dreapta sus */}
-                            <div className="flex flex-wrap items-center gap-2 shrink-0 md:justify-end">
-                              <Badge variant="outline" className={cn(getStatusStyle(session.status), "text-[10px] font-bold uppercase")}>
-                                {session.status}
-                              </Badge>
-                              <Badge variant="secondary" className="bg-gray-100 text-gray-700 border-gray-200 font-bold text-[10px] uppercase">
-                                {session.tip}
-                              </Badge>
-                            </div>
                           </div>
 
                           {/* Motiv Anulare (Stil identic cu cel de profesor) */}
                           {isCanceled && session.motiv_anulare && (
-                            <div className="text-xs p-3 rounded-lg bg-red-50/50 border border-red-100 flex items-start gap-2">
-                              <AlertCircle className="h-3.5 w-3.5 text-brand-red shrink-0 mt-0.5" />
-                              <div>
-                                <span className="font-bold text-brand-red mr-2">Motiv anulare:</span>
-                                <span className="text-gray-700 italic">&quot;{session.motiv_anulare}&quot;</span>
+                            <div className="border-red-50">
+                              <div className="text-xs p-3 rounded-lg bg-red-50/50 border border-red-100 flex items-start gap-2">
+                                <AlertCircle className="h-3.5 w-3.5 text-brand-red shrink-0 mt-0.5" />
+                                <div>
+                                  <span className="font-bold text-brand-red mr-2">Motiv anulare:</span>
+                                  <span className="text-gray-700 italic">&quot;{session.motiv_anulare}&quot;</span>
+                                </div>
                               </div>
                             </div>
                           )}
