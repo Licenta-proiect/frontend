@@ -16,146 +16,139 @@ import { toast } from "sonner";
 import api from "@/services/api";
 import { cn } from "@/lib/utils";
 
-// Interfața pentru obiectul primit de la /cauta-alternative
-interface AlternativeOption {
-  grupa: string;
-  zi: string;
-  ora_start: string;
-  ora_final: string;
-  profesor: string;
-  sala: string;
-  saptamani_lista: number[];
-  saptamani_grupate: string;
+export interface AlternativeOption {
+  group: string;
+  day: string;
+  start_time: string;  
+  end_time: string;    
+  professor: string;
+  room: string;
+  weeks_list: number[]; 
+  weeks_grouped: string;
 }
 
-export interface Grupa {
+export interface Group {
   id: number;
-  nume: string;
+  name: string;
   subgroupIndex: string;
   studyYear: number;
   specializationShortName: string;
 }
 
 export function StudentSearch() {
-  // State pentru datele din API
-  const [grupe, setGrupe] = useState<Grupa[]>([]);
-  const [materii, setMaterii] = useState<string[]>([]);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [subjects, setSubjects] = useState<string[]>([]);
   const [searchResults, setSearchResults] = useState<AlternativeOption[]>([]);
   
-  // State pentru selecții
   const [selectedGroupId, setSelectedGroupId] = useState<string>("");
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string>("");
   const [attendsCourse, setAttendsCourse] = useState(false);
   
-  // State pentru UI
   const [openGroups, setOpenGroups] = useState(false);
-  const [isLoadingGrupe, setIsLoadingGrupe] = useState(false);
-  const [isLoadingMaterii, setIsLoadingMaterii] = useState(false);
+  const [isLoadingGroups, setIsLoadingGroups] = useState(false);
+  const [isLoadingSubjects, setIsLoadingSubjects] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-
   const [allWeeks, setAllWeeks] = useState<number[]>([]);
   const hasShownStatusToast = useRef(false);
 
   const types = ["Seminar", "Laborator", "Proiect"];
 
-  // Încărcăm grupele la montarea componentei
+  // Fetch groups and available weeks on component mount
   useEffect(() => {
     const fetchInitialData = async () => {
-    setIsLoadingGrupe(true);
-    try {
-      // Preluăm grupele și săptămânile în paralel
-      const [grupeResp, weeksResp] = await Promise.all([
-        api.get("/data/grupe"),
-        api.get("/data/weeks")
-      ]);
+      setIsLoadingGroups(true);
+      try {
+        // Fetch groups and weeks in parallel
+        const [groupsResp, weeksResp] = await Promise.all([
+          api.get("/data/groups"),
+          api.get("/data/weeks")
+        ]);
 
-      setGrupe(grupeResp.data);
-      
-      const activeWeeks = weeksResp.data.active_weeks || [];
-      setAllWeeks(activeWeeks);
+      setGroups(groupsResp.data);
+        const activeWeeks = weeksResp.data.active_weeks || [];
+        setAllWeeks(activeWeeks);
 
-      if (activeWeeks.length === 0 && !hasShownStatusToast.current) {
-        const statusMessage = weeksResp.data.current_status || "Sesiune/Vacanță";
-        toast.info(statusMessage, { 
-          duration: Infinity,
-          description: "Nu mai există săptămâni de curs disponibile în acest semestru." 
-        });
-        hasShownStatusToast.current = true;
-      }
+        if (activeWeeks.length === 0 && !hasShownStatusToast.current) {
+          const statusMessage = weeksResp.data.current_status || "Sesiune/Vacanță";
+          toast.info(statusMessage, { 
+            duration: Infinity,
+            description: "Nu mai există săptămâni de curs disponibile în acest semestru." 
+          });
+          hasShownStatusToast.current = true;
+        }
       } catch {
         toast.error("Nu s-au putut încărca grupele.");
       } finally {
-        setIsLoadingGrupe(false);
+        setIsLoadingGroups(false);
       }
     };
     fetchInitialData();
   }, []);
 
-  // Încărcăm materiile când se schimbă grupa selectată
+  // Fetch subjects when the selected group changes
   useEffect(() => {
-    const fetchMaterii = async () => {
+    const fetchSubjects = async () => {
       if (!selectedGroupId) {
-        setMaterii([]);
+        setSubjects([]);
         return;
       }
-      setIsLoadingMaterii(true);
+      setIsLoadingSubjects(true);
       try {
-        const response = await api.get(`/subgrupe/materii?id_subgrupa=${selectedGroupId}`);
-        setMaterii(response.data.materii);
-        setSelectedSubject(""); // Resetăm materia aleasă anterior
+        const response = await api.get(`/subgroups/subjects?subgroup_id=${selectedGroupId}`);
+        setSubjects(response.data.subjects);
+        setSelectedSubject(""); 
       } catch {
         toast.error("Nu s-au putut încărca materiile pentru această grupă.");
       } finally {
-        setIsLoadingMaterii(false);
+        setIsLoadingSubjects(false);
       }
     };
-    fetchMaterii();
+    fetchSubjects();
   }, [selectedGroupId]);
 
-  // Search Handler (POST către backend)
+  // Search Handler (POST to backend)
   const handleSearch = async () => {
     if (!selectedGroupId || !selectedSubject || !selectedType) {
       toast.error("Vă rugăm să completați toate câmpurile obligatorii");
       return;
     }
 
-    // ȘTERGEM TOATE TOAST-URILE VECHI
+    // DISMISS ALL PREVIOUS TOASTS
     toast.dismiss();
 
-    // GOLIM ZONA DE REZULTATE ÎNAINTE DE CĂUTARE
+    // CLEAR RESULTS AREA BEFORE SEARCHING
     setSearchResults([]);
     setHasSearched(false);
     
     setIsSearching(true);
 
     try {
-      const response = await api.post("/subgrupe/cauta-alternative", {
+      const response = await api.post("/subgroups/search-alternatives", {
         selectedGroupId: parseInt(selectedGroupId),
         selectedSubject,
         selectedType,
         attendsCourse
       });
       
-      setSearchResults(response.data.optiuni);
+      setSearchResults(response.data.options);
 
       const { info_message } = response.data;
 
       if (info_message) {
         toast.info(info_message, { duration: Infinity });
       } else {
-        // Afișăm zona de rezultate doar după un succes (200 OK)
+        // Show results area only after a successful 200 OK
         setHasSearched(true);
-        toast.success(`Am găsit ${response.data.total_optiuni} opțiuni disponibile`);
+        toast.success(`Am găsit ${response.data.total_options} opțiuni disponibile`);
       }
     } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-      // Dacă eroarea este 400 (sau orice altă eroare), hasSearched rămâne false 
-      // zona de rezultate nu va fi randată, iar searchResults va fi listă goală.
+      // If error is 400 (or any other), hasSearched remains false
+      // Results area won't render and searchResults will be an empty list
       const msg = error.response?.data?.detail || "Eroare la căutare";
       toast.error(msg, { duration: 7000});
       
-      // Opțional: ne asigurăm explicit că hasSearched este false în caz de eroare 400
       setHasSearched(false);
     } finally {
       setIsSearching(false);
@@ -187,7 +180,7 @@ export function StudentSearch() {
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
-            {/* Select Grupă cu SEARCH (Combobox) */}
+            {/* Group Select with SEARCH (Combobox) */}
             <div className="space-y-2 flex flex-col w-full">
               <Label htmlFor="search-group" className="font-semibold text-gray-900">
                 Grupa <span className="text-brand-red">*</span>
@@ -198,7 +191,7 @@ export function StudentSearch() {
                     variant="outline"
                     role="combobox"
                     aria-expanded={openGroups}
-                    disabled={isLoadingGrupe}
+                    disabled={isLoadingGroups}
                     className={cn(
                       "w-full justify-between font-normal focus-visible:ring-1 border-gray-200 hover:bg-transparent active:scale-100",
                       !selectedGroupId && "text-muted-foreground hover:text-muted-foreground"
@@ -207,12 +200,12 @@ export function StudentSearch() {
                     <span className="truncate">
                       {selectedGroupId
                         ? (() => {
-                            const g = grupe.find((g) => g.id.toString() === selectedGroupId);
+                            const g = groups.find((g) => g.id.toString() === selectedGroupId);
                             return g 
-                              ? `${g.specializationShortName} • an ${g.studyYear} • ${g.nume}${g.subgroupIndex}` 
+                              ? `${g.specializationShortName} • an ${g.studyYear} • ${g.name}${g.subgroupIndex}` 
                               : "Selectează grupa";
                           })()
-                        : isLoadingGrupe ? "Se încarcă..." : "Selectează grupa"}
+                        : isLoadingGroups ? "Se încarcă..." : "Selectează grupa"}
                     </span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
@@ -223,10 +216,10 @@ export function StudentSearch() {
                     <CommandList className="max-h-64">
                       <CommandEmpty>Nu am găsit nicio grupă.</CommandEmpty>
                       <CommandGroup>
-                        {grupe.map((g) => (
+                        {groups.map((g) => (
                           <CommandItem
                             key={g.id}
-                            value={`${g.specializationShortName} ${g.studyYear} ${g.nume}${g.subgroupIndex}`}
+                            value={`${g.specializationShortName} ${g.studyYear} ${g.name}${g.subgroupIndex}`}
                             onSelect={() => {
                               setSelectedGroupId(g.id.toString());
                               setOpenGroups(false);
@@ -238,7 +231,7 @@ export function StudentSearch() {
                                 selectedGroupId === g.id.toString() ? "opacity-100" : "opacity-0"
                               )}
                             />
-                            {g.specializationShortName} • an {g.studyYear} • {g.nume}{g.subgroupIndex}
+                            {g.specializationShortName} • an {g.studyYear} • {g.name}{g.subgroupIndex}
                           </CommandItem>
                         ))}
                       </CommandGroup>
@@ -248,7 +241,7 @@ export function StudentSearch() {
               </Popover>
             </div>
 
-            {/* Select Materie (Dependent de Grupă) */}
+            {/* Subject Select (Dependent on Group) */}
             <div className="space-y-2">
               <Label htmlFor="search-subject" className="text-sm font-semibold text-gray-900">
                 Materia <span className="text-brand-red">*</span>
@@ -256,16 +249,16 @@ export function StudentSearch() {
               <Select 
                 value={selectedSubject} 
                 onValueChange={setSelectedSubject} 
-                disabled={!selectedGroupId || isLoadingMaterii}
+                disabled={!selectedGroupId || isLoadingSubjects}
               >
                 <SelectTrigger 
                   id="search-subject" 
                   className={cn(
                     "w-full border-gray-200 focus-visible:ring-1 focus:ring-brand-blue/30 transition-all",
-                    (!selectedGroupId || isLoadingMaterii) && "opacity-50 cursor-not-allowed bg-gray-50"
+                    (!selectedGroupId || isLoadingSubjects) && "opacity-50 cursor-not-allowed bg-gray-50"
                   )}
                 >
-                  {isLoadingMaterii ? (
+                  {isLoadingSubjects ? (
                     <div className="flex items-center gap-2">
                       <Loader2 className="h-3 w-3 animate-spin text-brand-blue"/> 
                       <span className="text-muted-foreground">Se încarcă...</span>
@@ -277,14 +270,14 @@ export function StudentSearch() {
                   )}
                 </SelectTrigger>
                 <SelectContent>
-                  {materii.map((m) => (
+                  {subjects.map((m) => (
                     <SelectItem key={m} value={m}>{m}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Select Tip Activitate */}
+            {/* Activity Type Select */}
             <div className="space-y-2">
               <Label htmlFor="search-type" className="text-sm font-semibold text-gray-900">
                 Tip activitate <span className="text-brand-red">*</span>
@@ -301,7 +294,7 @@ export function StudentSearch() {
               </Select>
             </div>
 
-            {/* Checkbox Participare Curs */}
+            {/* Course Attendance Checkbox */}
             <div className="flex items-end">
               <div className="flex items-center space-x-3 bg-gray-50 p-2.5 rounded-lg border border-gray-100 w-full h-10">
                 <Checkbox
@@ -320,7 +313,7 @@ export function StudentSearch() {
             </div>
           </div>
 
-          {/* Mesaj Atenționare*/}
+          {/* Warning Message */}
           <div className="relative w-full rounded-lg border border-amber-200 bg-amber-50 p-4 [&>svg~*]:pl-7 [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-amber-600">
             <InfoIcon className="h-4 w-4" />
             <div className="text-xs sm:text-sm font-medium text-amber-800 leading-relaxed">
@@ -352,7 +345,7 @@ export function StudentSearch() {
         </CardContent>
       </Card>
 
-      {/* Rezultate */}
+      {/* Results Section */}
       {hasSearched && (
         <SearchResults 
           results={searchResults} 

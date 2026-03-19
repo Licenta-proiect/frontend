@@ -8,17 +8,7 @@ import { Calendar, MapPin, Users, Filter, ArrowUpDown, Clock, Info, RotateCcw } 
 import { cn } from "@/lib/utils";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
-
-interface AlternativeOption {
-  grupa: string;
-  zi: string;
-  ora_start: string;
-  ora_final: string;
-  profesor: string;
-  sala: string;
-  saptamani_lista: number[];
-  saptamani_grupate: string;
-}
+import { AlternativeOption } from "@/components/student/StudentSearch";
 
 interface SearchResultsProps {
   results: AlternativeOption[];
@@ -33,7 +23,6 @@ const DAYS_ORDER: Record<string, number> = {
   "Joi": 4,
   "Vineri": 5,
   "Sâmbătă": 6,
-  "Duminică": 7
 };
 
 export function SearchResults({ results, selectedSubject, selectedType }: SearchResultsProps) {
@@ -47,26 +36,26 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
     setSortBy("time");
   };
 
-  // Logica de filtrare și sortare
+  // Filtering and sorting logic
   const filteredAndSortedResults = results
     .filter((result) => {
-      const matchDay = filterDay === "all" || result.zi === filterDay;
-      const matchWeek = filterWeek === "all" || result.saptamani_lista.includes(parseInt(filterWeek));
+      const matchDay = filterDay === "all" || result.day === filterDay;
+      const matchWeek = filterWeek === "all" || result.weeks_list.includes(parseInt(filterWeek));
       return matchDay && matchWeek;
     })
     .sort((a, b) => {
-      if (sortBy === "time") return a.ora_start.localeCompare(b.ora_start);
-      if (sortBy === "group") return a.grupa.localeCompare(b.grupa);
+      if (sortBy === "time") return a.start_time.localeCompare(b.start_time);
+      if (sortBy === "group") return a.group.localeCompare(b.group);
       return 0;
     });
 
-  // Extragem zilele unice disponibile în rezultate pentru filtru
-  const availableDays = Array.from(new Set(results.map((r) => r.zi)))
+  // Extract available days
+  const availableDays = Array.from(new Set(results.map((r) => r.day)))
   .sort((a, b) => (DAYS_ORDER[a] || 99) - (DAYS_ORDER[b] || 99));
 
-  // Extragem săptămânile unice disponibile în rezultate pentru filtru
+  // Extract available weeks
   const availableWeeks = Array.from(
-    new Set(results.flatMap((r) => r.saptamani_lista))
+    new Set(results.flatMap((r) => r.weeks_list))
   ).sort((a, b) => a - b);
 
   const getTypeColor = (type: string) => {
@@ -89,9 +78,9 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
           </div>
         </div>
 
-        {/* --- ZONA UNIFICATĂ DE FILTRARE ȘI SORTARE --- */}
+        {/* Filters */}
         <div className="flex flex-wrap items-end gap-4 p-4 w-fit">
-          {/* Filtru Zi */}
+          {/* Day */}
           <div className="space-y-1.5 flex-1 min-w-35">
             <Label className="text-xs font-semibold text-gray-500 mb-1.5 flex items-center gap-1.5 ml-0.5">
               <Calendar className="h-3.5 w-3.5" /> Ziua
@@ -109,7 +98,7 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
             </Select>
           </div>
 
-          {/* Filtru Săptămână */}
+          {/* Week */}
           <div className="space-y-1.5 flex-1 min-w-35">
             <Label className="text-xs font-semibold text-gray-500 mb-1.5 flex items-center gap-1.5 ml-0.5">
               <Filter className="h-3.5 w-3.5" /> Săptămâna
@@ -127,7 +116,7 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
             </Select>
           </div>
 
-          {/* Sortare */}
+          {/* Sort */}
           <div className="space-y-1.5 flex-1 min-w-35">
             <Label className="text-xs font-semibold text-gray-500 mb-1.5 flex items-center gap-1.5 ml-0.5">
               <ArrowUpDown className="h-3.5 w-3.5" /> Sortează după
@@ -143,7 +132,7 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
             </Select>
           </div>
 
-          {/* Butonul de Resetare - Apare doar dacă există filtre active */}
+          {/* Reset filters */}
           {(filterDay !== "all" || filterWeek !== "all" ) && (
             <div className="h-9 flex items-center">
               <Button 
@@ -171,59 +160,59 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
             {filteredAndSortedResults.map((result, idx) => (
               <Card key={idx} className="border-l-4 border-l-brand-blue shadow-sm hover:bg-gray-50/50 transition-colors overflow-hidden">
                 <CardContent className="p-0">
-                  {/* Header Card: Nume Prof la stanga, Tip la dreapta */}
+                  {/* Header */}
                   <div className="px-5 py-3 flex items-center justify-between">
-                    <span className="font-bold text-gray-900 text-base">{result.profesor}</span>
+                    <span className="font-bold text-gray-900 text-base">{result.professor}</span>
                     <Badge variant="outline" className={cn("font-bold text-[10px] uppercase px-2 py-0.5", getTypeColor(selectedType))}>
                       {selectedType}
                     </Badge>
                   </div>
 
-                  {/* Informatii principale - Grid layout */}
+                  {/* Info */}
                   <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     
-                    {/*Zi*/}
+                    {/*Day*/}
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
                         <Calendar className="h-4 w-4 text-brand-blue shrink-0" />
-                        <span>{result.zi}</span>
+                        <span>{result.day}</span>
                       </div>
                     </div>
 
-                    {/*Interval*/}
+                    {/*Duration*/}
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
                         <Clock className="h-4 w-4 text-brand-blue shrink-0" />
-                        <span>{result.ora_start} - {result.ora_final}</span>
+                        <span>{result.start_time} - {result.end_time}</span>
                       </div>
                     </div>
 
-                    {/*Sala*/}
+                    {/*Room*/}
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
                         <MapPin className="h-4 w-4 text-brand-blue shrink-0" />
-                        <span>Sala {result.sala}</span>
+                        <span>Sala {result.room}</span>
                       </div>
                     </div>
 
-                    {/*Grupe*/}
+                    {/*Groups*/}
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
                         <Users className="h-4 w-4 text-brand-blue shrink-0" />
-                        <span>{result.grupa}</span>
+                        <span>{result.group}</span>
                       </div>
                     </div>
 
-                    {/*Saptamani*/}
+                    {/*Weeks*/}
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                        {result.saptamani_lista.length === 1 ? "Săptămâna" : "Săptămânile"}{" "}
-                        {result.saptamani_grupate}
+                        {result.weeks_list.length === 1 ? "Săptămâna" : "Săptămânile"}{" "}
+                        {result.weeks_grouped}
                       </div>
                     </div>
                   </div>
 
-                  {/* Footer Card: Indicatia pe toata lungimea */}
+                  {/* Footer */}
                   <div className="px-5 py-2.5 flex items-center gap-2">
                     <Info className="h-3.5 w-3.5 text-gray-400" />
                     <span className="text-gray-500 text-xs font-medium italic">

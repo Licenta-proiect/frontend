@@ -10,22 +10,22 @@ import { format, parseISO } from "date-fns";
 import { ro } from "date-fns/locale";
 import api from "@/services/api";
 import { toast } from "sonner";
-import { SearchSelect } from "../ui/SearchSelect"; // Importă noua componentă
+import { SearchSelect } from "../ui/SearchSelect";
 import { cn } from "@/lib/utils";
 
 interface Reservation {
   id: number;
-  profesor: string;
-  email_profesor: string;
-  materie: string;
-  tip: string;
-  sala: string;
-  grupe_participante: string[];
-  data: string;
-  ora_start: number;
-  durata: number;
-  status: string;
-  motiv_anulare: string | null;
+  professor: string;
+  professor_email: string;
+  subject: string;
+  type: string;
+  room: string;
+  participating_groups: string[];
+  date: string; // ISO format from backend
+  start_hour: number;
+  duration: number;
+  status: string; // "reserved", "completed", "cancelled"
+  cancellation_reason: string | null;
 }
 
 interface GroupedReservations {
@@ -36,19 +36,19 @@ export function StudentCalendar() {
   const [data, setData] = useState<GroupedReservations>({});
   const [selectedGroupId, setSelectedGroupId] = useState<string>("all");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchReservations = async () => {
       try {
-        setLoading(true);
-        const response = await api.get("/subgrupe/rezervari");
+        setIsLoading(true);
+        const response = await api.get("/subgroups/reservations"); 
         setData(response.data);
       } catch (error) {
         toast.error("Nu s-au putut încărca datele calendarului.");
-        console.error(error);
+        console.error("Fetch error:", error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
     fetchReservations();
@@ -58,7 +58,7 @@ export function StudentCalendar() {
     const subgroupIds = Object.keys(data);
     
     const options = subgroupIds.map((id) => {
-      const fullName = data[id][0]?.grupe_participante.find(name => name.length > 0) || "";
+      const fullName = data[id][0]?.participating_groups.find(name => name.length > 0) || "";
   
       let label = `Subgrupa ${id}`;
       if (fullName) {
@@ -92,7 +92,7 @@ export function StudentCalendar() {
     if (!selectedOption) return [];
 
     const matchingSubgroupIds = Object.keys(data).filter(id => {
-      const fullName = data[id][0]?.grupe_participante[0] || "";
+      const fullName = data[id][0]?.participating_groups[0] || "";
       return fullName.startsWith(selectedOption.label);
     });
 
@@ -103,20 +103,20 @@ export function StudentCalendar() {
   const sessionsOnSelectedDate = useMemo(() => {
     if (!selectedDate) return [];
     return filteredSessions.filter((session) => {
-      const sessionDate = parseISO(session.data);
+      const sessionDate = parseISO(session.date);
       return sessionDate.toDateString() === selectedDate.toDateString();
     });
   }, [selectedDate, filteredSessions]);
 
   const eventDates = useMemo(() => {
-    return filteredSessions.map(s => parseISO(s.data));
+    return filteredSessions.map(s => parseISO(s.date));
   }, [filteredSessions]);
 
   const getStatusStyle = (status: string) => {
     switch (status.toLowerCase()) {
-      case "rezervat": return "bg-blue-50 text-brand-blue border-blue-100 font-bold";
-      case "efectuată": return "bg-green-50 text-green-700 border-green-100 font-bold";
-      case "anulat": return "bg-red-50 text-brand-red border-red-100 font-bold";
+      case "reserved": return "bg-blue-50 text-brand-blue border-blue-100 font-bold";
+      case "completed": return "bg-green-50 text-green-700 border-green-100 font-bold";
+      case "cancelled": return "bg-red-50 text-brand-red border-red-100 font-bold";
       default: return "bg-gray-50 text-gray-700 border-gray-100 font-bold";
     }
   };
@@ -193,7 +193,7 @@ export function StudentCalendar() {
                 </Badge>
               </div>
 
-              {loading ? (
+              {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-20">
                    <div className="animate-spin rounded-full h-8 w-8 border-primary border-b-2 mb-4"></div>
                    <p className="text-slate-500">Se încarcă recuperările...</p>
@@ -206,7 +206,7 @@ export function StudentCalendar() {
               ) : (
                 <div className="space-y-4 max-h-150 overflow-y-auto pr-2 custom-scrollbar">
                   {sessionsOnSelectedDate.map((session) => {
-                    const isCanceled = session.status.toLowerCase() === "anulat";
+                    const isCanceled = session.status.toLowerCase() === "cancelled";
 
                     return (
                       <Card 
@@ -220,71 +220,68 @@ export function StudentCalendar() {
                           <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                             
                             <div className="space-y-3 flex-1">
-                              {/* Materie + Profesor + Badge-uri pe același rând */}
                               <div className="space-y-1">
                                 <div className="flex items-center justify-between gap-4">
                                   <div className="font-semibold text-md text-gray-800 leading-none">
-                                    {session.materie}
+                                    {session.subject}
                                   </div>
                                   
-                                  {/* Badge-urile mutate aici pentru a fi pe linie cu materia */}
                                   <div className="flex items-center gap-2 shrink-0">
                                     <Badge 
                                       variant="outline" 
                                       className={cn(getStatusStyle(session.status), "text-[10px] font-bold uppercase whitespace-nowrap")}
                                     >
-                                      {session.status.toLowerCase() === "rezervat" ? "PROGRAMATĂ" : 
-                                      session.status.toLowerCase() === "efectuată" ? "FINALIZATĂ" : "ANULATĂ"}
+                                      {session.status.toLowerCase() === "reserved" ? "PROGRAMATĂ" : 
+                                       session.status.toLowerCase() === "completed" ? "FINALIZATĂ" : "ANULATĂ"}
                                     </Badge>
                                     <Badge 
                                       variant="secondary" 
                                       className="bg-gray-100 text-gray-700 border-gray-200 font-bold text-[10px] uppercase whitespace-nowrap"
                                     >
-                                      {session.tip}
+                                      {session.type}
                                     </Badge>
                                   </div>
                                 </div>
 
                                 <p className="text-sm font-semibold text-brand-blue">
-                                  {session.profesor}
+                                  {session.professor}
                                 </p>
                               </div>
 
-                              {/* Informații Detaliate (Grid) */}
                               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium text-gray-700">
-                                {/* Interval Orar */}
+                                {/* Duration */}
                                 <div className="flex items-center gap-1.5">
                                   <Clock className="h-4 w-4 text-brand-blue" />
                                   <span>
-                                    {String(session.ora_start).padStart(2, '0')}:00 - {String(session.ora_start + session.durata).padStart(2, '0')}:00
+                                    {String(session.start_hour).padStart(2, '0')}:00 - {String(session.start_hour + session.duration).padStart(2, '0')}:00
                                   </span>
                                 </div>
 
-                                {/* Sala */}
+                                {/* Room */}
                                 <div className="flex items-center gap-1.5">
                                   <MapPin className="h-4 w-4 text-brand-blue" />
-                                  <span>{session.sala}</span>
+                                  <span>Sala {session.room}</span>
                                 </div>
 
-                                {/* Grupe */}
+                                {/* Groups */}
                                 <div className="flex items-start gap-1.5">
                                   <Users className="h-4 w-4 text-brand-blue shrink-0 mt-0.5" />
                                   <span className="leading-tight">
-                                    {session.grupe_participante.join(", ")}
+                                    {session.participating_groups.join(", ")}
                                   </span>
                                 </div>
                               </div>
                             </div>
                           </div>
 
-                          {/* Motiv Anulare (Stil identic cu cel de profesor) */}
-                          {isCanceled && session.motiv_anulare && (
+                          {/* Cancellation reason */}
+                          {isCanceled && session.cancellation_reason && (
                             <div className="border-red-50">
                               <div className="text-xs p-3 rounded-lg bg-red-50/50 border border-red-100 flex items-start gap-2">
                                 <AlertCircle className="h-3.5 w-3.5 text-brand-red shrink-0 mt-0.5" />
                                 <div>
                                   <span className="font-bold text-brand-red mr-2">Motiv anulare:</span>
-                                  <span className="text-gray-700 italic">&quot;{session.motiv_anulare}&quot;</span>
+                                  <span className="text-gray-700 italic">&quot;{session.cancellation_reason}&quot;</span>
                                 </div>
                               </div>
                             </div>
