@@ -11,6 +11,7 @@ import { toast } from "sonner";
 const AdminHistory = () => <div className="p-6 bg-white rounded-lg shadow">Istoric Rezervări Sistem</div>;
 
 const emptySubscribe = () => () => {};
+  // Custom hook to detect if we are on the client side. Prevents hydration mismatch errors
 function useIsClient() {
   return useSyncExternalStore(emptySubscribe, () => true, () => false);
 }
@@ -20,10 +21,10 @@ function AdminDashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Citim tab-ul din URL. Dacă nu există, fallback la "sync"
+  // Read the active tab from the URL. If it doesn't exist, fallback to "sync"
   const activeTab = searchParams.get("tab") || "sync";
 
-  // Schimbăm tab-ul prin actualizarea URL-ului (fără refresh de pagină)
+  // Change the tab by updating the URL (without page refresh)
   const handleTabChange = (tabId: string) => {
     router.push(`/admin?tab=${tabId}`, { scroll: false });
   };
