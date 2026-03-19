@@ -12,7 +12,7 @@ function ErrorContent() {
   const searchParams = useSearchParams();
   const message = searchParams.get("message") || "Nu aveți permisiunea de a accesa această aplicație.";
 
-  // Adresa de email a administratorului din sistem
+  // System administrator email address
   const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
   
   return (
@@ -33,11 +33,11 @@ function ErrorContent() {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-3">
-          {/* Reutilizăm componenta existentă de solicitare acces */}
+          {/* Reusing the existing access request component */}
           <div className="w-full flex flex-col items-center gap-2">
              <ProfessorAccessRequest />
              
-             {/* Container pentru text și link-ul de email */}
+             {/* Container for text and email link */}
             {adminEmail && (
                 <div className="text-sm text-gray-500 flex items-center gap-1 font-medium pt-2">
                 <Mail className="h-3 w-3" />
