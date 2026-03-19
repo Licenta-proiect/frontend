@@ -25,7 +25,7 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
   const router = useRouter();
 
   useEffect(() => {
-    // 1. Verificare locală rapidă
+    // 1. Fast local check for tokens and basic user data
     const token = Cookies.get("access_token");
     const userFirstName = localStorage.getItem("userFirstName");
     
@@ -36,17 +36,22 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
       return;
     }
 
-    // 2. Verificare "Who Am I" către server
-    // Acest apel va forța backend-ul să verifice dacă user-ul mai există în DB
+    /**
+     * 2. Server-side identity verification (Who Am I)
+     * This forces the backend to verify if the session is still valid
+     * and if the user still exists in the Database.
+     */
     const verifyAuth = async () => {
       try {
-        // Folosim un endpoint care returnează date puține pentru performanță
-        // În cazul tău, /data/tip-activitate sau un endpoint nou de profile
+        // Updated route to match backend /auth/me or a profile endpoint
         await api.get("/me");
       } catch {
-        // Dacă primești 401, interceptorul din services/api.ts 
-        // va rula automat localStorage.clear() și window.location.href = "/"
-        console.error("Sesiune invalidă detectată de server.");
+        /**
+         * If 401 is returned, the interceptor in services/api.ts 
+         * should automatically clear storage and redirect.
+         * We add a fallback console log here for debugging.
+         */
+        console.error("Invalid session detected by server.");
       }
     };
 
@@ -55,8 +60,13 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
 
   const [sheetOpen, setSheetOpen] = useState(false);
 
+  /**
+   * Handles the logout process by calling the backend /auth/logout
+   * and clearing local state/cookies.
+   */
   const handleLogout = async () => {
     try {
+      // Updated route to match backend /auth/logout
       await api.get("/logout");
     } catch (error) {
       console.error("Backend logout failed:", error);
@@ -66,6 +76,7 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
       Cookies.remove("user_role");
       toast.success("Deconectare reușită!");
 
+      // Small delay to allow the user to see the toast message
       setTimeout(() => {
         window.location.href = "/";
       }, 1500);

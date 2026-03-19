@@ -23,21 +23,30 @@ export function ProfessorAccessRequest() {
   const [professorLastName, setProfessorLastName] = useState("");
   const [professorDialogOpen, setProfessorDialogOpen] = useState(false);
 
-  // Stare pentru erori
+  // State for form validation errors
   const [errors, setErrors] = useState<{
     email?: boolean;
     firstName?: boolean;
     lastName?: boolean;
   }>({});
 
-  const handleReset = () => { setProfessorEmail(""); setProfessorFirstName(""); setProfessorLastName("");
+  /**
+   * Resets the form fields to their initial empty values
+   */
+  const handleReset = () => { 
+    setProfessorEmail(""); 
+    setProfessorFirstName(""); 
+    setProfessorLastName("");
   };
 
+  /**
+   * Validates form data and sends an access request to the backend
+   */
   const handleProfessorRequest = async () => {
     const newErrors: typeof errors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // Validare locală în frontend
+    // Frontend validation logic
     if (!professorFirstName.trim()) newErrors.firstName = true;
     if (!professorLastName.trim()) newErrors.lastName = true;
     if (!professorEmail.trim() || !emailRegex.test(professorEmail)) {
@@ -51,20 +60,22 @@ export function ProfessorAccessRequest() {
     }
 
     try {
-      // Apel API către backend folosind instanța configurată
+      /**
+       * API call using the configured axios instance.
+       * Route matches the backend endpoint for access requests.
+       */
       const response = await api.post("/request-access", {
         firstName: professorFirstName.trim(),
         lastName: professorLastName.trim(),
         email: professorEmail.trim(),
       }, {
-        // Acceptăm statusurile de business (ex: 400) fără a polua consola
+        // Allows handling 400 status codes without triggering axios global error interceptors
         validateStatus: (status) => status >= 200 && status < 500 
       });
 
-      // Extragerea statusului și a datelor din răspuns
       const { status, data } = response;
 
-      // Gestionare caz de eroare (Bad Request - Cerere duplicat/invalidă)
+      // Handle business error cases (e.g., Duplicate request)
       if (status === 400) {
         toast.error(data?.detail || "Există deja o cerere pentru acest email.");
         
@@ -72,20 +83,17 @@ export function ProfessorAccessRequest() {
         return;
       }
 
-      // Succes
+      // Success handling
       setErrors({});
       toast.success(data?.message || "Cererea a fost trimisă către administrator!");
       setProfessorDialogOpen(false);
 
-      // Resetare câmpuri după succes
-      setProfessorEmail("");
-      setProfessorFirstName("");
-      setProfessorLastName("");
+      handleReset();
 
     } catch (error: unknown) {
-      // Gestionarea erorilor critice (500+, erori de rețea, etc.)
+      // Handle critical network or server errors
       toast.error("Eroare critică de conexiune la server.");
-      console.error("Eroare neprevăzută:", error);
+      console.error("Unexpected error during access request:", error);
     }
   };
 
@@ -111,7 +119,10 @@ export function ProfessorAccessRequest() {
       <DialogContent className="max-w-[95vw] sm:max-w-md rounded-lg">
         <DialogHeader>
           <DialogTitle className="text-gray-900 font-semibold text-xl">Solicitare acces profesor</DialogTitle>
-          <DialogDescription className="text-gray-800"> Administratorul va fi notificat pentru a vă activa accesul în sistem. Această procedură este necesară doar pentru cadrele didactice care nu au adresa de email configurată în orarul oficial.</DialogDescription>
+          <DialogDescription className="text-gray-800"> 
+            Administratorul va fi notificat pentru a vă activa accesul în sistem. 
+            Această procedură este necesară doar pentru cadrele didactice care nu au adresa de email configurată în orarul oficial.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
