@@ -17,7 +17,7 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Dacă serverul spune că token-ul nu mai e valid
+    // If the server indicates that the token is no longer valid
     if (error.response?.status === 401) {
       Cookies.remove("access_token");
       localStorage.clear();
