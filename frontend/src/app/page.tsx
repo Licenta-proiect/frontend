@@ -6,6 +6,9 @@ import { Calendar, Clock, Users, LogIn } from "lucide-react";
 import { ProfessorAccessRequest } from "@/components/ProfessorAccessRequest";
 
 export default function Home() {
+  /**
+   * Triggers the Google OAuth flow via the backend endpoint
+   */
   const handleGoogleLogin = () => {
     const backendUrl = process.env.NEXT_PUBLIC_API_URL;
     window.location.href = `${backendUrl}/login`;
@@ -13,6 +16,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 to-white flex flex-col font-sans">
+      {/* Sticky Header with Backdrop Blur */}
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-3 md:py-4 flex justify-between items-center">
           <div className="flex items-center gap-2 shrink-0">
@@ -21,7 +25,7 @@ export default function Home() {
           </div>
           
           <div className="flex gap-2 md:gap-4 items-center">
-            {/* Componenta separată pentru solicitare acces */}
+            {/* Separate component for access requests */}
             <ProfessorAccessRequest />
             
             <Button 
@@ -37,6 +41,7 @@ export default function Home() {
         </div>
       </header>
 
+      {/* Hero & Features Section */}
       <main className="container mx-auto px-4 py-8 md:py-16 grow flex flex-col justify-center">
         <div className="text-center mb-10 md:mb-16">
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 tracking-tight">
@@ -65,6 +70,7 @@ export default function Home() {
           />
         </div>
 
+        {/* CTA Section */}
         <div className="bg-brand-blue text-white rounded-2xl p-8 md:p-12 text-center mt-12 md:mt-16 shadow-lg">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">Gata să începi?</h2>
           <p className="text-lg md:text-xl mb-8 text-blue-100">
@@ -92,6 +98,10 @@ export default function Home() {
   );
 }
 
+/**
+ * FeatureCard Component
+ * Displays a specific capability of the application with an icon and description
+ */
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) {
   return (
     <Card className="border-blue-100 shadow-sm hover:shadow-md transition-all duration-200 text-center md:text-left">

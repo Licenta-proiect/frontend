@@ -4,11 +4,15 @@ import { useMemo, useSyncExternalStore, Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import { ClipboardList, FileText } from "lucide-react";
-import { ProfessorSchedule } from "@/components/profesor/ProfessorSchedule";
-import { ProfessorReservations } from "@/components/profesor/ProfessorReservations";
+import { ProfessorSchedule } from "@/components/professor/ProfessorSchedule";
+import { ProfessorReservations } from "@/components/professor/ProfessorReservations";
 import { toast } from "sonner";
 
 const emptySubscribe = () => () => {};
+/**
+ * Custom hook to detect if the component is mounted on the client
+ * Essential for accessing localStorage and avoiding hydration errors
+ */
 function useIsClient() {
   return useSyncExternalStore(emptySubscribe, () => true, () => false);
 }
@@ -18,12 +22,15 @@ function ProfessorDashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Get active tab from URL, defaults to "schedule"
   const activeTab = searchParams.get("tab") || "schedule";
 
+  // Updates URL query parameter to switch tabs without full page reload
   const handleTabChange = (tabId: string) => {
     router.push(`/profesor?tab=${tabId}`, { scroll: false });
   };
 
+  // Clear existing toasts when switching tabs
   useEffect(() => {
     toast.dismiss();
   }, [activeTab]);

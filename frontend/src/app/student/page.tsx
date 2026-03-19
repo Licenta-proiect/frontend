@@ -9,6 +9,11 @@ import { StudentCalendar } from "@/components/student/StudentCalendar";
 import { toast } from "sonner";
 
 const emptySubscribe = () => () => {};
+
+/**
+ * Hook to determine if the code is running on the client side.
+ * Prevents hydration errors when accessing localStorage.
+ */
 function useIsClient() {
   return useSyncExternalStore(emptySubscribe, () => true, () => false);
 }
@@ -18,12 +23,15 @@ function StudentDashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Determine active tab from URL, default to "calendar"
   const activeTab = searchParams.get("tab") || "calendar";
 
+  // Updates the URL query parameter to switch between dashboard views
   const handleTabChange = (tabId: string) => {
     router.push(`/student?tab=${tabId}`, { scroll: false });
   };
 
+  // Clear notifications when changing tabs
   useEffect(() => {
     toast.dismiss();
   }, [activeTab]);
