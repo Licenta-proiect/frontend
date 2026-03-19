@@ -81,7 +81,7 @@ export function SearchSelect({
                 {options.map((option) => (
                   <CommandItem
                     key={option.value}
-                    value={option.label} // Command folosește valoarea textului pentru filtrare implicită
+                    value={option.label} 
                     onSelect={() => {
                       onChange(option.value);
                       setOpen(false);
