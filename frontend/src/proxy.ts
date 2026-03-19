@@ -3,10 +3,10 @@ import type { NextRequest } from 'next/server';
 
 export function proxy(request: NextRequest) {
   const token = request.cookies.get('access_token')?.value;
-  const role = request.cookies.get('user_role')?.value; // Preluăm rolul din cookie
+  const role = request.cookies.get('user_role')?.value; // Retrieve the role from the cookie
   const { pathname } = request.nextUrl;
 
-  // Redirecționare automată de pe "/" dacă ești logat
+  // Automatic redirection from "/" if the user is already logged in
   if (pathname === '/' && token && role) {
     const dashboardRoute = 
       role === 'ADMIN' ? '/admin' : 
@@ -15,8 +15,8 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(dashboardRoute, request.url));
   }
 
-  // Verificarea rutei protejate 
-  // Verificăm existența token-ului pentru orice rută protejată
+  // Protected route validation
+  // Check for the existence of the token for any protected route
   const protectedRoutes = ['/admin', '/profesor', '/student'];
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
 
@@ -24,9 +24,9 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  // Protecție bazată pe ROL (Logica de autorizare)
+  // ROLE-based protection (Authorization logic)
   if (pathname.startsWith('/admin') && role !== 'ADMIN') {
-    return NextResponse.redirect(new URL('/profesor', request.url)); // Sau unde are voie
+    return NextResponse.redirect(new URL('/profesor', request.url));
   }
 
   if (pathname.startsWith('/profesor') && role !== 'PROFESOR') {
