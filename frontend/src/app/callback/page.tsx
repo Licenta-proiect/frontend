@@ -17,10 +17,11 @@ function AuthCallbackContent() {
     const email = searchParams.get("email");
 
     if (token && role) {
-      // Salvare în Cookies (pentru API)
+      // Save to Cookies (for API/Middleware)
       Cookies.set("access_token", token, { expires: 7 });
       Cookies.set("user_role", role, { expires: 7 });
 
+      // Save to localStorage (for client-side state)
       localStorage.setItem("access_token", token);
       localStorage.setItem("userRole", role);
       localStorage.setItem("userEmail", email || "");
@@ -29,7 +30,7 @@ function AuthCallbackContent() {
 
       toast.success(`Bine ai venit, ${firstName || "Utilizator"}!`);
       
-      // Redirecționare
+      // Redirection logic based on role
       const route = role === "ADMIN" ? "/admin" : role === "PROFESOR" ? "/profesor" : "/student";
       router.push(route);
     } else {
