@@ -147,7 +147,7 @@ export function StudentCalendar() {
               </CardDescription>
             </div>
             
-            <div className="flex flex-col space-y-4">
+            <div className="flex flex-col space-y-4 w-full md:w-1/2">
               <Label className="text-sm font-medium">Filtrare subgrupă</Label>
               <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
                 <PopoverTrigger asChild>
@@ -225,7 +225,7 @@ export function StudentCalendar() {
                   <Info className="h-5 w-5 text-blue-500 mt-0.5" />
                   <div className="text-sm text-blue-800">
                     <p className="font-semibold">Legendă</p>
-                    <p>Zilele marcate cu cerc albastru indică prezența unor recuperări programate.</p>
+                    <p>Zilele marcate cu albastru indică prezența unor recuperări programate.</p>
                   </div>
                 </div>
               </div>
