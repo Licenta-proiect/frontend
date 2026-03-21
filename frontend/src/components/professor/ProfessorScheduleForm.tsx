@@ -91,7 +91,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
           api.get("/data/rooms"),
           api.get("/data/weeks") // Endpoint returning semester status
         ]);
-        setSubjects(subResp.data.materii);
+        setSubjects(subResp.data.subjects);
         setAllRooms(roomsResp.data.map((r: ApiRoom) => ({ label: r.name, value: r.id.toString() })));
       
         const activeWeeks = weeksResp.data.active_weeks || [];
@@ -152,7 +152,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       const email = localStorage.getItem("userEmail");
       try {
         const sResp = await api.get(`/professor/rooms-by-subject?email=${email}&subject=${selectedSubject}`);
-        const roomsData = sResp.data.sali || [];
+        const roomsData = sResp.data.rooms || [];
         setSelectedRooms(roomsData.map((s: ApiRoom) => s.id.toString()));
       } catch {
         toast.error("Eroare la încărcarea sălilor");
@@ -174,10 +174,10 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       setIsSyncingGroups(true);
 
       try {
-        const typeParam = selectedType.toLowerCase().includes("curs") ? `&tip=${selectedType}` : "";
+        const typeParam = selectedType.toLowerCase().includes("curs") ? `&activity_type=${selectedType}` : "";
         const gResp = await api.get(`/professor/groups-by-subject?email=${email}&subject=${selectedSubject}${typeParam}`);
 
-        const groupsData = gResp.data.grupe || [];
+        const groupsData = gResp.data.groups || [];
         const groupsOptions = groupsData.map((g: ApiGroup) => ({
           label: `${g.specializationShortName} • an ${g.studyYear} • ${g.name}${g.subgroupIndex ? `${g.subgroupIndex}` : ""}`,
           value: g.id.toString(),
@@ -207,7 +207,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     setIsValidatingWeeks(true);
     try {
       const response = await api.post("/data/valid-weeks", { 
-        grupe_ids: groupIds.map(id => parseInt(id)) 
+        group_ids: groupIds.map(id => parseInt(id)) 
       });
       
       const weeks = response.data.active_weeks || [];
@@ -315,7 +315,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
                 <SelectValue placeholder="Selectează materia" />
               </SelectTrigger>
               <SelectContent position="popper" className="max-h-64 text-sm">
-                {subjects.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                {subjects && subjects.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>

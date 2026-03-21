@@ -10,7 +10,7 @@ export function proxy(request: NextRequest) {
   if (pathname === '/' && token && role) {
     const dashboardRoute = 
       role === 'ADMIN' ? '/admin' : 
-      role === 'PROFESOR' ? '/profesor' : 
+      role === 'PROFESSOR' ? '/profesor' : 
       '/student';
     return NextResponse.redirect(new URL(dashboardRoute, request.url));
   }
@@ -29,7 +29,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/profesor', request.url));
   }
 
-  if (pathname.startsWith('/profesor') && role !== 'PROFESOR') {
+  if (pathname.startsWith('/profesor') && role !== 'PROFESSOR') {
     const fallback = role === 'ADMIN' ? '/admin' : '/student';
     return NextResponse.redirect(new URL(fallback, request.url));
   }

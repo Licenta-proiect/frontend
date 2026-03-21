@@ -88,8 +88,8 @@ export function ProfessorReservations() {
     r.room.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const activeReservations = filtered.filter(r => r.status === "upcoming");
-  const historyReservations = filtered.filter(r => r.status !== "upcoming");
+  const activeReservations = filtered.filter(r => r.status === "reserved");
+  const historyReservations = filtered.filter(r => r.status !== "reserved");
 
   if (loading) {
     return (
