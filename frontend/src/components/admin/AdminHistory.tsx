@@ -39,45 +39,47 @@ export function AdminHistory() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [professors, setProfessors] = useState<{ id: number; lastName: string; firstName: string }[]>([]);
   const [rooms, setRooms] = useState<{ id: number; name: string }[]>([]);
-  const [weeks, setWeeks] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Filter States
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterProfessor, setFilterProfessor] = useState<string>("all");
   const [filterRoom, setFilterRoom] = useState<string>("all");
-  const [filterWeek, setFilterWeek] = useState<string>("all");
+  const [filterGroup, setFilterGroup] = useState<string>("all"); // Săptămâna devine Grupă
 
-  // UI States for Comboboxes
+  // UI States
   const [openProf, setOpenProf] = useState(false);
   const [openRoom, setOpenRoom] = useState(false);
+  const [openGroup, setOpenGroup] = useState(false);
 
   const fetchData = async () => {
-  try {
-    setIsLoading(true);
-    const [resReq, profReq, roomReq, weekReq] = await Promise.all([
-      api.get("/admin/reservations"),
-      api.get("/data/professors"),
-      api.get("/data/rooms"),
-      api.get("/data/weeks")
-    ]);
-    
-    setReservations(resReq.data);
-    setProfessors(profReq.data);
-    setRooms(roomReq.data);
-    
-    // Extrage array-ul de numere din obiectul primit
-    if (weekReq.data && Array.isArray(weekReq.data.active_weeks)) {
-      setWeeks(weekReq.data.active_weeks);
-    }
+    try {
+      setIsLoading(true);
+      const [resReq, profReq, roomReq] = await Promise.all([
+        api.get("/admin/reservations"),
+        api.get("/data/professors"),
+        api.get("/data/rooms")
+      ]);
       
+      setReservations(resReq.data);
+      setProfessors(profReq.data);
+      setRooms(roomReq.data);
     } catch (error) {
       console.error(error);
-      toast.error("Eroare la încărcarea datelor de administrare.");
+      toast.error("Eroare la încărcarea datelor.");
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Generăm lista unică de grupe din toate rezervările
+  const availableGroups = useMemo(() => {
+    const groupsSet = new Set<string>();
+    reservations.forEach(r => {
+      r.groups.forEach(g => groupsSet.add(g));
+    });
+    return Array.from(groupsSet).sort();
+  }, [reservations]);
 
   useEffect(() => {
     fetchData();
@@ -88,17 +90,18 @@ export function AdminHistory() {
       const matchStatus = filterStatus === "all" || r.status.toLowerCase() === filterStatus.toLowerCase();
       const matchProf = filterProfessor === "all" || r.professor === filterProfessor;
       const matchRoom = filterRoom === "all" || r.room === filterRoom;
-      const matchWeek = filterWeek === "all" || r.week_number?.toString() === filterWeek;
+      // Verificăm dacă grupa selectată se află în array-ul de grupe al rezervării
+      const matchGroup = filterGroup === "all" || r.groups.includes(filterGroup);
       
-      return matchStatus && matchProf && matchRoom && matchWeek;
+      return matchStatus && matchProf && matchRoom && matchGroup;
     });
-  }, [reservations, filterStatus, filterProfessor, filterRoom, filterWeek]);
+  }, [reservations, filterStatus, filterProfessor, filterRoom, filterGroup]);
 
   const handleReset = () => {
     setFilterStatus("all");
     setFilterProfessor("all");
     setFilterRoom("all");
-    setFilterWeek("all");
+    setFilterGroup("all");
   };
 
   const getStatusStyle = (status: string) => {
@@ -166,24 +169,6 @@ export function AdminHistory() {
                   <SelectItem value="completed">Finalizate</SelectItem>
                   <SelectItem value="cancelled">Anulate</SelectItem>
                 </SelectContent>
-              </Select>
-            </div>
-
-            {/* Săptămână */}
-            <div className="space-y-2 w-full">
-              <Label className="text-sm font-medium">Săptămână</Label>
-              <Select value={filterWeek} onValueChange={setFilterWeek}>
-                <SelectTrigger className="border-gray-200 w-full">
-                  <SelectValue placeholder="Oricare" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Toate săptămânile</SelectItem>
-                    {weeks.map((weekNum) => (
-                        <SelectItem key={weekNum} value={weekNum.toString()}>
-                        Săptămâna {weekNum}
-                        </SelectItem>
-                    ))}
-                  </SelectContent>
               </Select>
             </div>
 
@@ -258,6 +243,45 @@ export function AdminHistory() {
                   </Command>
                 </PopoverContent>
               </Popover>
+            </div>
+
+            {/* Grupa - COMBOBOX (în loc de Săptămână) */}
+            <div className="space-y-2 w-full">
+            <Label className="text-sm font-medium">Grupă</Label>
+            <Popover open={openGroup} onOpenChange={setOpenGroup}>
+                <PopoverTrigger asChild>
+                <Button variant="outline" role="combobox" className="w-full justify-between font-normal border-gray-200">
+                    <span className="truncate">
+                    {filterGroup === "all" ? "Toate grupele" : filterGroup}
+                    </span>
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                <Command>
+                    <CommandInput placeholder="Caută grupă..." />
+                    <CommandList>
+                    <CommandEmpty>Nu a fost găsită.</CommandEmpty>
+                    <CommandGroup>
+                        <CommandItem onSelect={() => { setFilterGroup("all"); setOpenGroup(false); }}>
+                        <Check className={cn("mr-2 h-4 w-4", filterGroup === "all" ? "opacity-100" : "opacity-0")} />
+                        Toate Grupele
+                        </CommandItem>
+                        {availableGroups.map((groupName) => (
+                        <CommandItem 
+                            key={groupName} 
+                            value={groupName} 
+                            onSelect={() => { setFilterGroup(groupName); setOpenGroup(false); }}
+                        >
+                            <Check className={cn("mr-2 h-4 w-4", filterGroup === groupName ? "opacity-100" : "opacity-0")} />
+                            {groupName}
+                        </CommandItem>
+                        ))}
+                    </CommandGroup>
+                    </CommandList>
+                </Command>
+                </PopoverContent>
+            </Popover>
             </div>
 
             {/* Butoane Acțiuni - Ocupă 2 coloane pe desktop pt a umple rândul de 6 */}
