@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import api from "@/services/api"; 
 
 interface SyncLog {
-  id: string;
+  id: number;
   startDate: string;
   endDate: string | null;
   triggerType: string;
@@ -330,12 +330,12 @@ export function AdminSync() {
                     </div>
                     <div className="text-right space-y-1">
                       <div className="flex items-center justify-end gap-1.5 text-gray-700 font-semibold text-sm">
-                        {log.status === "În curs" ? (
+                        {log.status === "In progress" ? (
                           <RefreshCw className="h-3.5 w-3.5 animate-spin text-brand-blue" />
                         ) : (
                           <Timer className="h-3.5 w-3.5 text-gray-400" />
                         )}
-                        <span>{log.status === "În curs" ? "Se procesează..." : durationText}</span>
+                        <span>{log.status === "In progress" ? "Se procesează..." : durationText}</span>
                       </div>
                     </div>
                   </div>
