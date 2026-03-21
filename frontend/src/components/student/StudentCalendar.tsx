@@ -5,12 +5,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui
 import { Label } from "../ui/label";
 import { Badge } from "../ui/badge";
 import { Calendar } from "../ui/calendar";
-import { Calendar as CalendarIcon, Clock, MapPin, Users, Info, AlertCircle } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Button } from "@/components/ui/button";
+import { 
+  Calendar as CalendarIcon, Clock, MapPin, Users, Info, 
+  AlertCircle, Check, ChevronsUpDown 
+} from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ro } from "date-fns/locale";
 import api from "@/services/api";
 import { toast } from "sonner";
-import { SearchSelect } from "../ui/SearchSelect";
 import { cn } from "@/lib/utils";
 
 interface Reservation {
@@ -37,6 +42,7 @@ export function StudentCalendar() {
   const [selectedGroupId, setSelectedGroupId] = useState<string>("all");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [isLoading, setIsLoading] = useState(true);
+  const [openCombobox, setOpenCombobox] = useState(false);
 
   useEffect(() => {
     const fetchReservations = async () => {
@@ -138,12 +144,51 @@ export function StudentCalendar() {
             
             <div className="flex flex-col space-y-4">
               <Label className="text-sm font-medium">Filtrare subgrupă</Label>
-              <SearchSelect
-                options={groupOptions}
-                value={selectedGroupId}
-                onChange={setSelectedGroupId}
-                placeholder="Alege subgrupa..."
-              />
+              <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={openCombobox}
+                    className="w-full justify-between font-normal border-gray-200 hover:bg-transparent"
+                  >
+                    <span className="truncate">
+                      {selectedGroupId === "all" 
+                        ? "Toate subgrupele" 
+                        : groupOptions.find((opt) => opt.value === selectedGroupId)?.label || "Selectează subgrupa"}
+                    </span>
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Caută subgrupă..." />
+                    <CommandList className="max-h-64">
+                      <CommandEmpty>Nu am găsit nicio subgrupă.</CommandEmpty>
+                      <CommandGroup>
+                        {groupOptions.map((opt) => (
+                          <CommandItem
+                            key={opt.value}
+                            value={opt.label}
+                            onSelect={() => {
+                              setSelectedGroupId(opt.value);
+                              setOpenCombobox(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedGroupId === opt.value ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {opt.label}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
         </CardHeader>
