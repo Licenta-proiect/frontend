@@ -216,7 +216,7 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
                   <div className="px-5 py-2.5 flex items-center gap-2">
                     <Info className="h-3.5 w-3.5 text-gray-400" />
                     <span className="text-gray-500 text-xs font-medium italic">
-                      Verifică cu profesorul înainte de merge cu altă grupă.
+                      Verifică cu profesorul înainte de a merge cu altă grupă.
                     </span>
                   </div>
                 </CardContent>
