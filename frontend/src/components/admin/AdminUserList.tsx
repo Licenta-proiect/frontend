@@ -84,14 +84,14 @@ export function AdminUserList({
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
-                    setDisplayLimit(step); // Resetăm limita la căutare nouă
+                    setDisplayLimit(step); // Reset the limit on new search
                   }}
                   className="pl-9 h-10 focus-visible:ring-1 border-gray-200 transition-colors shadow-xs text-sm"
                 />
               </div>
               <Select value={roleFilter} onValueChange={(val) => {
                 setRoleFilter(val);
-                setDisplayLimit(step); // Resetăm limita la schimbarea filtrului
+                setDisplayLimit(step); // Reset the limit on filter change
               }}>
                 <SelectTrigger className="h-10 text-sm border-gray-200 shadow-xs min-w-35">
                   <SelectValue placeholder="Rol" />
@@ -109,7 +109,9 @@ export function AdminUserList({
       </CardHeader>
       <CardContent className="space-y-4">
         {filtered.length === 0 ? (
-          <p className="text-center py-6 text-gray-500 font-medium text-sm italic">Niciun utilizator găsit</p>
+          <div className="text-center py-12 text-gray-500 bg-gray-50/50 rounded-lg border border-dashed">
+            <p className="font-medium text-gray-600 italic">Niciun utilizator găsit.</p>
+          </div>
         ) : (
           <>
             {visibleUsers.map((user) => {
@@ -123,7 +125,7 @@ export function AdminUserList({
                       <div className="flex items-center gap-3">
                         <div className="font-medium text-md text-gray-900">{user.lastName} {user.firstName}</div>
                         <Badge variant="outline" className={cn(getRoleBadgeColor(user.role))}>
-                          {user.role?.toUpperCase()}
+                          {user.role?.toUpperCase() === "PROFESSOR" ? "PROFESOR" : user.role?.toUpperCase()}
                         </Badge>
                       </div>
                       <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
@@ -132,7 +134,7 @@ export function AdminUserList({
                       </div>
                     </div>
                     <div className="flex gap-2 shrink-0">
-                      {/* Ascundem butoanele dacă este userul curent */}
+                      {/* We hide the buttons if it is the current user */}
                       {!isMe && (
                         <>
                           <Button 
@@ -159,7 +161,7 @@ export function AdminUserList({
               );
             })}
       
-            {/* Butonul "Vezi mai mulți" - apare doar dacă mai sunt utilizatori de afișat */}
+            {/* "See more" button - only appears if there are more users to show */}
             {filtered.length > displayLimit && (
               <Button 
                 variant="ghost" 
