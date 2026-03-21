@@ -13,8 +13,8 @@ import { useMemo, useState } from "react";
 
 export interface ProfessorRequest {
   id: number;
-  lastName: string;
-  firstName: string;
+  last_name: string;
+  first_name: string;
   email: string;
   status: string;
   request_date: string;
@@ -123,7 +123,7 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
                     <div className="space-y-2 w-full">
                       <div className="flex items-center gap-3">
                         <span className="font-semibold text-gray-900 text-md">
-                          {request.lastName} {request.firstName}
+                          {request.last_name} {request.first_name}
                         </span>
                         <Badge className={getStatusBadge(request.status)}>ÎN AȘTEPTARE</Badge>
                       </div>
@@ -208,7 +208,7 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
                   <div className="space-y-2">
                     <div className="flex items-center gap-3">
                       <span className="font-bold text-gray-900 text-md">
-                        {request.lastName} {request.firstName}
+                        {request.last_name} {request.first_name}
                       </span>
                       <Badge className={cn(getStatusBadge(request.status))}>
                         {request.status === "approved" ? "APROBATĂ" : "RESPINSĂ"}
