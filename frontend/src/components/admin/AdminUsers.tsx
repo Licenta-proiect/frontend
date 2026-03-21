@@ -24,17 +24,17 @@ export function AdminUsers() {
 
   const updateParams = useCallback((viewValue: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    // Păstrăm tab=users (sau îl setăm dacă nu există) pentru nav bar
+    // We keep tab=users (or set it if it doesn't exist) for the nav bar
     params.set("tab", "users"); 
-    // Actualizăm view-ul (list sau requests)
+    // Update the view (list or requests)
     params.set("view", viewValue);
     
     router.replace(`?${params.toString()}`, { scroll: false });
   }, [searchParams, router]);
 
-  // Handler pentru schimbarea tab-urilor interne (Toggle-ul de Admin)
+  // Handler for switching internal tabs (Admin Toggle)
   const handleViewChange = (value: string) => {
-    // Resetăm stările de dialog/eroare când schimbăm tab-ul
+    // Reset dialog/error states when changing tab
     setEditDialogOpen(false);
     setDeleteDialogOpen(false);
     setEmailError("");
@@ -176,7 +176,7 @@ export function AdminUsers() {
         </TabsContent>
       </Tabs>
 
-      {/* Dialog Editare Email */}
+      {/* Edit Email dialog */}
       <AdminUserEditDialog
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
@@ -189,7 +189,7 @@ export function AdminUsers() {
         isSameEmail={newEmail === userToEdit?.email}
       />
 
-      {/* Alert Dialog Ștergere */}
+      {/* Alert Dialog Delete */}
       <AdminUserDeleteDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
