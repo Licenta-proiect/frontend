@@ -72,12 +72,25 @@ export function AdminHistory() {
     }
   };
 
-  const availableGroups = useMemo(() => {
+  // În interiorul componentei AdminHistory
+  const groupOptions = useMemo(() => {
     const groupsSet = new Set<string>();
+    
     reservations.forEach(r => {
-      r.groups.forEach(g => groupsSet.add(g));
+        r.groups.forEach(groupFullName => {
+        // Aplicăm aceeași logică de regex ca în StudentCalendar
+        const match = groupFullName.match(/(.*an\s\d+)/i);
+        if (match && match[1]) {
+            groupsSet.add(match[1].trim());
+        } else {
+            groupsSet.add(groupFullName); // Fallback dacă nu corespunde regex-ului
+        }
+        });
     });
-    return Array.from(groupsSet).sort();
+
+    return Array.from(groupsSet).sort((a, b) => 
+        a.localeCompare(b, 'ro', { sensitivity: 'base' })
+    );
   }, [reservations]);
 
   useEffect(() => {
@@ -86,14 +99,14 @@ export function AdminHistory() {
 
   const filteredRecords = useMemo(() => {
     return reservations.filter((r) => {
-      const matchStatus = filterStatus === "all" || r.status.toLowerCase() === filterStatus.toLowerCase();
-      const matchProf = filterProfessor === "all" || r.professor === filterProfessor;
-      const matchRoom = filterRoom === "all" || r.room === filterRoom;
-      const matchGroup = filterGroup === "all" || r.groups.includes(filterGroup);
-      
-      return matchStatus && matchProf && matchRoom && matchGroup;
+        const matchStatus = filterStatus === "all" || r.status.toLowerCase() === filterStatus.toLowerCase();
+        const matchProf = filterProfessor === "all" || r.professor === filterProfessor;
+        const matchRoom = filterRoom === "all" || r.room === filterRoom;
+        const matchGroup = filterGroup === "all" || r.groups.some(g => g.startsWith(filterGroup));
+        
+        return matchStatus && matchProf && matchRoom && matchGroup;
     });
-  }, [reservations, filterStatus, filterProfessor, filterRoom, filterGroup]);
+}, [reservations, filterStatus, filterProfessor, filterRoom, filterGroup]);
 
   const handleReset = () => {
     setFilterStatus("all");
@@ -246,41 +259,42 @@ export function AdminHistory() {
 
             {/* Grupă */}
             <div className="space-y-2 col-span-2 md:col-span-1">
-              <Label className="text-sm font-medium">Grupă</Label>
-              <Popover open={openGroup} onOpenChange={setOpenGroup}>
+            <Label className="text-sm font-medium">Grupă</Label>
+            <Popover open={openGroup} onOpenChange={setOpenGroup}>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" role="combobox" className="w-full justify-between font-normal border-gray-200 px-3">
+                <Button variant="outline" role="combobox" className="w-full justify-between font-normal border-gray-200 px-3">
                     <span className="truncate">
-                      {filterGroup === "all" ? "Toate grupele" : filterGroup}
+                    {filterGroup === "all" ? "Toate grupele" : filterGroup}
                     </span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
+                </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
-                  <Command>
+                <Command>
                     <CommandInput placeholder="Caută grupă..." />
                     <CommandList>
-                      <CommandEmpty>Nu a fost găsită.</CommandEmpty>
-                      <CommandGroup>
+                    <CommandEmpty>Nu a fost găsită.</CommandEmpty>
+                    <CommandGroup>
                         <CommandItem onSelect={() => { setFilterGroup("all"); setOpenGroup(false); }}>
-                          <Check className={cn("mr-2 h-4 w-4", filterGroup === "all" ? "opacity-100" : "opacity-0")} />
-                          Toate Grupele
+                        <Check className={cn("mr-2 h-4 w-4", filterGroup === "all" ? "opacity-100" : "opacity-0")} />
+                        Toate Grupele
                         </CommandItem>
-                        {availableGroups.map((groupName) => (
-                          <CommandItem 
-                            key={groupName} 
-                            value={groupName} 
-                            onSelect={() => { setFilterGroup(groupName); setOpenGroup(false); }}
-                          >
-                            <Check className={cn("mr-2 h-4 w-4", filterGroup === groupName ? "opacity-100" : "opacity-0")} />
-                            {groupName}
-                          </CommandItem>
+                        {/* Folosim groupOptions generat cu Regex */}
+                        {groupOptions.map((groupLabel) => (
+                        <CommandItem 
+                            key={groupLabel} 
+                            value={groupLabel} 
+                            onSelect={() => { setFilterGroup(groupLabel); setOpenGroup(false); }}
+                        >
+                            <Check className={cn("mr-2 h-4 w-4", filterGroup === groupLabel ? "opacity-100" : "opacity-0")} />
+                            {groupLabel}
+                        </CommandItem>
                         ))}
-                      </CommandGroup>
+                    </CommandGroup>
                     </CommandList>
-                  </Command>
+                </Command>
                 </PopoverContent>
-              </Popover>
+            </Popover>
             </div>
 
             {/* Buton Resetează */}
