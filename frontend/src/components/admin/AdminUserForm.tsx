@@ -25,9 +25,11 @@ export function AdminUserForm({ onAdd }: { onAdd: () => void }) {
 
   const handleAdd = async () => {
     const newErrors: typeof errors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if (!firstName.trim()) newErrors.firstName = true;
     if (!lastName.trim()) newErrors.lastName = true;
-    if (!email.trim() || !email.includes("@")) newErrors.email = true;
+    if (!email.trim() || !emailRegex.test(email)) newErrors.email = true;
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -38,15 +40,13 @@ export function AdminUserForm({ onAdd }: { onAdd: () => void }) {
     setIsSubmitting(true);
     try {
       const response = await api.post("/admin/users/create", {
-        lastName: lastName.trim(),
-        firstName: firstName.trim(),
         email: email.trim(),
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
         role: "ADMIN" 
       });
 
-      // Verificăm statusul de succes (200 sau 201 Created)
       if (response.status === 200 || response.status === 201) {
-        // Folosim mesajul trimis de backend pentru o experiență mai precisă
         toast.success("Administrator adăugat!");
         onAdd(); 
         handleReset();
