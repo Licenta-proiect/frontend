@@ -11,15 +11,14 @@ import api from "@/services/api";
 import { AxiosError } from "axios";
 import { useMemo, useState } from "react";
 
-// Definim interfața aici pentru a evita importurile circulare și eroarea de tip "any"
 export interface ProfessorRequest {
   id: number;
   lastName: string;
   firstName: string;
   email: string;
   status: string;
-  data_cerere: string;
-  data_solutionare?: string;
+  request_date: string;
+  resolution_date?: string;
 }
 
 interface AdminRequestsProps {
@@ -38,19 +37,19 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
   const allPending = useMemo(() => {
     return requests
       .filter(r => r.status === "pending")
-      .sort((a, b) => new Date(b.data_cerere).getTime() - new Date(a.data_cerere).getTime());
+      .sort((a, b) => new Date(b.request_date).getTime() - new Date(a.request_date).getTime());
   }, [requests]);
   const visiblePending = allPending.slice(0, pendingLimit);
 
-  // Filtrăm istoricul în funcție de starea locală statusFilter
+  // Filter history based on local status statusFilter
   const allProcessed = useMemo(() => {
     const history = requests.filter(r => r.status !== "pending");
     const filtered = statusFilter === "all" 
       ? history 
       : history.filter(r => r.status === statusFilter);
       
-    // Sortăm mereu cele mai recente la început
-    return filtered.sort((a, b) => new Date(b.data_cerere).getTime() - new Date(a.data_cerere).getTime());
+    // Always sort the most recent first
+    return filtered.sort((a, b) => new Date(b.request_date).getTime() - new Date(a.request_date).getTime());
   }, [requests, statusFilter]);
   const visibleProcessed = allProcessed.slice(0, displayLimit);
 
@@ -74,9 +73,9 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
       const errorMessage = axiosError.response?.data?.detail || "Eroare la procesare";
       toast.error(errorMessage);
     } finally {
-      // Executăm onUpdate() indiferent dacă a reușit sau a dat eroare
-      // pentru a reflecta noul status (rejected) în listă
-      setProcessingId(null); // Finalizează procesarea
+      // We execute onUpdate() whether it succeeded or failed
+      // to reflect the new status (rejected) in the list
+      setProcessingId(null);
       onUpdate();
     }
   };
@@ -91,7 +90,7 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
     <div className="space-y-6 animate-in fade-in duration-500">
       <Card className="border-gray-200 shadow-sm">
         <CardHeader className="bg-transparent border-none pb-2">
-          {/* Antetul cu titlu și buton de refresh */}
+          {/* Header with title and refresh button */}
           <div className="flex items-center gap-3">
             <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
               <Mail className="h-5 w-5 text-brand-blue" /> Cereri în așteptare
@@ -135,7 +134,7 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
                       </div>
 
                       <p className="text-sm text-gray-500 font-medium flex items-center gap-2">
-                        <Clock className="h-3.5 w-3.5" /> Trimisă la: {formatDate(request.data_cerere)}
+                        <Clock className="h-3.5 w-3.5" /> Trimisă la: {formatDate(request.request_date)}
                       </p>
                     </div>
 
@@ -160,7 +159,7 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
                 </Card>
               ))}
 
-              {/* butonul de "Vezi mai mult" pentru Pending */}
+              {/* "See more" button for Pending */}
               {allPending.length > pendingLimit && (
                 <Button 
                   variant="ghost" 
@@ -184,7 +183,7 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
             <CardDescription className="text-gray-600 font-medium pt-1">Cereri procesate recent</CardDescription>
           </div>
           
-          {/* Filtru Istoric */}
+          {/* History Filter */}
           <div className="flex items-center gap-2">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="h-10 text-sm border-gray-200 shadow-xs min-w-35">
@@ -220,14 +219,14 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
                       <span className="text-sm">{request.email}</span>
                     </div>
                     <p className="text-xs text-gray-500 font-semibold">
-                      Solicitat la: {formatDate(request.data_cerere)}
+                      Solicitat la: {formatDate(request.request_date)}
                     </p>
                   </div>
                 </CardContent>
               </Card>
             ))}
 
-            {/* butonul de "Vezi mai mult" */}
+            {/* "See more" button */}
             {allProcessed.length > displayLimit && (
               <Button 
                 variant="ghost" 
@@ -238,7 +237,7 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
               </Button>
             )}
 
-            {/* butonul de "Vezi mai puțin" */}
+            {/* "See less" button */}
             {displayLimit > step && (
               <Button 
                 variant="link" 
