@@ -39,7 +39,7 @@ export function AdminHistory() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [professors, setProfessors] = useState<{ id: number; lastName: string; firstName: string }[]>([]);
   const [rooms, setRooms] = useState<{ id: number; name: string }[]>([]);
-  const [weeks, setWeeks] = useState<{ id: number; week_number: number; start_date: string }[]>([]);
+  const [weeks, setWeeks] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Filter States
@@ -53,19 +53,26 @@ export function AdminHistory() {
   const [openRoom, setOpenRoom] = useState(false);
 
   const fetchData = async () => {
-    try {
-      setIsLoading(true);
-      const [resReq, profReq, roomReq, weekReq] = await Promise.all([
-        api.get("/admin/reservations"),
-        api.get("/data/professors"),
-        api.get("/data/rooms"),
-        api.get("/data/weeks")
-      ]);
-      setReservations(resReq.data);
-      setProfessors(profReq.data);
-      setRooms(roomReq.data);
-      setWeeks(weekReq.data);
+  try {
+    setIsLoading(true);
+    const [resReq, profReq, roomReq, weekReq] = await Promise.all([
+      api.get("/admin/reservations"),
+      api.get("/data/professors"),
+      api.get("/data/rooms"),
+      api.get("/data/weeks")
+    ]);
+    
+    setReservations(resReq.data);
+    setProfessors(profReq.data);
+    setRooms(roomReq.data);
+    
+    // Extrage array-ul de numere din obiectul primit
+    if (weekReq.data && Array.isArray(weekReq.data.active_weeks)) {
+      setWeeks(weekReq.data.active_weeks);
+    }
+      
     } catch (error) {
+      console.error(error);
       toast.error("Eroare la încărcarea datelor de administrare.");
     } finally {
       setIsLoading(false);
@@ -171,12 +178,12 @@ export function AdminHistory() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Toate săptămânile</SelectItem>
-                  {Array.isArray(weeks) && weeks.map((w) => (
-                    <SelectItem key={w.id} value={w.week_number.toString()}>
-                      Săptămâna {w.week_number}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+                    {weeks.map((weekNum) => (
+                        <SelectItem key={weekNum} value={weekNum.toString()}>
+                        Săptămâna {weekNum}
+                        </SelectItem>
+                    ))}
+                  </SelectContent>
               </Select>
             </div>
 
