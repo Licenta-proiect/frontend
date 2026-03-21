@@ -47,11 +47,10 @@ export function AdminHistory() {
   const [filterProfessor, setFilterProfessor] = useState<string>("all");
   const [filterRoom, setFilterRoom] = useState<string>("all");
   const [filterWeek, setFilterWeek] = useState<string>("all");
-  const [filterGroup, setFilterGroup] = useState<string>("all");
 
   // UI States for Comboboxes
   const [openProf, setOpenProf] = useState(false);
-  const [openGroup, setOpenGroup] = useState(false);
+  const [openRoom, setOpenRoom] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -77,31 +76,22 @@ export function AdminHistory() {
     fetchData();
   }, []);
 
-  // Extract unique groups from reservations for the filter
-  const allGroups = useMemo(() => {
-    const groups = new Set<string>();
-    reservations.forEach(r => r.groups.forEach(g => groups.add(g)));
-    return Array.from(groups).sort();
-  }, [reservations]);
-
   const filteredRecords = useMemo(() => {
     return reservations.filter((r) => {
       const matchStatus = filterStatus === "all" || r.status.toLowerCase() === filterStatus.toLowerCase();
       const matchProf = filterProfessor === "all" || r.professor === filterProfessor;
       const matchRoom = filterRoom === "all" || r.room === filterRoom;
       const matchWeek = filterWeek === "all" || r.week_number?.toString() === filterWeek;
-      const matchGroup = filterGroup === "all" || r.groups.includes(filterGroup);
       
-      return matchStatus && matchProf && matchRoom && matchWeek && matchGroup;
+      return matchStatus && matchProf && matchRoom && matchWeek;
     });
-  }, [reservations, filterStatus, filterProfessor, filterRoom, filterWeek, filterGroup]);
+  }, [reservations, filterStatus, filterProfessor, filterRoom, filterWeek]);
 
   const handleReset = () => {
     setFilterStatus("all");
     setFilterProfessor("all");
     setFilterRoom("all");
     setFilterWeek("all");
-    setFilterGroup("all");
   };
 
   const getStatusStyle = (status: string) => {
@@ -153,15 +143,14 @@ export function AdminHistory() {
             Monitorizarea activităților didactice și gestionarea înregistrărilor
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Grid: 1 col pe mobil, 2 col pe tablete/split, desktop normal */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
             
             {/* Status */}
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               <Label className="text-sm font-medium">Status</Label>
               <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="border-gray-200">
+                <SelectTrigger className="border-gray-200 w-full">
                   <SelectValue placeholder="Toate" />
                 </SelectTrigger>
                 <SelectContent>
@@ -173,11 +162,13 @@ export function AdminHistory() {
               </Select>
             </div>
 
-            {/* Săptămână - Acum cu protecție la map */}
-            <div className="space-y-2">
+            {/* Săptămână */}
+            <div className="space-y-2 w-full">
               <Label className="text-sm font-medium">Săptămână</Label>
               <Select value={filterWeek} onValueChange={setFilterWeek}>
-                <SelectTrigger className="border-gray-200"><SelectValue placeholder="Oricare" /></SelectTrigger>
+                <SelectTrigger className="border-gray-200 w-full">
+                  <SelectValue placeholder="Oricare" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Toate săptămânile</SelectItem>
                   {Array.isArray(weeks) && weeks.map((w) => (
@@ -190,7 +181,7 @@ export function AdminHistory() {
             </div>
 
             {/* Profesor - COMBOBOX */}
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               <Label className="text-sm font-medium">Profesor</Label>
               <Popover open={openProf} onOpenChange={setOpenProf}>
                 <PopoverTrigger asChild>
@@ -201,7 +192,7 @@ export function AdminHistory() {
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[250px] p-0" align="start">
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
                   <Command>
                     <CommandInput placeholder="Caută profesor..." />
                     <CommandList>
@@ -227,32 +218,32 @@ export function AdminHistory() {
               </Popover>
             </div>
 
-            {/* Grupa - COMBOBOX */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Grupă/Subgrupă</Label>
-              <Popover open={openGroup} onOpenChange={setOpenGroup}>
+            {/* Sala - COMBOBOX */}
+            <div className="space-y-2 w-full">
+              <Label className="text-sm font-medium">Sală</Label>
+              <Popover open={openRoom} onOpenChange={setOpenRoom}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" role="combobox" className="w-full justify-between font-normal border-gray-200">
                     <span className="truncate">
-                      {filterGroup === "all" ? "Toate grupele" : filterGroup}
+                      {filterRoom === "all" ? "Toate sălile" : filterRoom}
                     </span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[250px] p-0" align="start">
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
                   <Command>
-                    <CommandInput placeholder="Caută grupa..." />
+                    <CommandInput placeholder="Caută sala..." />
                     <CommandList>
                       <CommandEmpty>Nu a fost găsită.</CommandEmpty>
                       <CommandGroup>
-                        <CommandItem onSelect={() => { setFilterGroup("all"); setOpenGroup(false); }}>
-                          <Check className={cn("mr-2 h-4 w-4", filterGroup === "all" ? "opacity-100" : "opacity-0")} />
-                          Toate Grupele
+                        <CommandItem onSelect={() => { setFilterRoom("all"); setOpenRoom(false); }}>
+                          <Check className={cn("mr-2 h-4 w-4", filterRoom === "all" ? "opacity-100" : "opacity-0")} />
+                          Toate Sălile
                         </CommandItem>
-                        {allGroups.map((group) => (
-                          <CommandItem key={group} value={group} onSelect={() => { setFilterGroup(group); setOpenGroup(false); }}>
-                            <Check className={cn("mr-2 h-4 w-4", filterGroup === group ? "opacity-100" : "opacity-0")} />
-                            {group}
+                        {rooms.map((r) => (
+                          <CommandItem key={r.id} value={r.name} onSelect={() => { setFilterRoom(r.name); setOpenRoom(false); }}>
+                            <Check className={cn("mr-2 h-4 w-4", filterRoom === r.name ? "opacity-100" : "opacity-0")} />
+                            {r.name}
                           </CommandItem>
                         ))}
                       </CommandGroup>
@@ -262,19 +253,14 @@ export function AdminHistory() {
               </Popover>
             </div>
 
-            {/* Sala + Butoane */}
-            <div className="md:col-span-2 lg:col-span-1 grid grid-cols-2 lg:grid-cols-1 gap-2 items-end">
-                <div className="space-y-2 lg:hidden">
-                    {/* Placeholder for alignment on tablet if needed */}
-                </div>
-                <div className="flex gap-2 w-full lg:mt-auto col-span-2 lg:col-span-1">
-                    <Button onClick={handleReset} variant="outline" className="flex-1 border-gray-200">
-                        <RefreshCcw className="h-4 w-4 mr-2" /> Resetează
-                    </Button>
-                    <Button onClick={handleExportCSV} className="flex-1 bg-brand-blue hover:bg-brand-blue/90">
-                        <Download className="h-4 w-4 mr-2" /> Export
-                    </Button>
-                </div>
+            {/* Butoane Acțiuni - Ocupă 2 coloane pe desktop pt a umple rândul de 6 */}
+            <div className="lg:col-span-2 flex gap-2 w-full">
+              <Button onClick={handleReset} variant="outline" className="flex-1 border-gray-200">
+                <RefreshCcw className="h-4 w-4 mr-2" /> Resetează
+              </Button>
+              <Button onClick={handleExportCSV} className="flex-1 bg-brand-blue hover:bg-brand-blue/90">
+                <Download className="h-4 w-4 mr-2" /> Export
+              </Button>
             </div>
           </div>
         </CardContent>
