@@ -329,7 +329,7 @@ export function AdminHistory() {
             </div>
         </CardHeader>
 
-        <CardContent className="p-4 sm:p-6 bg-slate-50/30">
+        <CardContent className="p-4 sm:p-6">
             {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20">
                 <div className="animate-spin rounded-full h-8 w-8 border-brand-blue border-b-2 mb-4"></div>
@@ -351,7 +351,7 @@ export function AdminHistory() {
                     key={session.id} 
                     className={cn(
                         "bg-white border shadow-sm group transition-all duration-300 border-l-4",
-                        isCanceled ? "border-l-brand-red opacity-85" : "border-l-brand-blue hover:shadow-md"
+                        isCanceled ? "border-l-brand-red opacity-85" : "border-l-brand-blue hover:border-brand-blue"
                     )}
                     >
                     <CardContent className="p-5 space-y-4">
