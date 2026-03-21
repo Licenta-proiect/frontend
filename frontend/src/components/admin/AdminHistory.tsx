@@ -152,11 +152,11 @@ export function AdminHistory() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {/* Grid configurat: 1 coloană pe mobil, 2 coloane pe desktop (md și sus) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+          {/* Grid: 2 coloane pe orice ecran peste mobil */}
+          <div className="grid grid-cols-2 gap-4 items-end">
             
-            {/* Rând 1, Col 1: Status */}
-            <div className="space-y-2 w-full">
+            {/* Status */}
+            <div className="space-y-2 col-span-2 md:col-span-1">
               <Label className="text-sm font-medium">Status</Label>
               <Select value={filterStatus} onValueChange={setFilterStatus}>
                 <SelectTrigger className="border-gray-200 w-full">
@@ -171,12 +171,12 @@ export function AdminHistory() {
               </Select>
             </div>
 
-            {/* Rând 1, Col 2: Profesor */}
-            <div className="space-y-2 w-full">
+            {/* Profesor */}
+            <div className="space-y-2 col-span-2 md:col-span-1">
               <Label className="text-sm font-medium">Profesor</Label>
               <Popover open={openProf} onOpenChange={setOpenProf}>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" role="combobox" className="w-full justify-between font-normal border-gray-200">
+                  <Button variant="outline" role="combobox" className="w-full justify-between font-normal border-gray-200 px-3">
                     <span className="truncate">
                       {filterProfessor === "all" ? "Toți profesorii" : filterProfessor}
                     </span>
@@ -209,12 +209,12 @@ export function AdminHistory() {
               </Popover>
             </div>
 
-            {/* Rând 2, Col 1: Sala */}
-            <div className="space-y-2 w-full">
+            {/* Sală */}
+            <div className="space-y-2 col-span-2 md:col-span-1">
               <Label className="text-sm font-medium">Sală</Label>
               <Popover open={openRoom} onOpenChange={setOpenRoom}>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" role="combobox" className="w-full justify-between font-normal border-gray-200">
+                  <Button variant="outline" role="combobox" className="w-full justify-between font-normal border-gray-200 px-3">
                     <span className="truncate">
                       {filterRoom === "all" ? "Toate sălile" : filterRoom}
                     </span>
@@ -244,12 +244,12 @@ export function AdminHistory() {
               </Popover>
             </div>
 
-            {/* Rând 2, Col 2: Grupa */}
-            <div className="space-y-2 w-full">
+            {/* Grupă */}
+            <div className="space-y-2 col-span-2 md:col-span-1">
               <Label className="text-sm font-medium">Grupă</Label>
               <Popover open={openGroup} onOpenChange={setOpenGroup}>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" role="combobox" className="w-full justify-between font-normal border-gray-200">
+                  <Button variant="outline" role="combobox" className="w-full justify-between font-normal border-gray-200 px-3">
                     <span className="truncate">
                       {filterGroup === "all" ? "Toate grupele" : filterGroup}
                     </span>
@@ -283,15 +283,20 @@ export function AdminHistory() {
               </Popover>
             </div>
 
-            {/* Rând 3: Butoanele ocupă cele 2 coloane */}
-            <div className="md:col-span-2 flex flex-col md:flex-row gap-4 w-full">
-              <Button onClick={handleReset} variant="outline" className="flex-1 border-gray-200">
-                <RefreshCcw className="h-4 w-4 mr-2" /> Resetează Filtrele
-              </Button>
-              <Button onClick={handleExportCSV} className="flex-1 bg-brand-blue hover:bg-brand-blue/90">
-                <Download className="h-4 w-4 mr-2" /> Exportă Raport CSV
+            {/* Buton Resetează */}
+            <div className="col-span-1">
+              <Button onClick={handleReset} variant="outline" className="w-full border-gray-200">
+                <RefreshCcw className="h-4 w-4 mr-2" /> <span className="sm:inline">Resetează</span>
               </Button>
             </div>
+
+            {/* Buton Export */}
+            <div className="col-span-1">
+              <Button onClick={handleExportCSV} className="w-full bg-brand-blue hover:bg-brand-blue/90">
+                <Download className="h-4 w-4 mr-2" /> <span className="sm:inline">Export CSV</span>
+              </Button>
+            </div>
+
           </div>
         </CardContent>
       </Card>
