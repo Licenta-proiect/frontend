@@ -6,9 +6,8 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Database, FileText, UserCog } from "lucide-react";
 import { AdminUsers } from "@/components/admin/AdminUsers";
 import { AdminSync } from "@/components/admin/AdminSync";
+import { AdminHistory } from "@/components/admin/AdminHistory";
 import { toast } from "sonner";
-
-const AdminHistory = () => <div className="p-6 bg-white rounded-lg shadow">Istoric Rezervări Sistem</div>;
 
 const emptySubscribe = () => () => {};
   // Custom hook to detect if we are on the client side. Prevents hydration mismatch errors
