@@ -14,32 +14,32 @@ import api from "@/services/api";
 
 interface SyncLog {
   id: string;
-  data_start: string;
-  data_final: string | null;
-  tip_declansare: "Manual" | "Automat";
-  tip_sincronizare: string; 
+  startDate: string;
+  endDate: string | null;
+  triggerType: "Manual" | "Automat";
+  syncType: string; 
   status: "Succes" | "Eroare" | "În curs";
-  mesaj_eroare: string | null;
+  errorMessage: string | null;
 }
 
 export function AdminSync() {
-  const step = 5; // Limita de pași pentru afișare
+  const step = 5; // Step limit to display
   const [syncInterval, setSyncInterval] = useState<string>("daily");
   const [autoSyncEnabled, setAutoSyncEnabled] = useState(true);
   const [syncTime, setSyncTime] = useState("00:00");
   const [syncLogs, setSyncLogs] = useState<SyncLog[]>([]);
-  const [displayLimit, setDisplayLimit] = useState(step); // State pentru limită
+  const [displayLimit, setDisplayLimit] = useState(step); 
   
   const prevSyncActive = useRef(false);
 
   const lastCalendarSyncDate = useMemo(() => {
-    const lastSync = syncLogs.find(l => l.tip_sincronizare === "Calendar" && l.status === "Succes");
-    return lastSync?.data_final ? new Date(lastSync.data_final).toLocaleString("ro-RO") : "Nicio sincronizare reușită";
+    const lastSync = syncLogs.find(l => l.syncType === "Calendar" && l.status === "Succes");
+    return lastSync?.endDate ? new Date(lastSync.endDate).toLocaleString("ro-RO") : "Nicio sincronizare reușită";
   }, [syncLogs]);
 
   const lastOrarSyncDate = useMemo(() => {
-    const lastSync = syncLogs.find(l => l.tip_sincronizare === "Baza + Orar" && l.status === "Succes");
-    return lastSync?.data_final ? new Date(lastSync.data_final).toLocaleString("ro-RO") : "Nicio sincronizare reușită";
+    const lastSync = syncLogs.find(l => l.syncType === "Base + Schedule" && l.status === "Succes");
+    return lastSync?.endDate ? new Date(lastSync.endDate).toLocaleString("ro-RO") : "Nicio sincronizare reușită";
   }, [syncLogs]);
 
   const isAnySyncActive = useMemo(() => 
@@ -62,15 +62,15 @@ export function AdminSync() {
     try {
       const response = await api.get("/admin/sync/history");
       const filteredLogs = response.data.filter((log: SyncLog) => 
-        log.tip_sincronizare === "Calendar" || log.tip_sincronizare === "Baza + Orar"
+        log.syncType === "Calendar" || log.syncType === "Base + Schedule"
       );
       
       if (prevSyncActive.current && !filteredLogs.some((l: SyncLog) => l.status === "În curs")) {
         const lastLog = filteredLogs[0];
         if (lastLog.status === "Succes") {
-          toast.success(`Sincronizarea ${lastLog.tip_sincronizare} s-a finalizat cu succes!`);
+          toast.success(`Sincronizarea ${lastLog.syncType} s-a finalizat cu succes!`);
         } else if (lastLog.status === "Eroare") {
-          toast.error(`Eroare la sincronizarea ${lastLog.tip_sincronizare}!`);
+          toast.error(`Eroare la sincronizarea ${lastLog.syncType}!`);
         }
       }
       
@@ -114,7 +114,7 @@ export function AdminSync() {
 
   const handleManualSync = async (type: "orar" | "calendar") => {
     const isBaza = type === "orar";
-    const endpoint = isBaza ? "/admin/sync/baza-orar" : "/admin/sync/calendar";
+    const endpoint = isBaza ? "/admin/sync/base-schedule" : "/admin/sync/calendar";
     
     try {
       await api.post(endpoint);
@@ -144,11 +144,11 @@ export function AdminSync() {
     const csvContent = [
       ["Data Start", "Tip Sincronizare", "Mod", "Status", "Durata"],
       ...syncLogs.map((log) => [
-        new Date(log.data_start).toLocaleString("ro-RO"),
-        log.tip_sincronizare,
-        log.tip_declansare,
+        new Date(log.startDate).toLocaleString("ro-RO"),
+        log.syncType,
+        log.triggerType,
         log.status,
-        formatDuration(log.data_start, log.data_final) || "N/A"
+        formatDuration(log.startDate, log.endDate) || "N/A"
       ]),
     ].map((row) => row.join(",")).join("\n");
 
@@ -169,18 +169,18 @@ export function AdminSync() {
   };
 
   const getSyncTypeBadge = (type: string) => {
-    return type === "Baza + Orar" 
+    return type === "Base + Schedule" 
       ? "bg-blue-50 text-brand-blue border-blue-100 font-bold" 
       : "bg-orange-50 text-orange-700 border-orange-100 font-bold";
   };
 
-  // Slice-ul pentru istoricul vizibil
+  // The slice for visible history
   const visibleLogs = syncLogs.slice(0, displayLimit);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 font-sans">
       
-      {/* 1. Control Sincronizare Manuală */}
+      {/* 1. Manual Sync Control */}
       <div className="grid md:grid-cols-2 gap-6">
         {/* Card Calendar */}
         <Card className="border-gray-200 shadow-sm">
@@ -209,7 +209,7 @@ export function AdminSync() {
           </CardContent>
         </Card>
 
-        {/* Card Baza + Orar */}
+        {/* Base Card + Schedule */}
         <Card className="border-gray-200 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
@@ -237,7 +237,7 @@ export function AdminSync() {
         </Card>
       </div>
 
-      {/* 2. Setări Sincronizare Automată */}
+      {/* 2. Automatic Sync Settings */}
       <Card className={cn("border-gray-200 shadow-sm transition-opacity", isAnySyncActive && "opacity-60 pointer-events-none")}>
         <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -292,7 +292,7 @@ export function AdminSync() {
         </CardContent>
       </Card>
 
-      {/* 3. Istoric Sincronizări */}
+      {/* 3. Synchronization History */}
       <Card className="border-gray-200 shadow-sm">
         <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
@@ -311,17 +311,17 @@ export function AdminSync() {
           ) : (
             <>
               {visibleLogs.map((log) => {
-                const durationText = formatDuration(log.data_start, log.data_final);
+                const durationText = formatDuration(log.startDate, log.endDate);
                 return (
                   <div key={log.id} className="flex items-center justify-between p-4 rounded-xl border shadow-xs group hover:border-brand-blue/50 transition-all duration-300">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 flex-wrap text-[10px]">
                         <Badge className={cn(getStatusBadge(log.status))}>{log.status.toUpperCase()}</Badge>
-                        <Badge className={cn(getSyncTypeBadge(log.tip_sincronizare))}>{log.tip_sincronizare.toUpperCase()}</Badge>
-                        <Badge variant="outline" className="font-bold border-gray-200 text-gray-500 bg-white">{log.tip_declansare.toUpperCase()}</Badge>
+                        <Badge className={cn(getSyncTypeBadge(log.syncType))}>{log.syncType.toUpperCase()}</Badge>
+                        <Badge variant="outline" className="font-bold border-gray-200 text-gray-500 bg-white">{log.triggerType.toUpperCase()}</Badge>
                       </div>
                       <p className="text-sm font-medium text-gray-600 flex items-center gap-2">
-                        <Clock className="h-3.5 w-3.5" /> {new Date(log.data_start).toLocaleString("ro-RO")}
+                        <Clock className="h-3.5 w-3.5" /> {new Date(log.startDate).toLocaleString("ro-RO")}
                       </p>
                     </div>
                     <div className="text-right space-y-1">
@@ -338,7 +338,7 @@ export function AdminSync() {
                 );
               })}
 
-              {/* Butonul Încarcă mai mulți */}
+              {/* Load more button */}
               {syncLogs.length > displayLimit && (
                 <Button 
                   variant="ghost" 
