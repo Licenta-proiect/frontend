@@ -11,13 +11,12 @@ import { Search, RotateCcw, Loader2, InfoIcon } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import api from "@/services/api";
-import { Grupa  as ApiGroup } from "@/components/student/StudentSearch";
+import { Group  as ApiGroup } from "@/components/student/StudentSearch";
 import { RawSlotsResponse } from "./ProfessorSchedule";
 
-// Interfețe pentru tipizare
-interface ApiRoom { id: number; nume: string; }
+// Type definitions
+interface ApiRoom { id: number; name: string; }
 
-// Definirea tipurilor pentru rezultate și filtre pentru a evita "any"
 export interface AvailableSlot {
   id: string;
   week: number;
@@ -51,9 +50,9 @@ interface ProfessorScheduleFormProps {
 export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) {
   const [subjects, setSubjects] = useState<string[]>([]);
   const [activityTypes, setActivityTypes] = useState<string[]>([]);
-  const [allGroups, setAllGroups] = useState<{ label: string; value: string }[]>([]);
-  const [allRooms, setAllRooms] = useState<{ label: string; value: string }[]>([]);
-  const [allWeeks, setAllWeeks] = useState<{ label: string; value: string }[]>([]);
+  const [allGroups, setAllGroups] = useState<SelectOption[]>([]);
+  const [allRooms, setAllRooms] = useState<SelectOption[]>([]);
+  const [allWeeks, setAllWeeks] = useState<SelectOption[]>([]);
   const [selectedWeeks, setSelectedWeeks] = useState<string[]>([]);
   const [isValidatingWeeks, setIsValidatingWeeks] = useState(false);
 
@@ -81,25 +80,25 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     "Sâmbătă": 6,
   };
 
-  // date inițiale
+  // Initial data fetching
   useEffect(() => {
     const fetchInitialData = async () => {
       const email = localStorage.getItem("userEmail");
       if (!email) return;
       try {
         const [subResp, roomsResp, weeksResp] = await Promise.all([
-          api.get(`/profesor/materii?email=${email}`),
-          api.get("/data/sali"),
-          api.get("/data/weeks") // Endpoint-ul care returnează statusul semestrului
+          api.get(`/professor/subjects?email=${email}`),
+          api.get("/data/rooms"),
+          api.get("/data/weeks") // Endpoint returning semester status
         ]);
         setSubjects(subResp.data.materii);
-        setAllRooms(roomsResp.data.map((s: ApiRoom) => ({ label: s.nume, value: s.id.toString() })));
+        setAllRooms(roomsResp.data.map((r: ApiRoom) => ({ label: r.name, value: r.id.toString() })));
       
         const activeWeeks = weeksResp.data.active_weeks || [];
         if (activeWeeks.length === 0 && !hasShownStatusToast.current) {
           const statusMessage = weeksResp.data.current_status || "Sesiune/Vacanță";
           toast.info(statusMessage, { 
-            duration: Infinity, // Mesajul nu dispare automat
+            duration: Infinity, // Persistent message
             description: "Nu mai există săptămâni de curs disponibile în acest semestru." 
           });
           hasShownStatusToast.current = true;
@@ -113,7 +112,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     fetchInitialData();
   }, []);
 
-  // 2. Când se schimbă MATERIA: Resetăm selecțiile inferioare și aducem TIPURILE de activitate
+  // When SUBJECT changes: Reset lower selections and fetch activity TYPES
   useEffect(() => {
     const fetchTypes = async () => {
       if (!selectedSubject) {
@@ -123,14 +122,15 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       }
       const email = localStorage.getItem("userEmail");
       setIsSyncingTypes(true);
-      // Resetăm tot ce depinde de materie
+      
+      // Reset dependencies
       setSelectedType("");
       setAllGroups([]);
       setSelectedGroups([]);
       setSelectedWeeks([]);
 
       try {
-        const tResp = await api.get(`/data/tipuri-activitate-profesor?email=${email}&materie=${selectedSubject}`);
+        const tResp = await api.get(`/data/professor-activity-types?email=${email}&subject=${selectedSubject}`);
         setActivityTypes(tResp.data);
         if (tResp.data.length >= 1) setSelectedType(tResp.data[0]);
       } catch {
@@ -142,7 +142,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     fetchTypes();
   }, [selectedSubject]);
 
-  // 3. Când se schimbă MATERIA: Aducem SĂLILE (o singură dată per materie)
+  // When SUBJECT changes: Fetch ROOMS (only once per subject change)
   useEffect(() => {
     const fetchRooms = async () => {
       if (!selectedSubject) {
@@ -151,18 +151,17 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       }
       const email = localStorage.getItem("userEmail");
       try {
-        const sResp = await api.get(`/profesor/sali-materie?email=${email}&materie=${selectedSubject}`);
-        const saliData = sResp.data.sali || [];
-        // Setăm sălile DOAR când se schimbă materia
-        setSelectedRooms(saliData.map((s: ApiRoom) => s.id.toString()));
+        const sResp = await api.get(`/professor/rooms-by-subject?email=${email}&subject=${selectedSubject}`);
+        const roomsData = sResp.data.sali || [];
+        setSelectedRooms(roomsData.map((s: ApiRoom) => s.id.toString()));
       } catch {
         toast.error("Eroare la încărcarea sălilor");
       }
     };
     fetchRooms();
-  }, [selectedSubject]); // Rulăm DOAR la schimbarea materiei
+  }, [selectedSubject]);
 
-  // 4. Când se schimbă MATERIA sau TIPUL: Aducem doar GRUPELE
+  // When SUBJECT or TYPE changes: Sync GROUPS
   useEffect(() => {
     const syncGroups = async () => {
       if (!selectedSubject || !selectedType) {
@@ -175,20 +174,20 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       setIsSyncingGroups(true);
 
       try {
-        const tipParam = selectedType.toLowerCase().includes("curs") ? `&tip=${selectedType}` : "";
-        const gResp = await api.get(`/profesor/grupe-materie?email=${email}&materie=${selectedSubject}${tipParam}`);
+        const typeParam = selectedType.toLowerCase().includes("curs") ? `&tip=${selectedType}` : "";
+        const gResp = await api.get(`/professor/groups-by-subject?email=${email}&subject=${selectedSubject}${typeParam}`);
 
-        const grupeData = gResp.data.grupe || [];
-        const groupsOptions = grupeData.map((g: ApiGroup) => ({
-          label: `${g.specializationShortName} • an ${g.studyYear} • ${g.nume}${g.subgroupIndex ? `${g.subgroupIndex}` : ""}`,
+        const groupsData = gResp.data.grupe || [];
+        const groupsOptions = groupsData.map((g: ApiGroup) => ({
+          label: `${g.specializationShortName} • an ${g.studyYear} • ${g.name}${g.subgroupIndex ? `${g.subgroupIndex}` : ""}`,
           value: g.id.toString(),
         }));
 
         setAllGroups(groupsOptions);
-        setSelectedGroups(grupeData.map((g: ApiGroup) => g.id.toString()));
+        setSelectedGroups(groupsData.map((g: ApiGroup) => g.id.toString()));
         
-        if (grupeData.length > 0) {
-          await fetchValidWeeks(grupeData.map((g: ApiGroup) => g.id.toString()));
+        if (groupsData.length > 0) {
+          await fetchValidWeeks(groupsData.map((g: ApiGroup) => g.id.toString()));
         }
       } catch {
         toast.error("Eroare la sincronizarea grupelor");
@@ -198,7 +197,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     };
 
     syncGroups();
-  }, [selectedSubject, selectedType]); // Grupele se schimbă la tip, dar sălile nu
+  }, [selectedSubject, selectedType]);
 
   const fetchValidWeeks = async (groupIds: string[]) => {
     if (groupIds.length === 0) {
@@ -207,7 +206,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     }
     setIsValidatingWeeks(true);
     try {
-      const response = await api.post("/data/weeks-valide", { 
+      const response = await api.post("/data/valid-weeks", { 
         grupe_ids: groupIds.map(id => parseInt(id)) 
       });
       
@@ -218,7 +217,6 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       }));
       
       setAllWeeks(options);
-
       setSelectedWeeks(prev => prev.filter(w => weeks.includes(parseInt(w))));
     } catch (error) {
       console.error("Eroare la validarea săptămânilor:", error);
@@ -238,23 +236,23 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
 
     const searchPayload = {
       email: localStorage.getItem("userEmail"),
-      materie: selectedSubject,
-      grupe_ids: selectedGroups.map(id => parseInt(id)),
-      sali_ids: selectedRooms.map(id => parseInt(id)),
-      durata: duration ? parseInt(duration.split(" ")[0]) : null,
-      tip_activitate: selectedType,
-      numar_persoane: studentCount ? parseInt(studentCount) : null,
-      zi: selectedDay ? DAYS_MAP[selectedDay] : null,
-      saptamani: selectedWeeks.map(w => parseInt(w))
+      subject: selectedSubject,
+      group_ids: selectedGroups.map(id => parseInt(id)),
+      room_ids: selectedRooms.map(id => parseInt(id)),
+      duration: duration ? parseInt(duration.split(" ")[0]) : null,
+      activity_type: selectedType,
+      number_of_people: studentCount ? parseInt(studentCount) : null,
+      day: selectedDay ? DAYS_MAP[selectedDay] : null,
+      weeks: selectedWeeks.map(w => parseInt(w))
     };
 
     try {
       setIsLoading(true);
-      const response = await api.post("/rezervari/cauta-libere", searchPayload);
+      const response = await api.post("/reservations/search-free", searchPayload);
       
       if (response.data.info) {
         toast.info(response.data.info, { duration: 7000});
-        onSearch(null, {}); // Ascundem rezultatele
+        onSearch(null, {}); 
         return;
       }
 
@@ -309,7 +307,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/*Materia*/}
+            {/*Subject*/}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Materia <span className="text-brand-red">*</span></Label>
             <Select value={selectedSubject} onValueChange={setSelectedSubject}>
@@ -322,7 +320,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
             </Select>
           </div>
 
-            {/* Select Tip Activitate */}
+            {/* Activity type */}
           <div className="space-y-2">
             <Label htmlFor="search-type" className="text-sm font-semibold text-gray-900">
               Tip activitate <span className="text-brand-red">*</span>
@@ -364,7 +362,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
             </div>
           </div>
 
-            {/* Grupe - Blocat până la selectarea materiei */}
+            {/* Groups */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Grupe <span className="text-brand-red">*</span></Label>
             <div className="relative">
@@ -372,7 +370,6 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
                 options={allGroups} 
                 selected={selectedGroups} 
                 onChange={setSelectedGroups} 
-                // Dezactivat dacă nu e selectată materia SAU dacă se sincronizează
                 disabled={!selectedSubject || isSyncingGroups}
                 placeholder={
                     !selectedSubject 
@@ -390,7 +387,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
             </div>
           </div>
 
-            {/* Săli - Blocat până la selectarea materiei */}
+            {/* Rooms */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Săli <span className="text-brand-red">*</span></Label>
             <div className="relative">
@@ -398,7 +395,6 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
                 options={allRooms} 
                 selected={selectedRooms} 
                 onChange={setSelectedRooms} 
-                // Dezactivat dacă nu e selectată materia SAU dacă se sincronizează
                 disabled={!selectedSubject || isSyncingGroups}
                 placeholder={
                     !selectedSubject 
@@ -416,7 +412,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
             </div>
           </div>
 
-            {/*Durata*/}
+            {/*Duration*/}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Durata <span className="text-brand-red">*</span></Label>
             <Select value={duration} onValueChange={setDuration}>
@@ -429,7 +425,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
             </Select>
           </div>
 
-            {/* Săptămâni - Acum depinde de selecția de mai sus */}
+            {/* Weeks */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Săptămâni <span className="text-brand-red">*</span></Label>
             <div className="relative">
@@ -449,13 +445,13 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
             </div>
           </div>
 
-            {/*Număr persoane*/}
+            {/*Number of people*/}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Număr persoane</Label>
             <Input type="number" step="1" onKeyDown={(e) => ["e", "E", ".", ",", "-"].includes(e.key) && e.preventDefault()} placeholder="Exemplu: 15" value={studentCount} onChange={(e) => (e.target.value === "" || /^\d+$/.test(e.target.value)) && setStudentCount(e.target.value)} className={cn(inputClasses, "px-3")} />
           </div>
 
-            {/*Ziua*/}
+            {/*Day*/}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Ziua</Label>
             <Select value={selectedDay} onValueChange={setSelectedDay}>
@@ -473,7 +469,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
           </div>
         </div>
 
-        {/* Mesaj Atenționare*/}
+        {/* Warning message */}
         <div className="relative w-full rounded-lg border border-amber-200 bg-amber-50 p-4 [&>svg~*]:pl-7 [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-amber-600">
           <InfoIcon className="h-4 w-4" />
           <div className="text-xs sm:text-sm font-medium text-amber-800 leading-relaxed">

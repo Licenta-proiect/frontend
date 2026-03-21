@@ -6,21 +6,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, MapPin, CheckCircle2, Filter, Loader2, RotateCcw } from "lucide-react";
-import { ProfessorScheduleForm, AvailableSlot, SearchFilters, SelectOption } from "@/components/profesor/ProfessorScheduleForm";
+import { ProfessorScheduleForm, AvailableSlot, SearchFilters, SelectOption } from "@/components/professor/ProfessorScheduleForm";
 import { toast } from "sonner";
 import api from "@/services/api";
 import { Label } from "../ui/label";
 
 export interface BackendSlot {
-  sala_id: number;
-  ora_start: number;
-  ora_final: number;
+  room_id: number;
+  start_time: number;
+  end_time: number;
 }
 
 export interface BackendDay {
-  zi_nume: string;
-  data: string;
-  optiuni: BackendSlot[];
+  day_name: string;
+  date: string;
+  options: BackendSlot[];
 }
 
 const DAYS_ORDER: Record<string, number> = {
@@ -39,10 +39,9 @@ export function ProfessorSchedule() {
 
   const [lastFilters, setLastFilters] = useState<SearchFilters | null>(null);
   const [isBooking, setIsBooking] = useState<string | null>(null);
-  
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
 
-  // --- LOGICA DE FILTRARE ---
+  // --- FILTERING LOGIC ---
   const filteredSlots = useMemo(() => {
     return availableSlots.filter((slot) => {
       const dayName = slot.date.toLocaleDateString("ro-RO", { weekday: "long" });
@@ -56,7 +55,7 @@ export function ProfessorSchedule() {
     });
   }, [availableSlots, filterDay, filterWeek, filterRoom]);
 
-  // Extragere opțiuni unice pentru filtre din rezultatele brute
+  // Extract unique filter options from raw results
   const uniqueRooms = useMemo(() => 
     Array.from(new Set(availableSlots.map(s => s.room))).sort(), 
   [availableSlots]);
@@ -73,6 +72,7 @@ export function ProfessorSchedule() {
     return days.sort((a, b) => (DAYS_ORDER[a] || 99) - (DAYS_ORDER[b] || 99));
   }, [availableSlots]);
 
+  // Maps backend data structure to UI-ready AvailableSlot[]
   const transformBackendData = (filters: SearchFilters, slotsRaw: RawSlotsResponse): AvailableSlot[] => {
     if (!slotsRaw || (Array.isArray(slotsRaw) && slotsRaw.length === 0)) return [];
     
@@ -81,17 +81,17 @@ export function ProfessorSchedule() {
 
     Object.entries(slotsRaw).forEach(([week, days]: [string, BackendDay[]]) => {
       days.forEach((dayData: BackendDay) => {
-        dayData.optiuni.forEach((slot: BackendSlot, index: number) => {
-          const roomName = allRooms?.find((r: SelectOption) => r.value === slot.sala_id.toString())?.label || `Sala ${slot.sala_id}`;
+        dayData.options.forEach((slot: BackendSlot, index: number) => {
+          const roomName = allRooms?.find((r: SelectOption) => r.value === slot.room_id.toString())?.label || `Sala ${slot.room_id}`;
           
-          const dateObj = new Date(dayData.data);
+          const dateObj = new Date(dayData.date);
           
           results.push({
-            id: `${slot.sala_id}-${week}-${dayData.data}-${slot.ora_start}-${index}`,
+            id: `${slot.room_id}-${week}-${dayData.date}-${slot.start_time}-${index}`,
             week: parseInt(week),
             date: dateObj,
-            startTime: `${slot.ora_start}:00`,
-            endTime: `${slot.ora_final}:00`,
+            startTime: `${slot.start_time}:00`,
+            endTime: `${slot.end_time}:00`,
             room: roomName,
             capacity: parseInt(studentCount) || 0,
             availableGroups: allGroups
@@ -107,7 +107,6 @@ export function ProfessorSchedule() {
   const handleSearchResults = (filters: SearchFilters | null, rawResults: RawSlotsResponse) => {
     setLastFilters(filters);
     setBookedSlots([]);
-
     setFilterDay("all");
     setFilterWeek("all");
     setFilterRoom("all");
@@ -121,12 +120,10 @@ export function ProfessorSchedule() {
     const formatted = transformBackendData(filters, rawResults);
     
     if (formatted.length === 0) {
-      // Dacă nu sunt rezultate, resetăm starea de căutare pentru a ascunde zona
       setHasSearched(false);
       setAvailableSlots([]);
       toast.info("Nu s-au găsit sloturi disponibile pentru criteriile selectate.");
     } else {
-      // Dacă avem rezultate, le afișăm
       setHasSearched(true);
       setAvailableSlots(formatted);
       toast.success(`Am găsit ${formatted.length} sloturi disponibile`);
@@ -134,23 +131,22 @@ export function ProfessorSchedule() {
   };
 
   const confirmBooking = async (slot: AvailableSlot) => {
-    // Validăm existența filtrelor folosite la căutare
     if (!lastFilters) return;
 
     try {
       setIsBooking(slot.id);
-      const response = await api.post("/rezervari/confirma-rezervare", {
+      const response = await api.post("/reservations/confirm-reservation", {
         email: localStorage.getItem("userEmail"),
-        sala_id: parseInt(slot.id.split('-')[0]),
-        grupe_ids: lastFilters.selectedGroups.map(id => parseInt(id)),
-        materie: lastFilters.selectedSubject,
-        tip_activitate: lastFilters.selectedType, 
-        zi: slot.date.getDay() === 0 ? 7 : slot.date.getDay(),
-        saptamana: slot.week,
-        ora_start: parseInt(slot.startTime.split(':')[0]),
-        durata: parseInt(slot.endTime.split(':')[0]) - parseInt(slot.startTime.split(':')[0]),
-        data_rezervare: slot.date.toISOString().split('T')[0],
-        numar_persoane: parseInt(lastFilters.studentCount) || 0
+        room_id: parseInt(slot.id.split('-')[0]),
+        group_ids: lastFilters.selectedGroups.map(id => parseInt(id)),
+        subject: lastFilters.selectedSubject,
+        activity_type: lastFilters.selectedType, 
+        day: slot.date.getDay() === 0 ? 7 : slot.date.getDay(),
+        week: slot.week,
+        start_hour: parseInt(slot.startTime.split(':')[0]),
+        duration: parseInt(slot.endTime.split(':')[0]) - parseInt(slot.startTime.split(':')[0]),
+        reservation_date: slot.date.toISOString().split('T')[0],
+        number_of_people: parseInt(lastFilters.studentCount) || 0
       });
 
       if (response.data.success) {
@@ -173,10 +169,8 @@ export function ProfessorSchedule() {
 
   return (
     <div className="space-y-6">
-      {/* Randarea formularului extras */}
       <ProfessorScheduleForm onSearch={handleSearchResults} />
 
-      {/* Secțiunea de Rezultate */}
       {hasSearched && (
         <Card className="border-gray-200 shadow-sm">
           <CardHeader className="pb-2">
@@ -191,7 +185,7 @@ export function ProfessorSchedule() {
 
             <div className="flex flex-wrap items-end gap-4 mt-4 p-4 w-fit">
               
-              {/* Filtrul Ziua */}
+             {/* Day Filter */}
               <div className="space-y-1.5 min-w-35">
                 <Label className="text-xs font-semibold text-gray-500 flex items-center gap-1.5 ml-0.5">
                   <Calendar className="h-3.5 w-3.5" /> Ziua
@@ -207,7 +201,7 @@ export function ProfessorSchedule() {
                 </Select>
               </div>
 
-              {/* Filtrul Săptămâna */}
+              {/* Week Filter */}
               <div className="space-y-1.5 min-w-35">
                 <Label className="text-xs font-semibold text-gray-500 flex items-center gap-1.5 ml-0.5">
                   <Filter className="h-3.5 w-3.5" /> Săptămâna
@@ -223,7 +217,7 @@ export function ProfessorSchedule() {
                 </Select>
               </div>
 
-              {/* Filtrul Sala */}
+              {/* Room Filter */}
               <div className="space-y-1.5 min-w-35">
                 <Label className="text-xs font-semibold text-gray-500 flex items-center gap-1.5 ml-0.5">
                   <MapPin className="h-3.5 w-3.5" /> Sala
@@ -239,7 +233,7 @@ export function ProfessorSchedule() {
                 </Select>
               </div>
 
-              {/* Butonul de Resetare*/}
+              {/* Reset Local Filters Button */}
               {(filterDay !== "all" || filterWeek !== "all" || filterRoom !== "all") && (
                 <div className="h-9 flex items-center"> 
                   <Button 
@@ -256,19 +250,19 @@ export function ProfessorSchedule() {
           </CardHeader>
           
           <CardContent className="space-y-4">
-            {/* CAZ 1: Căutarea inițială nu a returnat nimic de la server */}
+            {/* CASE 1: Initial search returned nothing from server */}
             {availableSlots.length === 0 ? (
               <div className="text-center py-12 text-gray-500">
                 <p className="font-medium">Nu s-au găsit sloturi disponibile</p>
               </div>
-            ) : /* CAZ 2: Avem date de la server, dar filtrele de sus (Zi, Săptămână, Sală) au eliminat tot */
+            ) : /* CASE 2: We have data from the server, but the top filters (Day, Week, Room) removed everything */
               filteredSlots.length === 0 ? (
                 <div className="text-center py-12 bg-gray-50/50 rounded-lg border border-dashed">
                   <Filter className="h-12 w-12 mx-auto mb-3 opacity-20" />
                   <p className="font-medium text-gray-600 italic">Nu există rezultate pentru filtrele selectate.</p>
                 </div>
               ) : (
-                /* CAZ 3: Avem rezultate care trec de filtre */
+                /* CASE 3: We have results that pass the filters */
               <div className="grid gap-4">
                 {filteredSlots.map((slot) => (
                   <Card key={slot.id} className="border-l-4 border-l-brand-blue shadow-sm hover:bg-gray-50/50 transition-colors">

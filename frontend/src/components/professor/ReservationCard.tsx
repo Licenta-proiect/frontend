@@ -13,7 +13,7 @@ interface ReservationCardProps {
 }
 
 export function ReservationCard({ reservation, onCancel }: ReservationCardProps) {
-  const isUpcoming = reservation.status === "upcoming";
+  const isUpcoming = reservation.status === "reserved";
   const isCanceled = reservation.status === "canceled";
 
   const dateObj = new Date(reservation.data);
@@ -21,9 +21,9 @@ export function ReservationCard({ reservation, onCancel }: ReservationCardProps)
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "upcoming": return "bg-blue-50 text-brand-blue border-blue-100 font-bold";
+      case "reserved": return "bg-blue-50 text-brand-blue border-blue-100 font-bold";
       case "completed": return "bg-green-50 text-green-700 border-green-100 font-bold";
-      case "canceled": return "bg-red-50 text-brand-red border-red-100 font-bold";
+      case "cancelled": return "bg-red-50 text-brand-red border-red-100 font-bold";
       default: return "bg-gray-50 text-gray-700 border-gray-100 font-bold";
     }
   };
@@ -34,7 +34,7 @@ export function ReservationCard({ reservation, onCancel }: ReservationCardProps)
       isUpcoming ? "hover:border-brand-blue/50" : "opacity-85 grayscale-[0.2]"
     )}>
       <CardContent className="p-5 space-y-4"> 
-        {/* Container pentru Info + Buton (aliniate orizontal) */}
+        {/* Container for Info + Button (horizontally aligned) */}
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
           <div className="space-y-3">
             {/* Materie + Status + Tip */}
