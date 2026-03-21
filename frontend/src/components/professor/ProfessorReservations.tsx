@@ -13,17 +13,17 @@ import { AxiosError } from "axios";
 
 export interface Reservation {
   id: string;          
-  materie: string;      
-  tip: string;          
-  sala: string;         
-  grupe: string[];      
-  saptamana: number;    
-  zi: string;           
-  data: string;         
-  ora_start: number;    
-  durata: number;      
+  subject: string;      
+  type: string;          
+  room: string;         
+  groups: string[];      
+  week: number;    
+  day: string;           
+  date: string;         
+  start_hour: number;    
+  duration: number;      
   status: string;       
-  motiv_anulare: string | null;
+  cancellation_reason: string | null;
 }
 
 export function ProfessorReservations() {
@@ -37,24 +37,12 @@ export function ProfessorReservations() {
   const fetchReservations = async () => {
     try {
       setLoading(true);
-      const response = await api.get<Reservation[]>("/profesor/rezervari");
+      const response = await api.get<Reservation[]>("/professor/reservations");
 
       const mappedData = response.data.map((r): Reservation => {
-        let finalStatus = "upcoming";
-        const backendStatus = r.status?.toLowerCase() || "";
-
-        if (backendStatus === "anulat") {
-          finalStatus = "canceled";
-        } else if (backendStatus === "efectuată" || backendStatus === "efectuata" || backendStatus === "completed") {
-          finalStatus = "completed";
-        } else {
-          finalStatus = "upcoming"; // implicit pentru "rezervat"
-        }
-
         return {
           ...r,
-          id: r.id.toString(),
-          status: finalStatus
+          id: r.id.toString()
         };
       });
 
@@ -76,10 +64,10 @@ export function ProfessorReservations() {
     const token = localStorage.getItem("access_token");
 
     try {
-      await api.post("/rezervari/anuleaza-rezervare", {
-        rezervare_id: reservationToCancel,
+      await api.post("/reservations/cancel-reservation", {
+        reservation_id: reservationToCancel,
         email: userEmail,
-        motiv: cancelReason || ""
+        reason: cancelReason || ""
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -96,8 +84,8 @@ export function ProfessorReservations() {
   };
 
   const filtered = reservations.filter(r => 
-    r.materie.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    r.sala.toLowerCase().includes(searchQuery.toLowerCase())
+    r.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    r.room.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const activeReservations = filtered.filter(r => r.status === "upcoming");
@@ -114,6 +102,7 @@ export function ProfessorReservations() {
 
   return (
     <div className="max-w-6xl mx-auto pb-10 space-y-6">
+      {/* Search bar */}
       <div className="flex justify-end">
         <div className="relative w-full sm:w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -126,7 +115,7 @@ export function ProfessorReservations() {
         </div>
       </div>
 
-      {/* CARD 1: ACTIVE */}
+      {/* Card 1: Upcoming reservations */}
       <Card className="border-gray-200 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
@@ -151,7 +140,7 @@ export function ProfessorReservations() {
         </CardContent>
       </Card>
 
-      {/* CARD 2: ISTORIC */}
+      {/* Card 2: History */}
       <Card className="border-gray-200 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
@@ -172,6 +161,7 @@ export function ProfessorReservations() {
         </CardContent>
       </Card>
 
+        {/* Cancel confirmation dialog */}
       <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
         <AlertDialogContent className="rounded-xl border-gray-200 shadow-xl">
           <AlertDialogHeader>
@@ -181,7 +171,7 @@ export function ProfessorReservations() {
             </AlertDialogDescription>
           </AlertDialogHeader>
 
-          {/* Zona de Input */}
+          {/* Optional cancellation reason */}
           <div className="py-2">
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700 ml-1">

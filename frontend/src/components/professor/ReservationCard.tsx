@@ -16,11 +16,11 @@ export function ReservationCard({ reservation, onCancel }: ReservationCardProps)
   const isUpcoming = reservation.status === "reserved";
   const isCanceled = reservation.status === "canceled";
 
-  const dateObj = new Date(reservation.data);
+  const dateObj = new Date(reservation.date);
   const dayName = new Intl.DateTimeFormat('ro-RO', { weekday: 'long' }).format(dateObj);
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status.toLowerCase()) {
       case "reserved": return "bg-blue-50 text-brand-blue border-blue-100 font-bold";
       case "completed": return "bg-green-50 text-green-700 border-green-100 font-bold";
       case "cancelled": return "bg-red-50 text-brand-red border-red-100 font-bold";
@@ -34,57 +34,57 @@ export function ReservationCard({ reservation, onCancel }: ReservationCardProps)
       isUpcoming ? "hover:border-brand-blue/50" : "opacity-85 grayscale-[0.2]"
     )}>
       <CardContent className="p-5 space-y-4"> 
-        {/* Container for Info + Button (horizontally aligned) */}
+        {/* Info row + Action button */}
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
           <div className="space-y-3">
-            {/* Materie + Status + Tip */}
+            {/* Subject + Status badge + Activity type badge */}
             <div className="flex flex-wrap items-center gap-3">
-              <div className="font-semibold text-md text-gray-900">{reservation.materie}</div>
+              <div className="font-semibold text-md text-gray-900">{reservation.subject}</div>
               <Badge variant="outline" className={cn(getStatusColor(reservation.status), "text-[10px]")}>
                 {reservation.status === "upcoming" ? "PROGRAMATĂ" : 
                  reservation.status === "completed" ? "FINALIZATĂ" : "ANULATĂ"}
               </Badge>
               <Badge variant="secondary" className="bg-gray-100 text-gray-700 border-gray-200 font-bold text-[10px]">
-                {reservation.tip.toUpperCase()}
+                {reservation.type.toUpperCase()}
               </Badge>
             </div>
             
-            {/* Informații Detaliate */}
+            {/* Detail row */}
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium text-gray-700">
-              {/* Săptămâna */}
+              {/* Week number */}
               <div className="flex items-center gap-1.5">
-                <span>Săptămâna {reservation.saptamana}</span>
+                <span>Săptămâna {reservation.week}</span>
               </div>
 
-              {/* Ziua și Data */}
+              {/* Day + Date */}
               <div className="flex items-center gap-1.5">
                 <Calendar className="h-4 w-4 text-brand-blue" />
                 <span className="capitalize">{dayName}, {dateObj.toLocaleDateString("ro-RO")}</span>
               </div>
 
-              {/* Interval Orar */}
+              {/* Time interval */}
               <div className="flex items-center gap-1.5">
                 <Clock className="h-4 w-4 text-brand-blue" />
                 <span>
-                  {String(reservation.ora_start).padStart(2, '0')}:00 - {String(reservation.ora_start + reservation.durata).padStart(2, '0')}:00
+                  {String(reservation.start_hour).padStart(2, '0')}:00 - {String(reservation.start_hour + reservation.duration).padStart(2, '0')}:00
                 </span>
               </div>
 
-              {/* Sala */}
+              {/* Room */}
               <div className="flex items-center gap-1.5">
                 <MapPin className="h-4 w-4 text-brand-blue" />
-                <span>{reservation.sala}</span>
+                <span>{reservation.room}</span>
               </div>
 
-              {/* Grupe */} 
+              {/* Groups */} 
               <div className="flex items-center gap-1.5">
                 <Users className="h-4 w-4 text-brand-blue" />
-                <span className="text-gray-600">{reservation.grupe.join(", ")}</span>
+                <span className="text-gray-600">{reservation.groups.join(", ")}</span>
               </div>
             </div>
           </div>
 
-          {/* Buton Anulare */}
+          {/* Cancel button — only for upcoming reservations */}
           <div className="flex gap-2 shrink-0">
             {isUpcoming && onCancel && (
               <Button 
@@ -99,14 +99,14 @@ export function ReservationCard({ reservation, onCancel }: ReservationCardProps)
           </div>
         </div>
 
-        {/* Motiv Anulare (Apare dedesubt pe toată lățimea) */}
-        {isCanceled && reservation.motiv_anulare && (
+        {/* Cancellation reason */}
+        {isCanceled && reservation.cancellation_reason && (
           <div className="border-red-50">
             <div className="text-xs p-3 rounded-lg bg-red-50/50 border border-red-100 flex items-start gap-2">
               <AlertCircle className="h-3.5 w-3.5 text-brand-red shrink-0 mt-0.5" />
               <div>
                 <span className="font-bold text-brand-red mr-2">Motiv anulare:</span>
-                <span className="text-gray-700 italic">&quot;{reservation.motiv_anulare}&quot;</span>
+                <span className="text-gray-700 italic">&quot;{reservation.cancellation_reason}&quot;</span>
               </div>
             </div>
           </div>
