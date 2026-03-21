@@ -196,7 +196,7 @@ export function AdminHistory() {
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
                   <Command>
                     <CommandInput placeholder="Caută profesor..." />
                     <CommandList>
@@ -234,7 +234,7 @@ export function AdminHistory() {
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
                   <Command>
                     <CommandInput placeholder="Caută sala..." />
                     <CommandList>
@@ -269,7 +269,7 @@ export function AdminHistory() {
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
                 <Command>
                     <CommandInput placeholder="Caută grupă..." />
                     <CommandList>
@@ -306,7 +306,7 @@ export function AdminHistory() {
 
             {/* Buton Export */}
             <div className="col-span-1">
-              <Button onClick={handleExportCSV} className="w-full bg-brand-blue hover:bg-brand-blue/90">
+              <Button onClick={handleExportCSV} className="w-full bg-brand-blue hover:bg-brand-blue-dark shadow-md">
                 <Download className="h-4 w-4 mr-2" /> <span className="sm:inline">Export CSV</span>
               </Button>
             </div>
