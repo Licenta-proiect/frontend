@@ -88,7 +88,12 @@ export function StudentCalendar() {
 
   const allUniqueReservations = useMemo(() => {
     const all = Object.values(data).flat();
-    return Array.from(new Map(all.map(item => [item.id, item])).values());
+
+    const activeReservations = all.filter(
+      (session) => session.status.toLowerCase() !== "cancelled"
+    );
+
+    return Array.from(new Map(activeReservations.map(item => [item.id, item])).values());
   }, [data]);
 
   const filteredSessions = useMemo(() => {
