@@ -16,9 +16,9 @@ interface SyncLog {
   id: string;
   startDate: string;
   endDate: string | null;
-  triggerType: "Manual" | "Automat";
-  syncType: string; 
-  status: "Succes" | "Eroare" | "În curs";
+  triggerType: string;
+  syncType: string;
+  status: string;
   errorMessage: string | null;
 }
 
@@ -29,21 +29,22 @@ export function AdminSync() {
   const [syncTime, setSyncTime] = useState("00:00");
   const [syncLogs, setSyncLogs] = useState<SyncLog[]>([]);
   const [displayLimit, setDisplayLimit] = useState(step); 
+  const [isLoading, setIsLoading] = useState(false);
   
   const prevSyncActive = useRef(false);
 
   const lastCalendarSyncDate = useMemo(() => {
-    const lastSync = syncLogs.find(l => l.syncType === "Calendar" && l.status === "Succes");
+    const lastSync = syncLogs.find(l => l.syncType === "Calendar" && l.status === "Success");
     return lastSync?.endDate ? new Date(lastSync.endDate).toLocaleString("ro-RO") : "Nicio sincronizare reușită";
   }, [syncLogs]);
 
   const lastOrarSyncDate = useMemo(() => {
-    const lastSync = syncLogs.find(l => l.syncType === "Base + Schedule" && l.status === "Succes");
+    const lastSync = syncLogs.find(l => (l.syncType === "Base + Schedule") && l.status === "Success");
     return lastSync?.endDate ? new Date(lastSync.endDate).toLocaleString("ro-RO") : "Nicio sincronizare reușită";
   }, [syncLogs]);
 
-  const isAnySyncActive = useMemo(() => 
-    syncLogs.some(log => log.status === "În curs"), 
+  const isAnySyncActive = useMemo(() =>
+    syncLogs.some(log => log.status === "In progress"),
   [syncLogs]);
 
   const formatDuration = (start: string, end: string | null) => {
@@ -65,16 +66,16 @@ export function AdminSync() {
         log.syncType === "Calendar" || log.syncType === "Base + Schedule"
       );
       
-      if (prevSyncActive.current && !filteredLogs.some((l: SyncLog) => l.status === "În curs")) {
+      if (prevSyncActive.current && !filteredLogs.some((l: SyncLog) => l.status === "In progress")) {
         const lastLog = filteredLogs[0];
-        if (lastLog.status === "Succes") {
+        if (lastLog.status === "Success") {
           toast.success(`Sincronizarea ${lastLog.syncType} s-a finalizat cu succes!`);
-        } else if (lastLog.status === "Eroare") {
+        } else if (lastLog.status === "Error") {
           toast.error(`Eroare la sincronizarea ${lastLog.syncType}!`);
         }
       }
       
-      prevSyncActive.current = filteredLogs.some((l: SyncLog) => l.status === "În curs");
+      prevSyncActive.current = filteredLogs.some((l: SyncLog) => l.status === "In progress");
       setSyncLogs(filteredLogs);
     } catch (error) {
       console.error("Eroare la încărcarea istoricului:", error);
@@ -106,22 +107,21 @@ export function AdminSync() {
 
   useEffect(() => {
     if (!isAnySyncActive) return;
-    const interval = setInterval(() => {
-      fetchLogs();
-    }, 3000);
+    const interval = setInterval(fetchLogs, 3000);
     return () => clearInterval(interval);
   }, [isAnySyncActive, fetchLogs]);
 
   const handleManualSync = async (type: "orar" | "calendar") => {
-    const isBaza = type === "orar";
-    const endpoint = isBaza ? "/admin/sync/base-schedule" : "/admin/sync/calendar";
-    
+    const endpoint = type === "orar" ? "/admin/sync/base-schedule" : "/admin/sync/calendar";
     try {
+      setIsLoading(true);
       await api.post(endpoint);
-      toast.info("Sincronizarea a început pe server...");
+      toast.info("Sincronizarea a pornit în fundal.");
       fetchLogs();
-    } catch {
-      toast.error("Eroare: Nu s-a putut contacta serverul.");
+    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+      toast.error(error.response?.data?.detail || "Eroare la pornirea sincronizării");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -161,17 +161,17 @@ export function AdminSync() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "Succes": return "bg-green-50 text-green-700 border-green-100 font-bold";
-      case "Eroare": return "bg-red-50 text-brand-red border-red-100 font-bold";
-      case "În curs": return "bg-blue-50 text-brand-blue border-blue-100 font-bold";
-      default: return "bg-gray-50 text-gray-700 border-gray-100 font-bold";
+      case "Success": return { label: "SUCCES", class: "bg-green-50 text-green-700 border-green-100" };
+      case "Error": return { label: "EROARE", class: "bg-red-50 text-brand-red border-red-100" };
+      case "In progress": return { label: "ÎN CURS", class: "bg-blue-50 text-brand-blue border-blue-100" };
+      default: return { label: status, class: "bg-gray-50 text-gray-700 border-gray-100" };
     }
   };
 
   const getSyncTypeBadge = (type: string) => {
     return type === "Base + Schedule" 
-      ? "bg-blue-50 text-brand-blue border-blue-100 font-bold" 
-      : "bg-orange-50 text-orange-700 border-orange-100 font-bold";
+      ? { label: "ORAR", class: "bg-blue-50 text-brand-blue border-blue-100" }
+      : { label: "CALENDAR", class: "bg-orange-50 text-orange-700 border-orange-100" };
   };
 
   // The slice for visible history
@@ -200,10 +200,10 @@ export function AdminSync() {
             </div>
             <Button
               onClick={() => handleManualSync("calendar")}
-              disabled={isAnySyncActive}
+              disabled={isAnySyncActive || isLoading}
               className="w-full bg-orange-700 hover:bg-orange-800 text-white font-medium active:scale-95 transition-all shadow-md"
             >
-              <RefreshCw className={cn("h-4 w-4 mr-2", isAnySyncActive && "animate-spin")} />
+              <RefreshCw className={cn("h-4 w-4 mr-2", (isAnySyncActive || isLoading) && "animate-spin")} />
               {isAnySyncActive ? "Sistem ocupat..." : "Sincronizează calendar"}
             </Button>
           </CardContent>
@@ -227,10 +227,10 @@ export function AdminSync() {
             </div>
             <Button
               onClick={() => handleManualSync("orar")}
-              disabled={isAnySyncActive}
+              disabled={isAnySyncActive || isLoading}
               className="w-full bg-brand-blue hover:bg-brand-blue-dark text-white font-medium active:scale-95 transition-all shadow-md"
             >
-              <RefreshCw className={cn("h-4 w-4 mr-2", isAnySyncActive && "animate-spin")} />
+              <RefreshCw className={cn("h-4 w-4 mr-2", (isAnySyncActive || isLoading) && "animate-spin")} />
               {isAnySyncActive ? "Sistem ocupat..." : "Sincronizează orar"}
             </Button>
           </CardContent>
@@ -307,17 +307,21 @@ export function AdminSync() {
         </CardHeader>
         <CardContent className="space-y-3">
           {syncLogs.length === 0 ? (
-            <p className="text-center py-6 text-gray-500 italic">Nicio activitate înregistrată</p>
+            <div className="text-center py-12 text-gray-500 bg-gray-50/50 rounded-lg border border-dashed">
+              <p className="font-medium text-gray-600 italic">Nicio activitate înregistrată</p>
+            </div>
           ) : (
             <>
               {visibleLogs.map((log) => {
+                const statusInfo = getStatusBadge(log.status);
+                const typeInfo = getSyncTypeBadge(log.syncType);
                 const durationText = formatDuration(log.startDate, log.endDate);
                 return (
                   <div key={log.id} className="flex items-center justify-between p-4 rounded-xl border shadow-xs group hover:border-brand-blue/50 transition-all duration-300">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 flex-wrap text-[10px]">
-                        <Badge className={cn(getStatusBadge(log.status))}>{log.status.toUpperCase()}</Badge>
-                        <Badge className={cn(getSyncTypeBadge(log.syncType))}>{log.syncType.toUpperCase()}</Badge>
+                        <Badge className={cn("font-bold", statusInfo.class)}>{statusInfo.label}</Badge>
+                        <Badge className={cn("font-bold", typeInfo.class)}>{typeInfo.label}</Badge>
                         <Badge variant="outline" className="font-bold border-gray-200 text-gray-500 bg-white">{log.triggerType.toUpperCase()}</Badge>
                       </div>
                       <p className="text-sm font-medium text-gray-600 flex items-center gap-2">
@@ -325,7 +329,7 @@ export function AdminSync() {
                       </p>
                     </div>
                     <div className="text-right space-y-1">
-                      <div className="flex items-center justify-end gap-1.5 text-gray-900 font-semibold text-sm">
+                      <div className="flex items-center justify-end gap-1.5 text-gray-700 font-semibold text-sm">
                         {log.status === "În curs" ? (
                           <RefreshCw className="h-3.5 w-3.5 animate-spin text-brand-blue" />
                         ) : (
