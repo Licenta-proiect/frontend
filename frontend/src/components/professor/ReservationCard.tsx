@@ -14,7 +14,7 @@ interface ReservationCardProps {
 
 export function ReservationCard({ reservation, onCancel }: ReservationCardProps) {
   const isUpcoming = reservation.status === "reserved";
-  const isCanceled = reservation.status === "canceled";
+  const isCanceled = reservation.status === "cancelled";
 
   const dateObj = new Date(reservation.date);
   const dayName = new Intl.DateTimeFormat('ro-RO', { weekday: 'long' }).format(dateObj);
@@ -41,7 +41,7 @@ export function ReservationCard({ reservation, onCancel }: ReservationCardProps)
                 <div className="font-semibold text-md text-gray-900">{reservation.subject}</div>
                 <div className="flex items-center gap-2 shrink-0">
                   <Badge variant="outline" className={cn(getStatusColor(reservation.status), "text-[10px]")}>
-                    {reservation.status === "upcoming" ? "PROGRAMATĂ" : 
+                    {reservation.status === "reserved" ? "PROGRAMATĂ" : 
                     reservation.status === "completed" ? "FINALIZATĂ" : "ANULATĂ"}
                   </Badge>
                   <Badge variant="secondary" className="bg-gray-100 text-gray-700 border-gray-200 font-bold text-[10px]">
