@@ -21,7 +21,15 @@ export default function Home() {
         <div className="container mx-auto px-4 py-3 md:py-4 flex justify-between items-center">
           <div className="flex items-center gap-2 shrink-0">
             <Calendar className="h-7 w-7 md:h-9 md:w-9 text-brand-blue" />
-            <span className="text-xl md:text-2xl font-bold text-black tracking-tight leading-none">SGR</span>
+            {/* Short Version: Visible on mobile, hidden from 'md' up */}
+            <span className="text-xl md:text-2xl font-bold text-black tracking-tight leading-none md:hidden">
+              SGR
+            </span>
+                
+            {/* Long Version: Hidden on mobile, visible from 'md' up */}
+            <span className="hidden md:block text-xl md:text-xl font-semibold text-black tracking-tight leading-none">
+              Sistem de gestionare a recuperărilor
+            </span>
           </div>
           
           <div className="flex gap-2 md:gap-4 items-center">

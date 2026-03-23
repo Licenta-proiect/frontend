@@ -148,7 +148,15 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
             <div className="flex items-center gap-2 shrink-0">
               <Calendar className="h-7 w-7 md:h-9 md:w-9 text-brand-blue" />
               <div className="flex flex-col justify-center">
-                <span className="text-xl md:text-2xl font-bold text-black tracking-tight leading-none">SGR</span>
+                {/* Short Version: Visible on mobile, hidden from 'md' up */}
+                <span className="text-xl md:text-2xl font-bold text-black tracking-tight leading-none md:hidden">
+                  SGR
+                </span>
+                
+                {/* Long Version: Hidden on mobile, visible from 'md' up */}
+                <span className="hidden md:block text-xl md:text-xl font-semibold text-black tracking-tight leading-none">
+                  Sistem de gestionare a recuperărilor
+                </span>
                 <span className="text-sm md:text-xs font-semibold text-brand-blue tracking-tight leading-none mt-1">
                   {activeTabLabel} 
                 </span>
