@@ -30,36 +30,33 @@ export function ReservationCard({ reservation, onCancel }: ReservationCardProps)
 
   return (
     <Card className={cn(
-      "border shadow-xs group transition-all duration-300",
-      isUpcoming ? "hover:border-brand-blue/50" : "opacity-85 grayscale-[0.2]"
-    )}>
+        "border shadow-xs group transition-all duration-300 border-l-4 border-l-brand-blue",
+        isCanceled ? "opacity-85 grayscale-[0.2]" : "hover:border-brand-blue")}>
       <CardContent className="p-5 space-y-4"> 
         {/* Info row + Action button */}
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-          <div className="space-y-3">
+          <div className="space-y-3 flex-1">
             {/* Subject + Status badge + Activity type badge */}
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="font-semibold text-md text-gray-900">{reservation.subject}</div>
-              <Badge variant="outline" className={cn(getStatusColor(reservation.status), "text-[10px]")}>
-                {reservation.status === "upcoming" ? "PROGRAMATĂ" : 
-                 reservation.status === "completed" ? "FINALIZATĂ" : "ANULATĂ"}
-              </Badge>
-              <Badge variant="secondary" className="bg-gray-100 text-gray-700 border-gray-200 font-bold text-[10px]">
-                {reservation.type.toUpperCase()}
-              </Badge>
+            <div className="flex items-center justify-between gap-4">
+                <div className="font-semibold text-md text-gray-900">{reservation.subject}</div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Badge variant="outline" className={cn(getStatusColor(reservation.status), "text-[10px]")}>
+                    {reservation.status === "upcoming" ? "PROGRAMATĂ" : 
+                    reservation.status === "completed" ? "FINALIZATĂ" : "ANULATĂ"}
+                  </Badge>
+                  <Badge variant="secondary" className="bg-gray-100 text-gray-700 border-gray-200 font-bold text-[10px]">
+                    {reservation.type.toUpperCase()}
+                  </Badge>
+                </div>
             </div>
             
             {/* Detail row */}
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium text-gray-700">
-              {/* Week number */}
-              <div className="flex items-center gap-1.5">
-                <span>Săptămâna {reservation.week}</span>
-              </div>
 
-              {/* Day + Date */}
+              {/* Day + Date + Week number */}
               <div className="flex items-center gap-1.5">
                 <Calendar className="h-4 w-4 text-brand-blue" />
-                <span className="capitalize">{dayName}, {dateObj.toLocaleDateString("ro-RO")}</span>
+                <span className="capitalize">{dayName}, {dateObj.toLocaleDateString("ro-RO")}, Săptămâna {reservation.week}</span>
               </div>
 
               {/* Time interval */}
@@ -73,13 +70,13 @@ export function ReservationCard({ reservation, onCancel }: ReservationCardProps)
               {/* Room */}
               <div className="flex items-center gap-1.5">
                 <MapPin className="h-4 w-4 text-brand-blue" />
-                <span>{reservation.room}</span>
+                <span>Sala {reservation.room}</span>
               </div>
 
               {/* Groups */} 
               <div className="flex items-center gap-1.5">
-                <Users className="h-4 w-4 text-brand-blue" />
-                <span className="text-gray-600">{reservation.groups.join(", ")}</span>
+                <Users className="h-4 w-4 text-brand-blue shrink-0 mt-0.5" />
+                <span className="text-gray-600 leading-tight">{reservation.groups.join(", ")}</span>
               </div>
             </div>
           </div>
