@@ -183,7 +183,7 @@ export function ProfessorSchedule() {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-end gap-4 mt-4 p-4 w-fit">
+            <div className="flex flex-wrap items-end gap-4 p-4 w-fit">
               
              {/* Day Filter */}
               <div className="space-y-1.5 min-w-35">
