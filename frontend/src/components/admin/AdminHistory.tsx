@@ -72,18 +72,17 @@ export function AdminHistory() {
     }
   };
 
-  // În interiorul componentei AdminHistory
+  // Inside the AdminHistory component
   const groupOptions = useMemo(() => {
     const groupsSet = new Set<string>();
     
     reservations.forEach(r => {
         r.groups.forEach(groupFullName => {
-        // Aplicăm aceeași logică de regex ca în StudentCalendar
         const match = groupFullName.match(/(.*an\s\d+)/i);
         if (match && match[1]) {
             groupsSet.add(match[1].trim());
         } else {
-            groupsSet.add(groupFullName); // Fallback dacă nu corespunde regex-ului
+            groupsSet.add(groupFullName); 
         }
         });
     });
@@ -156,16 +155,16 @@ export function AdminHistory() {
     <div className="space-y-6">
       <Card className="border-gray-200 shadow-sm">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
+          <CardTitle className="flex items-center gap-2 text-lg text-gray-900 font-semibold">
             <Filter className="h-5 w-5 text-brand-blue" />
-            Panou Control Istoric
+              Filtre căutare
           </CardTitle>
           <CardDescription className="text-gray-600 font-medium">
-            Monitorizarea activităților didactice și gestionarea înregistrărilor
+            Filtrați istoricul după status, profesor, sală și grupă
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {/* Grid: 2 coloane pe orice ecran peste mobil */}
+          {/* Grid: 2 columns on any screen over mobile */}
           <div className="grid grid-cols-2 gap-4 items-end">
             
             {/* Status */}
@@ -176,7 +175,7 @@ export function AdminHistory() {
                   <SelectValue placeholder="Toate" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Toate Statusurile</SelectItem>
+                  <SelectItem value="all">Toate statusurile</SelectItem>
                   <SelectItem value="reserved">Programate</SelectItem>
                   <SelectItem value="completed">Finalizate</SelectItem>
                   <SelectItem value="cancelled">Anulate</SelectItem>
@@ -184,7 +183,7 @@ export function AdminHistory() {
               </Select>
             </div>
 
-            {/* Profesor */}
+            {/* Professor */}
             <div className="space-y-2 col-span-2 md:col-span-1">
               <Label className="text-sm font-medium">Profesor</Label>
               <Popover open={openProf} onOpenChange={setOpenProf}>
@@ -204,7 +203,7 @@ export function AdminHistory() {
                       <CommandGroup>
                         <CommandItem onSelect={() => { setFilterProfessor("all"); setOpenProf(false); }}>
                           <Check className={cn("mr-2 h-4 w-4", filterProfessor === "all" ? "opacity-100" : "opacity-0")} />
-                          Toți Profesorii
+                          Toți profesorii
                         </CommandItem>
                         {professors.map((p) => {
                           const name = `${p.lastName} ${p.firstName}`;
@@ -222,7 +221,7 @@ export function AdminHistory() {
               </Popover>
             </div>
 
-            {/* Sală */}
+            {/* Room */}
             <div className="space-y-2 col-span-2 md:col-span-1">
               <Label className="text-sm font-medium">Sală</Label>
               <Popover open={openRoom} onOpenChange={setOpenRoom}>
@@ -242,7 +241,7 @@ export function AdminHistory() {
                       <CommandGroup>
                         <CommandItem onSelect={() => { setFilterRoom("all"); setOpenRoom(false); }}>
                           <Check className={cn("mr-2 h-4 w-4", filterRoom === "all" ? "opacity-100" : "opacity-0")} />
-                          Toate Sălile
+                          Toate sălile
                         </CommandItem>
                         {rooms.map((r) => (
                           <CommandItem key={r.id} value={r.name} onSelect={() => { setFilterRoom(r.name); setOpenRoom(false); }}>
@@ -257,7 +256,7 @@ export function AdminHistory() {
               </Popover>
             </div>
 
-            {/* Grupă */}
+            {/* Group */}
             <div className="space-y-2 col-span-2 md:col-span-1">
             <Label className="text-sm font-medium">Grupă</Label>
             <Popover open={openGroup} onOpenChange={setOpenGroup}>
@@ -277,9 +276,8 @@ export function AdminHistory() {
                     <CommandGroup>
                         <CommandItem onSelect={() => { setFilterGroup("all"); setOpenGroup(false); }}>
                         <Check className={cn("mr-2 h-4 w-4", filterGroup === "all" ? "opacity-100" : "opacity-0")} />
-                        Toate Grupele
+                        Toate grupele
                         </CommandItem>
-                        {/* Folosim groupOptions generat cu Regex */}
                         {groupOptions.map((groupLabel) => (
                         <CommandItem 
                             key={groupLabel} 
@@ -297,14 +295,14 @@ export function AdminHistory() {
             </Popover>
             </div>
 
-            {/* Buton Resetează */}
+            {/* Reset button */}
             <div className="col-span-1">
               <Button onClick={handleReset} variant="outline" className="w-full border-gray-200">
                 <RefreshCcw className="h-4 w-4 mr-2" /> <span className="sm:inline">Resetează</span>
               </Button>
             </div>
 
-            {/* Buton Export */}
+            {/* Export button */}
             <div className="col-span-1">
               <Button onClick={handleExportCSV} className="w-full bg-brand-blue hover:bg-brand-blue-dark shadow-md">
                 <Download className="h-4 w-4 mr-2" /> <span className="sm:inline">Export CSV</span>
@@ -315,21 +313,19 @@ export function AdminHistory() {
         </CardContent>
       </Card>
 
-      {/* Results Section încapsulat într-un Card */}
+      {/* Results section */}
         <Card className="border-gray-200 shadow-sm overflow-hidden">
-        <CardHeader className="py-4">
-            <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <CardHeader className="pt-4 pb-0">
+          <div>
+            <CardTitle className="text-lg text-gray-900 font-semibold flex items-center gap-2">
                 <FileText className="h-5 w-5 text-brand-blue" />
-                Rezultate Filtrare
+                Istoric rezervări și anulări
             </CardTitle>
-            <Badge variant="secondary" className="bg-blue-50 text-brand-blue border-blue-100 px-3 py-1">
-                {filteredRecords.length} înregistrări
-            </Badge>
-            </div>
+            <CardDescription className="text-gray-600 font-medium pt-2">{filteredRecords.length} înregistrări</CardDescription>
+          </div>
         </CardHeader>
 
-        <CardContent className="p-4 sm:p-6">
+        <CardContent>
             {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20">
                 <div className="animate-spin rounded-full h-8 w-8 border-brand-blue border-b-2 mb-4"></div>
@@ -350,8 +346,8 @@ export function AdminHistory() {
                     <Card 
                     key={session.id} 
                     className={cn(
-                        "bg-white border shadow-sm group transition-all duration-300 border-l-4",
-                        isCanceled ? "border-l-brand-red opacity-85" : "border-l-brand-blue hover:border-brand-blue"
+                        "border shadow-xs group transition-all duration-300 border-l-4 border-l-brand-blue",
+                        isCanceled ? "opacity-85 grayscale-[0.2]" : "hover:border-brand-blue"
                     )}
                     >
                     <CardContent className="p-5 space-y-4">
@@ -377,7 +373,7 @@ export function AdminHistory() {
                             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium text-gray-700">
                             <div className="flex items-center gap-1.5">
                                 <CalendarIcon className="h-4 w-4 text-brand-blue" />
-                                <span>{format(sessionDate, "dd MMM yyyy", { locale: ro })} (Sapt. {session.week_number})</span>
+                                <span>{format(sessionDate, "dd MMM yyyy", { locale: ro })} (Săpt. {session.week_number})</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <Clock className="h-4 w-4 text-brand-blue" />
