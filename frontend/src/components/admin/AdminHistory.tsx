@@ -11,7 +11,8 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { 
   FileText, Filter, Calendar as CalendarIcon, Clock, 
   MapPin, Search, Download, Users, AlertCircle, RefreshCcw,
-  Check, ChevronsUpDown 
+  Check, ChevronsUpDown, 
+  Mail
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
@@ -368,6 +369,11 @@ export function AdminHistory() {
                                 </div>
                             </div>
                             <p className="text-sm font-semibold text-brand-blue">{session.professor}</p>
+                            
+                            <div className="flex items-center gap-1.5">
+                                <Mail className="h-4 w-4 text-brand-blue" />
+                                <span className="text-sm text-gray-700 italic">{session.professor_email}</span>
+                            </div>
                             </div>
 
                             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium text-gray-700">
