@@ -283,7 +283,7 @@ export function ProfessorSchedule() {
                             </div>
                             <div className="flex items-center gap-2 text-gray-700">
                               <MapPin className="h-4 w-4 text-brand-blue" />
-                              <span>{slot.room}</span>
+                              <span>Sala {slot.room}</span>
                             </div>
                           </div>
                         </div>
