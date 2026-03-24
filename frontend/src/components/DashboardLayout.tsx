@@ -19,11 +19,10 @@ interface DashboardLayoutProps {
   userName: string;
   userEmail: string;
   activeTab?: string;
-  onTabChange?: (tab: string) => void;
   tabs: { id: string; label: string; icon: ReactNode }[];
 }
 
-export default function DashboardLayout({ children, userRole, userName, userEmail, activeTab, onTabChange, tabs }: DashboardLayoutProps) {
+export default function DashboardLayout({ children, userRole, userName, userEmail, activeTab, tabs }: DashboardLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -84,11 +83,6 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
         window.location.href = "/";
       }, 1500);
     }
-  };
-
-  const handleTabChange = (tabId: string) => {
-    onTabChange?.(tabId);
-    setSheetOpen(false);
   };
 
   const getRoleName = (role: string) => {

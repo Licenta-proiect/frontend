@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useSyncExternalStore, Suspense, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Calendar, Search } from "lucide-react";
 import { StudentSearch } from "@/components/student/StudentSearch";
@@ -20,16 +20,10 @@ function useIsClient() {
 
 function StudentDashboardContent() {
   const isClient = useIsClient();
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   // Determine active tab from URL, default to "calendar"
   const activeTab = searchParams.get("tab") || "calendar";
-
-  // Updates the URL query parameter to switch between dashboard views
-  const handleTabChange = (tabId: string) => {
-    router.push(`/student?tab=${tabId}`, { scroll: false });
-  };
 
   // Clear notifications when changing tabs
   useEffect(() => {
@@ -58,7 +52,6 @@ function StudentDashboardContent() {
       userName={user.name}
       userEmail={user.email}
       activeTab={activeTab}
-      onTabChange={handleTabChange}
       tabs={tabs}
     >
       <div className="space-y-6">

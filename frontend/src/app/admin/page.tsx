@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useSyncExternalStore, Suspense, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Database, FileText, UserCog } from "lucide-react";
 import { AdminUsers } from "@/components/admin/AdminUsers";
@@ -17,16 +17,10 @@ function useIsClient() {
 
 function AdminDashboardContent() {
   const isClient = useIsClient();
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   // Read the active tab from the URL. If it doesn't exist, fallback to "sync"
   const activeTab = searchParams.get("tab") || "sync";
-
-  // Change the tab by updating the URL (without page refresh)
-  const handleTabChange = (tabId: string) => {
-    router.push(`/admin?tab=${tabId}`, { scroll: false });
-  };
 
   useEffect(() => {
     toast.dismiss();
@@ -56,7 +50,6 @@ function AdminDashboardContent() {
       userName={user.name}
       userEmail={user.email}
       activeTab={activeTab}
-      onTabChange={handleTabChange}
       tabs={tabs}
     >
       <div className="space-y-6">

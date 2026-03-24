@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useSyncExternalStore, Suspense, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import { ClipboardList, FileText } from "lucide-react";
 import { ProfessorSchedule } from "@/components/professor/ProfessorSchedule";
@@ -19,16 +19,10 @@ function useIsClient() {
 
 function ProfessorDashboardContent() {
   const isClient = useIsClient();
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   // Get active tab from URL, defaults to "schedule"
   const activeTab = searchParams.get("tab") || "schedule";
-
-  // Updates URL query parameter to switch tabs without full page reload
-  const handleTabChange = (tabId: string) => {
-    router.push(`/profesor?tab=${tabId}`, { scroll: false });
-  };
 
   // Clear existing toasts when switching tabs
   useEffect(() => {
@@ -57,7 +51,6 @@ function ProfessorDashboardContent() {
       userName={user.name}
       userEmail={user.email}
       activeTab={activeTab}
-      onTabChange={handleTabChange}
       tabs={tabs}
     >
       <div className="space-y-6">
