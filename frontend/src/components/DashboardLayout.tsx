@@ -10,6 +10,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescri
 import { toast } from "sonner";
 import Cookies from "js-cookie";
 import api from "@/services/api";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -23,6 +25,7 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children, userRole, userName, userEmail, activeTab, onTabChange, tabs }: DashboardLayoutProps) {
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     // 1. Fast local check for tokens and basic user data
@@ -121,9 +124,10 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
                 </SheetHeader>
                 <nav className="space-y-2 mt-6">
                   {tabs.map((tab) => (
-                    <button
+                    <Link
                       key={tab.id}
-                      onClick={() => handleTabChange(tab.id)}
+                      href={`${pathname}?tab=${tab.id}`}
+                      onClick={() => setSheetOpen(false)}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all font-medium ${
                         activeTab === tab.id 
                           ? "bg-brand-blue text-white shadow-md" 
@@ -131,8 +135,8 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
                       }`}
                     >
                       {tab.icon} <span>{tab.label}</span>
-                    </button>
-                  ))}
+                    </Link>
+                ))}
                   <div className="pt-4 mt-4 border-t">
                     <button 
                       onClick={handleLogout} 
