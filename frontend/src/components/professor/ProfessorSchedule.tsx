@@ -275,7 +275,7 @@ export function ProfessorSchedule() {
                           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-sm font-medium">
                             <div className="flex items-center gap-2 text-gray-700">
                               <Calendar className="h-4 w-4 text-brand-blue" />
-                              <span>{slot.date.toLocaleDateString("ro-RO", { weekday: "long", day: "numeric", month: "long" })}</span>
+                              <span>{slot.date.toLocaleDateString("ro-RO", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span>
                             </div>
                             <div className="flex items-center gap-2 text-gray-700">
                               <Clock className="h-4 w-4 text-brand-blue" />
