@@ -118,6 +118,7 @@ export function StudentSearch() {
         return;
       }
       setIsLoadingTypes(true);
+      setSelectedType("");
       try {
         const response = await api.get(`/data/group-activity-types`, {
           params: {
@@ -126,13 +127,15 @@ export function StudentSearch() {
           }
         });
 
-        setActivityTypes(response.data);
-        if (response.data.length === 1) {
-          setSelectedType(response.data[0]);
-        } else
-          setSelectedType("");
+        const data = response.data || [];
+        setActivityTypes(data);
+
+        if (data.length === 1) {
+          setSelectedType(data[0]);
+        }
       } catch {
         toast.error("Nu s-au putut încărca tipurile de activitate.");
+        setActivityTypes([]);
       } finally {
         setIsLoadingTypes(false);
       }
