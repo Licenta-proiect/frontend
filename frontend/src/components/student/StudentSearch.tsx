@@ -193,7 +193,7 @@ export function StudentSearch() {
                     aria-expanded={openGroups}
                     disabled={isLoadingGroups}
                     className={cn(
-                      "w-full justify-between font-normal focus-visible:ring-1 border-gray-200 hover:bg-transparent active:scale-100",
+                      "w-full justify-between font-normal border-gray-200 hover:bg-transparent active:scale-100",
                       !selectedGroupId && "text-muted-foreground hover:text-muted-foreground"
                     )}
                   >
@@ -254,7 +254,7 @@ export function StudentSearch() {
                 <SelectTrigger 
                   id="search-subject" 
                   className={cn(
-                    "w-full border-gray-200 focus-visible:ring-1 focus:ring-brand-blue/30 transition-all",
+                    "w-full border-gray-200 focus:ring-brand-blue/30 transition-all",
                     (!selectedGroupId || isLoadingSubjects) && "opacity-50 cursor-not-allowed bg-gray-50"
                   )}
                 >
@@ -283,7 +283,7 @@ export function StudentSearch() {
                 Tip activitate <span className="text-brand-red">*</span>
               </Label>
               <Select value={selectedType} onValueChange={setSelectedType}> 
-                <SelectTrigger id="search-type" className="w-full focus-visible:ring-1 focus:ring-brand-blue/30 border-gray-200">
+                <SelectTrigger id="search-type" className="w-full focus:ring-brand-blue/30 border-gray-200">
                   <SelectValue placeholder="Selectează tipul" />
                 </SelectTrigger>
                 <SelectContent>

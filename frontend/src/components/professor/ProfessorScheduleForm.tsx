@@ -289,7 +289,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     setSelectedType(""); setActivityTypes([]); onSearch(null, {});
   };
 
-  const inputClasses = "min-h-10 w-full border-gray-200 text-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-brand-blue/30 focus-visible:border-brand-blue/50 transition-all duration-200 shadow-xs";
+  const inputClasses = "min-h-10 w-full border-gray-200 text-sm placeholder:text-muted-foreground focus-visible:border-brand-blue/50 transition-all duration-200 shadow-xs";
   const placeholderClasses = "text-muted-foreground font-normal";
 
   if (isLoading) return <div className="flex justify-center p-12"><Loader2 className="h-8 w-8 animate-spin text-brand-blue" /></div>;

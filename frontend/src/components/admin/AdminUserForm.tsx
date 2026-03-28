@@ -85,8 +85,8 @@ export function AdminUserForm({ onAdd }: { onAdd: () => void }) {
                 if (errors.lastName) setErrors(prev => ({ ...prev, lastName: false }));
               }} 
               className={cn(
-                "focus-visible:ring-1 border-gray-200 transition-colors shadow-xs h-10",
-                errors.lastName ? "border-brand-red focus-visible:ring-brand-red" : "focus-visible:ring-brand-blue/30"
+                "border-gray-200 transition-colors shadow-xs h-10",
+                errors.lastName ? "border-brand-red focus-visible:ring-brand-red" : ""
               )}
             />
           </div>
@@ -102,8 +102,8 @@ export function AdminUserForm({ onAdd }: { onAdd: () => void }) {
                 if (errors.firstName) setErrors(prev => ({ ...prev, firstName: false }));
               }} 
               className={cn(
-                "focus-visible:ring-1 border-gray-200 transition-colors shadow-xs h-10",
-                errors.firstName ? "border-brand-red focus-visible:ring-brand-red" : "focus-visible:ring-brand-blue/30"
+                "border-gray-200 transition-colors shadow-xs h-10",
+                errors.firstName ? "border-brand-red focus-visible:ring-brand-red" : ""
               )}
             />
           </div>
@@ -122,8 +122,8 @@ export function AdminUserForm({ onAdd }: { onAdd: () => void }) {
               if (errors.email) setErrors(prev => ({ ...prev, email: false }));
             }} 
             className={cn(
-              "focus-visible:ring-1 border-gray-200 transition-colors shadow-xs h-10",
-              errors.email ? "border-brand-red focus-visible:ring-brand-red" : "focus-visible:ring-brand-blue/30"
+              "border-gray-200 transition-colors shadow-xs h-10",
+              errors.email ? "border-brand-red focus-visible:ring-brand-red" : ""
             )}
           />
         </div>

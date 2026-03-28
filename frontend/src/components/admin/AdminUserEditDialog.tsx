@@ -45,8 +45,8 @@ export function AdminUserEditDialog({
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
                 className={cn(
-                    "focus-visible:ring-1 border-gray-200 transition-colors",
-                    emailError ? "border-brand-red focus-visible:ring-brand-red" : "focus-visible:ring-brand-blue/30"
+                    "border-gray-200 transition-colors",
+                    emailError ? "border-brand-red focus-visible:ring-brand-red" : ""
                 )}
                 />
                 <p className="text-xs text-gray-500 italic">

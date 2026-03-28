@@ -260,7 +260,7 @@ export function AdminSync() {
             <div className="space-y-2">
               <Label className="font-semibold text-gray-900 text-sm">Interval sincronizare</Label>
               <Select value={syncInterval} onValueChange={setSyncInterval} disabled={!autoSyncEnabled}>
-                <SelectTrigger className="h-10 text-sm border-gray-200 shadow-xs focus-visible:ring-1">
+                <SelectTrigger className="h-10 text-sm border-gray-200 shadow-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -277,7 +277,7 @@ export function AdminSync() {
                 value={syncTime} 
                 onChange={(e) => setSyncTime(e.target.value)} 
                 disabled={!autoSyncEnabled}
-                className="h-10 border-gray-200 shadow-xs text-md focus-visible:ring-1 transition-colors"
+                className="h-10 border-gray-200 shadow-xs text-md transition-colors"
               />
             </div>
           </div>

@@ -86,7 +86,7 @@ export function AdminUserList({
                     setSearchQuery(e.target.value);
                     setDisplayLimit(step); // Reset the limit on new search
                   }}
-                  className="pl-9 h-10 focus-visible:ring-1 border-gray-200 transition-colors shadow-xs text-sm"
+                  className="pl-9 h-10 border-gray-200 transition-colors shadow-xs text-sm"
                 />
               </div>
               <Select value={roleFilter} onValueChange={(val) => {

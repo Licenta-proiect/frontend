@@ -137,8 +137,8 @@ export function ProfessorAccessRequest() {
                   if (errors.lastName) setErrors(prev => ({ ...prev, lastName: false }));
                 }} 
                 className={cn(
-                  "focus-visible:ring-1 border-gray-200 transition-colors",
-                  errors.lastName ? "border-brand-red focus-visible:ring-brand-red" : "focus-visible:ring-brand-blue/30"
+                  "border-gray-200 transition-colors",
+                  errors.lastName ? "border-brand-red focus-visible:ring-brand-red" : ""
                 )}
               />
             </div>
@@ -153,8 +153,8 @@ export function ProfessorAccessRequest() {
                   if (errors.firstName) setErrors(prev => ({ ...prev, firstName: false }));
                 }} 
                 className={cn(
-                  "focus-visible:ring-1 border-gray-200 transition-colors",
-                  errors.firstName ? "border-brand-red focus-visible:ring-brand-red" : "focus-visible:ring-brand-blue/30"
+                  "border-gray-200 transition-colors",
+                  errors.firstName ? "border-brand-red focus-visible:ring-brand-red" : ""
                 )}
               />
             </div>
@@ -171,8 +171,8 @@ export function ProfessorAccessRequest() {
                 if (errors.email) setErrors(prev => ({ ...prev, email: false }));
               }} 
               className={cn(
-                "focus-visible:ring-1 border-gray-200 transition-colors",
-                errors.email ? "border-brand-red focus-visible:ring-brand-red" : "focus-visible:ring-brand-blue/30"
+                "border-gray-200 transition-colors",
+                errors.email ? "border-brand-red focus-visible:ring-brand-red" : ""
               )}
             />
           </div>
