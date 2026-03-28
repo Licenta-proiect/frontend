@@ -35,9 +35,14 @@ export interface Group {
   specializationShortName: string;
 }
 
+export interface Subject {
+  longName: string;
+  shortName: string;
+}
+
 export function StudentSearch() {
   const [groups, setGroups] = useState<Group[]>([]);
-  const [subjects, setSubjects] = useState<string[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [activityTypes, setActivityTypes] = useState<string[]>([]);
   const [searchResults, setSearchResults] = useState<AlternativeOption[]>([]);
   
@@ -313,8 +318,10 @@ export function StudentSearch() {
                   )}
                 </SelectTrigger>
                 <SelectContent>
-                  {subjects.map((m) => (
-                    <SelectItem key={m} value={m}>{m}</SelectItem>
+                  {subjects.map((s) => (
+                    <SelectItem key={s.longName} value={s.longName}>
+                      {s.longName} ({s.shortName})
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
