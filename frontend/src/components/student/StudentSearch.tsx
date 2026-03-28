@@ -98,9 +98,15 @@ export function StudentSearch() {
       setIsLoadingSubjects(true);
       try {
         const response = await api.get(`/subgroups/subjects?subgroup_id=${selectedGroupId}`);
-        setSubjects(response.data.subjects);
+        const fetchedSubjects = response.data.subjects || [];
+        
+        setSubjects(fetchedSubjects);
         setSelectedSubject(""); 
         setActivityTypes([]);
+
+        if (fetchedSubjects.length === 0) {
+          toast.info("Această grupă nu are materii înregistrate în orar.", { duration: 7000});
+        }
       } catch {
         toast.error("Nu s-au putut încărca materiile pentru această grupă.");
       } finally {
