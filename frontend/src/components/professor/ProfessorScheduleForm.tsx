@@ -183,11 +183,12 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
         }));
 
         setAllGroups(groupsOptions);
-        setSelectedGroups(groupsData.map((g: ApiGroup) => g.id.toString()));
         
-        if (groupsData.length > 0) {
-          await fetchValidWeeks(groupsData.map((g: ApiGroup) => g.id.toString()));
-        }
+        if(selectedType.toLowerCase().includes("curs"))
+          setSelectedGroups(groupsData.map((g: ApiGroup) => g.id.toString()));
+        else
+          setSelectedGroups([]);
+        
       } catch {
         toast.error("Eroare la sincronizarea grupelor");
       } finally {
@@ -223,6 +224,14 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       setIsValidatingWeeks(false);
     }
   };
+
+  useEffect(() => {
+    if (selectedGroups.length > 0) {
+      fetchValidWeeks(selectedGroups);
+    } else {
+      setAllWeeks([]);
+    }
+  }, [selectedGroups]);
 
   const handleSearch = async () => {
     toast.dismiss();
