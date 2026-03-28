@@ -174,8 +174,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       setIsSyncingGroups(true);
 
       try {
-        const typeParam = selectedType.toLowerCase().includes("curs") ? `&activity_type=${selectedType}` : "";
-        const gResp = await api.get(`/professor/groups-by-subject?email=${email}&subject=${selectedSubject}${typeParam}`);
+        const gResp = await api.get(`/professor/groups-by-subject?email=${email}&subject=${selectedSubject}&activity_type=${selectedType}`);
 
         const groupsData = gResp.data.groups || [];
         const groupsOptions = groupsData.map((g: ApiGroup) => ({
