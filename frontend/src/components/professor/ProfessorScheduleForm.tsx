@@ -151,7 +151,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       }
       const email = localStorage.getItem("userEmail");
       try {
-        const sResp = await api.get(`/professor/rooms-by-subject?email=${email}&subject=${selectedSubject}`);
+        const sResp = await api.get(`/professor/rooms-by-subject?email=${email}&subject=${selectedSubject}&activity_type=${selectedType}`);
         const roomsData = sResp.data.rooms || [];
         setSelectedRooms(roomsData.map((s: ApiRoom) => s.id.toString()));
       } catch {
@@ -159,7 +159,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       }
     };
     fetchRooms();
-  }, [selectedSubject]);
+  }, [selectedSubject, selectedType]);
 
   // When SUBJECT or TYPE changes: Sync GROUPS
   useEffect(() => {
