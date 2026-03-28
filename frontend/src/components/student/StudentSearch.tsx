@@ -38,6 +38,7 @@ export interface Group {
 export function StudentSearch() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [subjects, setSubjects] = useState<string[]>([]);
+  const [activityTypes, setActivityTypes] = useState<string[]>([]);
   const [searchResults, setSearchResults] = useState<AlternativeOption[]>([]);
   
   const [selectedGroupId, setSelectedGroupId] = useState<string>("");
@@ -48,12 +49,11 @@ export function StudentSearch() {
   const [openGroups, setOpenGroups] = useState(false);
   const [isLoadingGroups, setIsLoadingGroups] = useState(false);
   const [isLoadingSubjects, setIsLoadingSubjects] = useState(false);
+  const [isLoadingTypes, setIsLoadingTypes] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [allWeeks, setAllWeeks] = useState<number[]>([]);
   const hasShownStatusToast = useRef(false);
-
-  const types = ["Seminar", "Laborator", "Proiect"];
 
   // Fetch groups and available weeks on component mount
   useEffect(() => {
@@ -92,6 +92,7 @@ export function StudentSearch() {
     const fetchSubjects = async () => {
       if (!selectedGroupId) {
         setSubjects([]);
+        setActivityTypes([]);
         return;
       }
       setIsLoadingSubjects(true);
@@ -99,6 +100,7 @@ export function StudentSearch() {
         const response = await api.get(`/subgroups/subjects?subgroup_id=${selectedGroupId}`);
         setSubjects(response.data.subjects);
         setSelectedSubject(""); 
+        setActivityTypes([]);
       } catch {
         toast.error("Nu s-au putut încărca materiile pentru această grupă.");
       } finally {
@@ -107,6 +109,36 @@ export function StudentSearch() {
     };
     fetchSubjects();
   }, [selectedGroupId]);
+
+  // Fetch Activity Types when Subject changes
+  useEffect(() => {
+    const fetchTypes = async () => {
+      if (!selectedGroupId || !selectedSubject) {
+        setActivityTypes([]);
+        return;
+      }
+      setIsLoadingTypes(true);
+      try {
+        const response = await api.get(`/data/group-activity-types`, {
+          params: {
+            group_id: selectedGroupId,
+            subject: selectedSubject
+          }
+        });
+
+        setActivityTypes(response.data);
+        if (response.data.length === 1) {
+          setSelectedType(response.data[0]);
+        } else
+          setSelectedType("");
+      } catch {
+        toast.error("Nu s-au putut încărca tipurile de activitate.");
+      } finally {
+        setIsLoadingTypes(false);
+      }
+    };
+    fetchTypes();
+  }, [selectedGroupId, selectedSubject]);
 
   // Search Handler (POST to backend)
   const handleSearch = async () => {
@@ -160,6 +192,8 @@ export function StudentSearch() {
     setSelectedGroupId("");
     setSelectedSubject("");
     setSelectedType("");
+    setSubjects([]);        
+    setActivityTypes([]);   
     setAttendsCourse(false);
     setSearchResults([]);
     setHasSearched(false);
@@ -282,14 +316,37 @@ export function StudentSearch() {
               <Label htmlFor="search-type" className="text-sm font-semibold text-gray-900">
                 Tip activitate <span className="text-brand-red">*</span>
               </Label>
-              <Select value={selectedType} onValueChange={setSelectedType}> 
-                <SelectTrigger id="search-type" className="w-full focus:ring-brand-blue/30 border-gray-200">
-                  <SelectValue placeholder="Selectează tipul" />
+              <Select 
+                value={selectedType} 
+                onValueChange={setSelectedType}
+                disabled={!selectedSubject || isLoadingTypes} 
+              > 
+                <SelectTrigger 
+                  id="search-type" 
+                  className={cn(
+                    "w-full focus:ring-brand-blue/30 border-gray-200",
+                    (!selectedSubject || isLoadingTypes) && "opacity-50 cursor-not-allowed bg-gray-50"
+                  )}
+                >
+                  {isLoadingTypes ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-3 w-3 animate-spin text-brand-blue"/> 
+                      <span className="text-muted-foreground">Se încarcă...</span>
+                    </div>
+                  ) : (
+                    <SelectValue placeholder={!selectedSubject ? "Alegeți materia" : "Selectează tipul"} />
+                  )}
                 </SelectTrigger>
                 <SelectContent>
-                  {types.map((type) => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
-                  ))}
+                  {activityTypes.length > 0 ? (
+                    activityTypes.map((type) => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))
+                  ) : (
+                    <div className="p-2 text-xs text-center text-muted-foreground">
+                      Niciun tip găsit
+                    </div>
+                  )}
                 </SelectContent>
               </Select>
             </div>
