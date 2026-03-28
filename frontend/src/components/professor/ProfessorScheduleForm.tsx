@@ -183,11 +183,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
         }));
 
         setAllGroups(groupsOptions);
-        
-        if(selectedType.toLowerCase().includes("curs"))
-          setSelectedGroups(groupsData.map((g: ApiGroup) => g.id.toString()));
-        else
-          setSelectedGroups([]);
+        setSelectedGroups(groupsData.map((g: ApiGroup) => g.id.toString()));
         
       } catch {
         toast.error("Eroare la sincronizarea grupelor");
