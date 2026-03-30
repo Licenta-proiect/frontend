@@ -3,10 +3,11 @@
 import { useMemo, useSyncExternalStore, Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Database, FileText, UserCog } from "lucide-react";
+import { Database, FileText, UserCog, ClipboardList } from "lucide-react";
 import { AdminUsers } from "@/components/admin/AdminUsers";
 import { AdminSync } from "@/components/admin/AdminSync";
 import { AdminHistory } from "@/components/admin/AdminHistory";
+import { AdminEvents } from "@/components/admin/AdminEvents";
 import { toast } from "sonner";
 
 const emptySubscribe = () => () => {};
@@ -37,7 +38,7 @@ function AdminDashboardContent() {
   }, [isClient]);
 
   const tabs = useMemo(() => [
-    { id: "reserve", label: "Rezervare eveniment", icon: <ClipboardList className="h-5 w-5" /> },
+    { id: "reserve", label: "Programare eveniment", icon: <ClipboardList className="h-5 w-5" /> },
     { id: "history", label: "Istoric rezervări", icon: <FileText className="h-5 w-5" /> },
     { id: "sync", label: "Sincronizare orar", icon: <Database className="h-5 w-5" /> },
     { id: "users", label: "Gestionare utilizatori", icon: <UserCog className="h-5 w-5" /> },

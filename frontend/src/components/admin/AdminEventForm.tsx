@@ -7,47 +7,50 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MultiSelect } from "@/components/ui/multi-select";
-import { TreeSelect } from "@/components/ui/tree-select"; // Presupunem un component de TreeSelect pentru ierarhie
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Search, RotateCcw, Loader2, CalendarIcon, Users } from "lucide-react";
+import { Search, RotateCcw, Loader2, CalendarIcon, Users, InfoIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ro } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import api from "@/services/api";
 
+interface SelectOption { label: string; value: string; }
+
 export function AdminEventForm() {
-  const [rooms, setRooms] = useState([]);
-  const [professors, setProfessors] = useState([]);
-  const [groupsHierarchical, setGroupsHierarchical] = useState([]);
+  const [rooms, setRooms] = useState<SelectOption[]>([]);
+  const [professors, setProfessors] = useState<SelectOption[]>([]);
+  const [specializations, setSpecializations] = useState<SelectOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form State
-  const [eventName, setEventName] = useState("");
-  const [selectedRooms, setSelectedRooms] = useState([]);
-  const [selectedGroups, setSelectedGroups] = useState([]);
-  const [selectedProfessors, setSelectedProfessors] = useState([]);
-  const [date, setDate] = useState<Date>();
-  const [duration, setDuration] = useState("");
-  const [studentCount, setStudentCount] = useState("");
+  const [eventName, setEventName] = useState<string>("");
+  const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
+  const [selectedSpecs, setSelectedSpecs] = useState<string[]>([]);
+  const [selectedProfessors, setSelectedProfessors] = useState<string[]>([]);
+  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [duration, setDuration] = useState<string>("");
+  const [studentCount, setStudentCount] = useState<string>("");
+
+  const durations = ["1 oră", "2 ore", "3 ore", "4 ore", "5 ore"];
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [roomsResp, profsResp, groupsResp] = await Promise.all([
+        const [roomsResp, profsResp, specsResp] = await Promise.all([
           api.get("/data/rooms"),
           api.get("/data/professors"),
-          api.get("/data/groups-hierarchical")
+          api.get("/data/groups-specialization")
         ]);
         
-        setRooms(roomsResp.data.map(r => ({ label: r.name, value: r.id.toString() })));
-        setProfessors(profsResp.data.map(p => ({ 
+        setRooms(roomsResp.data.map((r: any) => ({ label: r.name, value: r.id.toString() })));
+        setProfessors(profsResp.data.map((p: any) => ({ 
           label: `${p.lastName} ${p.firstName}`, 
           value: p.id.toString() 
         })));
-        setGroupsHierarchical(groupsResp.data);
+        setSpecializations(specsResp.data);
       } catch (error) {
         toast.error("Eroare la încărcarea datelor");
       } finally {
@@ -68,10 +71,10 @@ export function AdminEventForm() {
       const payload = {
         subject: eventName,
         room_ids: selectedRooms.map(Number),
-        group_ids: selectedGroups.map(Number),
+        specialization_years: selectedSpecs, // Trimite sub formă de "CR-1"
         professor_ids: selectedProfessors.map(Number),
         reservation_date: format(date, "yyyy-MM-dd"),
-        duration: parseInt(duration),
+        duration: parseInt(duration.split(" ")[0]),
         number_of_people: studentCount ? parseInt(studentCount) : 0,
         activity_type: "events"
       };
@@ -87,85 +90,94 @@ export function AdminEventForm() {
   };
 
   const handleReset = () => {
-    setEventName(""); setSelectedRooms([]); setSelectedGroups([]);
-    setSelectedProfessors([]); setDate(undefined); setDuration("");
+    setEventName(""); 
+    setSelectedRooms([]); 
+    setSelectedSpecs([]);
+    setSelectedProfessors([]); 
+    setDate(undefined); 
+    setDuration("");
     setStudentCount("");
   };
+
+  const inputClasses = "min-h-10 w-full border-gray-200 text-sm placeholder:text-muted-foreground focus-visible:border-brand-blue/50 transition-all duration-200 shadow-xs";
 
   if (isLoading) return <div className="flex justify-center p-12"><Loader2 className="h-8 w-8 animate-spin text-brand-blue" /></div>;
 
   return (
-    <Card className="border-gray-200 shadow-sm max-w-5xl mx-auto">
+    <Card className="border-gray-200 shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
           <Users className="h-5 w-5 text-brand-blue" />
-          Creare Eveniment Administrativ
+          Programare eveniment
         </CardTitle>
-        <CardDescription>
-          Planificați evenimente, ședințe sau activități administrative în sălile facultății
+        <CardDescription className="text-gray-600 font-medium text-sm">
+          Planificați activități administrative, conferințe sau ședințe
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
           {/* Nume Eveniment */}
-          <div className="space-y-2 md:col-span-2">
-            <Label className="text-sm font-semibold">Nume eveniment <span className="text-brand-red">*</span></Label>
+          <div className="space-y-2 lg:col-span-2">
+            <Label className="text-sm font-semibold text-gray-900">Nume eveniment <span className="text-brand-red">*</span></Label>
             <Input 
-              placeholder="Ex: Conferință Cybersecurity / Ședință Departament" 
+              placeholder="Ex: Conferință / Ședință Consiliu" 
               value={eventName}
               onChange={(e) => setEventName(e.target.value)}
-              className="shadow-xs"
+              className={inputClasses}
             />
           </div>
 
           {/* Săli MultiSelect */}
           <div className="space-y-2">
-            <Label className="text-sm font-semibold">Săli <span className="text-brand-red">*</span></Label>
+            <Label className="text-sm font-semibold text-gray-900">Săli <span className="text-brand-red">*</span></Label>
             <MultiSelect
               options={rooms}
               selected={selectedRooms}
               onChange={setSelectedRooms}
               placeholder="Selectați sălile"
+              className={inputClasses}
             />
           </div>
 
           {/* Profesori MultiSelect */}
           <div className="space-y-2">
-            <Label className="text-sm font-semibold">Profesori participanți</Label>
+            <Label className="text-sm font-semibold text-gray-900">Profesori participanți</Label>
             <MultiSelect
               options={professors}
               selected={selectedProfessors}
               onChange={setSelectedProfessors}
-              placeholder="Selectați profesorii"
+              placeholder="Căutați profesori"
+              className={inputClasses}
             />
           </div>
 
-          {/* Grupe TreeSelect (Hierarchical) */}
+          {/* Specializări*/}
           <div className="space-y-2">
-            <Label className="text-sm font-semibold">Grupe vizate</Label>
-            <TreeSelect
-              data={groupsHierarchical}
-              selected={selectedGroups}
-              onChange={setSelectedGroups}
-              placeholder="Selectați specializări/ani/grupe"
+            <Label className="text-sm font-semibold text-gray-900">Specializări pe ani</Label>
+            <MultiSelect
+              options={specializations}
+              selected={selectedSpecs}
+              onChange={setSelectedSpecs}
+              placeholder="Ex: CR an 1, TI an 2..."
+              className={inputClasses}
             />
           </div>
 
           {/* Data Picker */}
           <div className="space-y-2">
-            <Label className="text-sm font-semibold">Data <span className="text-brand-red">*</span></Label>
+            <Label className="text-sm font-semibold text-gray-900">Data <span className="text-brand-red">*</span></Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant={"outline"}
-                  className={cn("w-full justify-start text-left font-normal shadow-xs", !date && "text-muted-foreground")}
+                  className={cn("w-full justify-start text-left font-normal shadow-xs h-10", !date && "text-muted-foreground")}
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  <CalendarIcon className="mr-2 h-4 w-4 text-brand-blue" />
                   {date ? format(date, "PPP", { locale: ro }) : <span>Selectați data</span>}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
+              <PopoverContent className="w-auto p-0" align="start">
                 <Calendar mode="single" selected={date} onSelect={setDate} initialFocus locale={ro} />
               </PopoverContent>
             </Popover>
@@ -173,46 +185,53 @@ export function AdminEventForm() {
 
           {/* Durata */}
           <div className="space-y-2">
-            <Label className="text-sm font-semibold">Durata <span className="text-brand-red">*</span></Label>
+            <Label className="text-sm font-semibold text-gray-900">Durata <span className="text-brand-red">*</span></Label>
             <Select value={duration} onValueChange={setDuration}>
-              <SelectTrigger className="shadow-xs">
+              <SelectTrigger className={inputClasses}>
                 <SelectValue placeholder="Selectează durata" />
               </SelectTrigger>
               <SelectContent>
-                {[1, 2, 3, 4, 5].map((h) => (
-                  <SelectItem key={h} value={h.toString()}>{h} {h === 1 ? 'oră' : 'ore'}</SelectItem>
+                {durations.map((d) => (
+                  <SelectItem key={d} value={d}>{d}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
-          {/* Nr Persoane */}
+           {/*Number of people*/}
           <div className="space-y-2">
-            <Label className="text-sm font-semibold">Număr estimat persoane</Label>
-            <Input 
-              type="number" 
-              placeholder="Ex: 50" 
-              value={studentCount}
-              onChange={(e) => setStudentCount(e.target.value)}
-              className="shadow-xs"
-            />
+            <Label className="text-sm font-semibold text-gray-900">Număr persoane</Label>
+            <Input type="number" step="1" onKeyDown={(e) => ["e", "E", ".", ",", "-"].includes(e.key) && e.preventDefault()} placeholder="Exemplu: 15" value={studentCount} onChange={(e) => (e.target.value === "" || /^\d+$/.test(e.target.value)) && setStudentCount(e.target.value)} className={cn(inputClasses, "px-3")} />
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+        {/* Warning message */}
+        <div className="relative w-full rounded-lg border border-amber-200 bg-amber-50 p-4 [&>svg~*]:pl-7 [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-amber-600">
+          <InfoIcon className="h-4 w-4" />
+          <div className="text-xs sm:text-sm font-medium text-amber-800 leading-relaxed">
+            Rezultatele sunt generate pe baza disponibilității orarului general, însă este esențial să le verificați. 
+            <span className="block">
+              Notă: Puteți planifica recuperări exclusiv pentru grupele la care sunteți titularul activității respective.
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-100">
           <Button 
             onClick={handleCreateEvent} 
             disabled={isSubmitting}
-            className="bg-brand-blue hover:bg-brand-blue-dark text-white font-medium px-8"
+            className="bg-brand-blue hover:bg-brand-blue-dark text-white font-semibold shadow-md px-10 h-11"
           >
             {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
-            Creează Eveniment
+            Caută
           </Button>
-          <Button onClick={handleReset} variant="outline" className="px-8">
+          <Button onClick={handleReset} variant="outline" className="h-11 px-8 border-gray-200 text-gray-700">
             <RotateCcw className="mr-2 h-4 w-4" /> Resetează
           </Button>
         </div>
-      </CardHeader>
+
+
+      </CardContent>
     </Card>
   );
 }
