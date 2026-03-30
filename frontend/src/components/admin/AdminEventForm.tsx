@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Search, RotateCcw, Loader2, CalendarIcon, Users, InfoIcon } from "lucide-react";
+import { Search, RotateCcw, Loader2, CalendarIcon, InfoIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ro } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -107,11 +107,11 @@ export function AdminEventForm() {
     <Card className="border-gray-200 shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
-          <Users className="h-5 w-5 text-brand-blue" />
+          <Search className="h-5 w-5 text-brand-blue" />
           Programare eveniment
         </CardTitle>
         <CardDescription className="text-gray-600 font-medium text-sm">
-          Planificați activități administrative, conferințe sau ședințe
+          Planificați activități academice, administrative, conferințe sau ședințe
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -147,7 +147,7 @@ export function AdminEventForm() {
               options={professors}
               selected={selectedProfessors}
               onChange={setSelectedProfessors}
-              placeholder="Căutați profesori"
+              placeholder="Selectați profesorii"
               className={inputClasses}
             />
           </div>
@@ -159,7 +159,7 @@ export function AdminEventForm() {
               options={specializations}
               selected={selectedSpecs}
               onChange={setSelectedSpecs}
-              placeholder="Ex: CR an 1, TI an 2..."
+              placeholder="Selectați specializările"
               className={inputClasses}
             />
           </div>
@@ -188,7 +188,7 @@ export function AdminEventForm() {
             <Label className="text-sm font-semibold text-gray-900">Durata <span className="text-brand-red">*</span></Label>
             <Select value={duration} onValueChange={setDuration}>
               <SelectTrigger className={inputClasses}>
-                <SelectValue placeholder="Selectează durata" />
+                <SelectValue placeholder="Selectați durata" />
               </SelectTrigger>
               <SelectContent>
                 {durations.map((d) => (
@@ -220,13 +220,13 @@ export function AdminEventForm() {
           <Button 
             onClick={handleCreateEvent} 
             disabled={isSubmitting}
-            className="bg-brand-blue hover:bg-brand-blue-dark text-white font-semibold shadow-md px-10 h-11"
+            className="bg-brand-blue hover:bg-brand-blue-dark text-white font-medium shadow-md transition-all active:scale-95 flex-1 sm:flex-none"
           >
             {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
             Caută
           </Button>
-          <Button onClick={handleReset} variant="outline" className="h-11 px-8 border-gray-200 text-gray-700">
-            <RotateCcw className="mr-2 h-4 w-4" /> Resetează
+          <Button onClick={handleReset} variant="outline" className="border-gray-200 text-gray-700 font-medium hover:bg-gray-50 flex-1 sm:flex-none">
+            <RotateCcw className="h-4 w-4 mr-2" /> Resetează
           </Button>
         </div>
 
