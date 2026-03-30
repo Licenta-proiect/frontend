@@ -15,7 +15,7 @@ import { Group  as ApiGroup } from "@/components/student/StudentSearch";
 import { RawSlotsResponse } from "./ProfessorSchedule";
 
 // Type definitions
-interface ApiRoom { id: number; name: string; }
+export interface ApiRoom { id: number; name: string; }
 
 export interface AvailableSlot {
   id: string;

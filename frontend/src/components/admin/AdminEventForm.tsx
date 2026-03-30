@@ -15,8 +15,16 @@ import { ro } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import api from "@/services/api";
+import { ApiRoom } from "@/components/professor/ProfessorScheduleForm";
 
 interface SelectOption { label: string; value: string; }
+
+interface ProfessorData {
+  id: number;
+  lastName: string;
+  firstName: string;
+  emailAddress: string;
+}
 
 export function AdminEventForm() {
   const [rooms, setRooms] = useState<SelectOption[]>([]);
@@ -45,13 +53,13 @@ export function AdminEventForm() {
           api.get("/data/groups-specialization")
         ]);
         
-        setRooms(roomsResp.data.map((r: any) => ({ label: r.name, value: r.id.toString() })));
-        setProfessors(profsResp.data.map((p: any) => ({ 
+        setRooms(roomsResp.data.map((r: ApiRoom) => ({ label: r.name, value: r.id.toString() })));
+        setProfessors(profsResp.data.map((p: ProfessorData) => ({ 
           label: `${p.lastName} ${p.firstName}`, 
           value: p.id.toString() 
         })));
         setSpecializations(specsResp.data);
-      } catch (error) {
+      } catch {
         toast.error("Eroare la încărcarea datelor");
       } finally {
         setIsLoading(false);
@@ -80,11 +88,11 @@ export function AdminEventForm() {
       };
 
       console.log(JSON.stringify(payload, null, 2));
-      
+
       await api.post("/admin/reservations/events", payload);
       toast.success("Eveniment creat cu succes!");
       handleReset();
-    } catch (error: any) {
+    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       toast.error(error.response?.data?.detail || "Eroare la crearea evenimentului");
     } finally {
       setIsSubmitting(false);
