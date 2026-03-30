@@ -10,7 +10,7 @@ import { MultiSelect } from "@/components/ui/multi-select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search, RotateCcw, Loader2, CalendarIcon, InfoIcon } from "lucide-react";
-import { format } from "date-fns";
+import { format, startOfToday } from "date-fns";
 import { ro } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -71,14 +71,16 @@ export function AdminEventForm() {
       const payload = {
         subject: eventName,
         room_ids: selectedRooms.map(Number),
-        specialization_years: selectedSpecs, // Trimite sub formă de "CR-1"
+        specialization_years: selectedSpecs, 
         professor_ids: selectedProfessors.map(Number),
         reservation_date: format(date, "yyyy-MM-dd"),
         duration: parseInt(duration.split(" ")[0]),
         number_of_people: studentCount ? parseInt(studentCount) : 0,
-        activity_type: "events"
+        activity_type: "event"
       };
 
+      console.log(JSON.stringify(payload, null, 2));
+      
       await api.post("/admin/reservations/events", payload);
       toast.success("Eveniment creat cu succes!");
       handleReset();
@@ -117,7 +119,7 @@ export function AdminEventForm() {
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
-          {/* Nume Eveniment */}
+          {/* Event Name */}
           <div className="space-y-2 lg:col-span-2">
             <Label className="text-sm font-semibold text-gray-900">Nume eveniment <span className="text-brand-red">*</span></Label>
             <Input 
@@ -128,7 +130,7 @@ export function AdminEventForm() {
             />
           </div>
 
-          {/* Săli MultiSelect */}
+          {/* Rooms MultiSelect */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Săli <span className="text-brand-red">*</span></Label>
             <MultiSelect
@@ -140,7 +142,7 @@ export function AdminEventForm() {
             />
           </div>
 
-          {/* Profesori MultiSelect */}
+          {/* Professors MultiSelect */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Profesori participanți</Label>
             <MultiSelect
@@ -152,7 +154,7 @@ export function AdminEventForm() {
             />
           </div>
 
-          {/* Specializări*/}
+          {/* Specializations */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Specializări pe ani</Label>
             <MultiSelect
@@ -164,7 +166,7 @@ export function AdminEventForm() {
             />
           </div>
 
-          {/* Data Picker */}
+          {/* Date Picker */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Data <span className="text-brand-red">*</span></Label>
             <Popover>
@@ -178,12 +180,18 @@ export function AdminEventForm() {
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <Calendar mode="single" selected={date} onSelect={setDate} initialFocus locale={ro} />
+                <Calendar mode="single" 
+                selected={date} 
+                onSelect={setDate} 
+                autoFocus
+                locale={ro}
+                disabled={(date) => date < startOfToday()}
+                 />
               </PopoverContent>
             </Popover>
           </div>
 
-          {/* Durata */}
+          {/* Duration */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Durata <span className="text-brand-red">*</span></Label>
             <Select value={duration} onValueChange={setDuration}>
@@ -229,7 +237,6 @@ export function AdminEventForm() {
             <RotateCcw className="h-4 w-4 mr-2" /> Resetează
           </Button>
         </div>
-
 
       </CardContent>
     </Card>
