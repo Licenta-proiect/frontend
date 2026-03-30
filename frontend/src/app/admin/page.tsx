@@ -37,8 +37,9 @@ function AdminDashboardContent() {
   }, [isClient]);
 
   const tabs = useMemo(() => [
-    { id: "sync", label: "Sincronizare orar", icon: <Database className="h-5 w-5" /> },
+    { id: "reserve", label: "Rezervare eveniment", icon: <ClipboardList className="h-5 w-5" /> },
     { id: "history", label: "Istoric rezervări", icon: <FileText className="h-5 w-5" /> },
+    { id: "sync", label: "Sincronizare orar", icon: <Database className="h-5 w-5" /> },
     { id: "users", label: "Gestionare utilizatori", icon: <UserCog className="h-5 w-5" /> },
   ], []);
 
@@ -53,8 +54,9 @@ function AdminDashboardContent() {
       tabs={tabs}
     >
       <div className="space-y-6">
-        {activeTab === "sync" && <AdminSync />}
+        {activeTab === "reserve" && <AdminEvents />}
         {activeTab === "history" && <AdminHistory />}
+        {activeTab === "sync" && <AdminSync />}
         {activeTab === "users" && <Suspense fallback={<div>Încărcare...</div>}><AdminUsers /></Suspense>}
       </div>
     </DashboardLayout>
