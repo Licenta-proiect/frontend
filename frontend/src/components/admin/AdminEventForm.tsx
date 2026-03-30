@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import api from "@/services/api";
 import { ApiRoom } from "@/components/professor/ProfessorScheduleForm";
+import { DateRange } from "react-day-picker";
 
 interface SelectOption { label: string; value: string; }
 
@@ -38,7 +39,12 @@ export function AdminEventForm() {
   const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
   const [selectedSpecs, setSelectedSpecs] = useState<string[]>([]);
   const [selectedProfessors, setSelectedProfessors] = useState<string[]>([]);
-  const [date, setDate] = useState<Date | undefined>(undefined);
+  
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: undefined,
+    to: undefined,
+  });
+  
   const [duration, setDuration] = useState<string>("");
   const [studentCount, setStudentCount] = useState<string>("");
 
@@ -69,8 +75,8 @@ export function AdminEventForm() {
   }, []);
 
   const handleCreateEvent = async () => {
-    if (!eventName || !date || selectedRooms.length === 0 || !duration) {
-      toast.error("Vă rugăm să completați câmpurile obligatorii (*)");
+    if (!eventName || !dateRange?.from || !dateRange?.to || selectedRooms.length === 0 || !duration) {
+      toast.error("Vă rugăm să completați toate câmpurile obligatorii, inclusiv intervalul de date.");
       return;
     }
 
@@ -81,7 +87,8 @@ export function AdminEventForm() {
         room_ids: selectedRooms.map(Number),
         specialization_years: selectedSpecs, 
         professor_ids: selectedProfessors.map(Number),
-        reservation_date: format(date, "yyyy-MM-dd"),
+        start_date: format(dateRange.from, "yyyy-MM-dd"),
+        end_date: format(dateRange.to, "yyyy-MM-dd"),
         duration: parseInt(duration.split(" ")[0]),
         number_of_people: studentCount ? parseInt(studentCount) : 0,
         activity_type: "event"
@@ -104,7 +111,7 @@ export function AdminEventForm() {
     setSelectedRooms([]); 
     setSelectedSpecs([]);
     setSelectedProfessors([]); 
-    setDate(undefined); 
+    setDateRange({ from: undefined, to: undefined });
     setDuration("");
     setStudentCount("");
   };
@@ -181,17 +188,33 @@ export function AdminEventForm() {
               <PopoverTrigger asChild>
                 <Button
                   variant={"outline"}
-                  className={cn("w-full justify-start text-left font-normal shadow-xs h-10", !date && "text-muted-foreground")}
+                  className={cn(
+                    "w-full justify-start text-left font-normal shadow-xs h-10",
+                    !dateRange?.from && "text-muted-foreground"
+                  )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4 text-brand-blue" />
-                  {date ? format(date, "PPP", { locale: ro }) : <span>Selectați data</span>}
+                  {dateRange?.from ? (
+                    dateRange.to ? (
+                      <>
+                        {format(dateRange.from, "dd MMM", { locale: ro })} -{" "}
+                        {format(dateRange.to, "dd MMM yyyy", { locale: ro })}
+                      </>
+                    ) : (
+                      format(dateRange.from, "dd MMM yyyy", { locale: ro })
+                    )
+                  ) : (
+                    <span>Selectați perioada</span>
+                  )}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <Calendar mode="single" 
-                selected={date} 
-                onSelect={setDate} 
+                <Calendar 
                 autoFocus
+                mode="range" 
+                defaultMonth={dateRange?.from}
+                selected={dateRange}
+                onSelect={setDateRange}
                 locale={ro}
                 disabled={(date) => date < startOfToday()}
                  />
