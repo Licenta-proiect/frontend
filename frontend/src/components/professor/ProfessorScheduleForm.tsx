@@ -503,7 +503,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
               </>
             )}
           </Button>
-          <Button onClick={handleReset} variant="outline" className="border-gray-200 text-gray-700 font-medium hover:bg-gray-50 flex-1 sm:flex-none">
+          <Button onClick={handleReset} disabled={isSearching} variant="outline" className="border-gray-200 text-gray-700 font-medium hover:bg-gray-50 flex-1 sm:flex-none">
             <RotateCcw className="h-4 w-4 mr-2" /> Resetează
           </Button>
         </div>
