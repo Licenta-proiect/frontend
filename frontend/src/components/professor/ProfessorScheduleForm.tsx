@@ -65,6 +65,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
   const [selectedDay, setSelectedDay] = useState<string>("");
   
   const [isLoading, setIsLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
   const [isSyncingTypes, setIsSyncingTypes] = useState(false);
   const [isSyncingGroups, setIsSyncingGroups] = useState(false);
 
@@ -251,7 +252,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     };
 
     try {
-      setIsLoading(true);
+      setIsSearching(true);
       const response = await api.post("/reservations/search-free", searchPayload);
       
       if (response.data.info) {
@@ -282,7 +283,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
   
       toast.error(errorMessage);
     } finally {
-      setIsLoading(false);
+      setIsSearching(false);
     }
   };
 
@@ -485,8 +486,22 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
-          <Button onClick={handleSearch} disabled={allWeeks.length === 0} className="bg-brand-blue hover:bg-brand-blue-dark text-white font-medium shadow-md transition-all active:scale-95 flex-1 sm:flex-none">
-            <Search className="h-4 w-4 mr-2" /> Caută
+          <Button 
+            onClick={handleSearch} 
+            disabled={allWeeks.length === 0 || isSearching}
+            className="bg-brand-blue hover:bg-brand-blue-dark text-white font-medium shadow-md transition-all active:scale-95 flex-1 sm:flex-none"
+          >
+            {isSearching ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Se caută...
+              </>
+            ) : (
+              <>
+                <Search className="h-4 w-4 mr-2" /> 
+                Caută
+              </>
+            )}
           </Button>
           <Button onClick={handleReset} variant="outline" className="border-gray-200 text-gray-700 font-medium hover:bg-gray-50 flex-1 sm:flex-none">
             <RotateCcw className="h-4 w-4 mr-2" /> Resetează
