@@ -21,7 +21,7 @@ function AdminDashboardContent() {
   const searchParams = useSearchParams();
 
   // Read the active tab from the URL. If it doesn't exist, fallback to "sync"
-  const activeTab = searchParams.get("tab") || "sync";
+  const activeTab = searchParams.get("tab") || "reserve";
 
   useEffect(() => {
     toast.dismiss();

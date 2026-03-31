@@ -18,6 +18,11 @@ import api from "@/services/api";
 import { ApiRoom } from "@/components/professor/ProfessorScheduleForm";
 import { DateRange } from "react-day-picker";
 
+interface SpecializationOption {
+  label: string;
+  ids: number[];
+}
+
 interface SelectOption { label: string; value: string; }
 
 interface ProfessorData {
@@ -30,14 +35,14 @@ interface ProfessorData {
 export function AdminEventForm() {
   const [rooms, setRooms] = useState<SelectOption[]>([]);
   const [professors, setProfessors] = useState<SelectOption[]>([]);
-  const [specializations, setSpecializations] = useState<SelectOption[]>([]);
+  const [specializationOptions, setSpecializations] = useState<SelectOption[]>([]);
+  const [selectedSpecsJson, setSelectedSpecsJson] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form State
   const [eventName, setEventName] = useState<string>("");
   const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
-  const [selectedSpecs, setSelectedSpecs] = useState<string[]>([]);
   const [selectedProfessors, setSelectedProfessors] = useState<string[]>([]);
   
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
@@ -64,7 +69,12 @@ export function AdminEventForm() {
           label: `${p.lastName} ${p.firstName}`, 
           value: p.id.toString() 
         })));
-        setSpecializations(specsResp.data);
+
+        const specsMapped = specsResp.data.map((s: SpecializationOption) => ({
+          label: s.label,
+          value: JSON.stringify(s.ids) 
+        }));
+        setSpecializations(specsMapped);
       } catch {
         toast.error("Eroare la încărcarea datelor");
       } finally {
@@ -82,10 +92,14 @@ export function AdminEventForm() {
 
     setIsSubmitting(true);
     try {
+      const allSubgroupIds = Array.from(
+        new Set(selectedSpecsJson.flatMap(json => JSON.parse(json) as number[]))
+      );
+
       const payload = {
         subject: eventName,
         room_ids: selectedRooms.map(Number),
-        specialization_years: selectedSpecs, 
+        subgroup_ids: allSubgroupIds,
         professor_ids: selectedProfessors.map(Number),
         start_date: format(dateRange.from, "yyyy-MM-dd"),
         end_date: format(dateRange.to, "yyyy-MM-dd"),
@@ -109,7 +123,7 @@ export function AdminEventForm() {
   const handleReset = () => {
     setEventName(""); 
     setSelectedRooms([]); 
-    setSelectedSpecs([]);
+    setSelectedSpecsJson([]);
     setSelectedProfessors([]); 
     setDateRange({ from: undefined, to: undefined });
     setDuration("");
@@ -173,9 +187,9 @@ export function AdminEventForm() {
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Specializări pe ani</Label>
             <MultiSelect
-              options={specializations}
-              selected={selectedSpecs}
-              onChange={setSelectedSpecs}
+              options={specializationOptions} 
+              selected={selectedSpecsJson}
+              onChange={setSelectedSpecsJson}
               placeholder="Selectați specializările"
               className={inputClasses}
             />
