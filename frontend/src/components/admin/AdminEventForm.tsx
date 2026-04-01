@@ -119,7 +119,6 @@ export function AdminEventForm({ onSearch }: AdminEventFormProps) {
         toast.info(response.data.info);
         onSearch(null, []);
       } else {
-        // Trimitem filtrele și rezultatele către părinte
         onSearch({
           eventName,
           selectedRooms,
