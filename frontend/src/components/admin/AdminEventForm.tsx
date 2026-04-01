@@ -149,9 +149,16 @@ export function AdminEventForm({ onSearch }: AdminEventFormProps) {
           studentCount: studentCount || "0"
         }, days);
       }
-    } catch (error: unknown) { 
-        const errorMessage = error instanceof Error ? error.message : "Eroare la căutarea sloturilor";
-        toast.error(errorMessage);
+    } catch (error: any) { 
+        const errorMessage = error.response?.data?.detail || "Eroare la căutarea sloturilor";
+        
+        if (Array.isArray(errorMessage)) {
+          toast.error(errorMessage[0].msg || "Eroare de validare date");
+        } else {
+          toast.error(errorMessage);
+        }
+        
+        onSearch(null, []);
       } finally {
         setIsSearching(false);
       }
@@ -267,7 +274,7 @@ export function AdminEventForm({ onSearch }: AdminEventFormProps) {
                 selected={dateRange}
                 onSelect={setDateRange}
                 locale={ro}
-                disabled={(date) => date < startOfToday()}
+                //disabled={(date) => date < startOfToday()}
                  />
               </PopoverContent>
             </Popover>
@@ -306,7 +313,7 @@ export function AdminEventForm({ onSearch }: AdminEventFormProps) {
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-100">
+        <div className="flex flex-col sm:flex-row gap-3 pt-4 border-gray-100">
           <Button 
             onClick={handleSearch} 
             disabled={isSearching}
