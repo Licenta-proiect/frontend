@@ -267,47 +267,52 @@ export function ProfessorSchedule() {
                 {filteredSlots.map((slot) => (
                   <Card key={slot.id} className="border-l-4 border-l-brand-blue shadow-sm hover:bg-gray-50/50 transition-colors">
                     <CardContent className="pt-3">
-                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                        <div className="space-y-3">
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 w-full">
+                        
+                        <div className="space-y-3 grow">
                           <div className="flex items-center gap-2">
                             <Badge className="bg-blue-50 text-brand-blue border-blue-100 font-bold">Săptămâna {slot.week}</Badge>
                           </div>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-sm font-medium">
-                            <div className="flex items-center gap-2 text-gray-700">
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-4 text-sm font-medium">
+                            <div className="flex items-center gap-2 text-gray-700 min-w-0">
                               <Calendar className="h-4 w-4 text-brand-blue" />
                               <span>{slot.date.toLocaleDateString("ro-RO", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span>
                             </div>
-                            <div className="flex items-center gap-2 text-gray-700">
+                            <div className="flex items-center gap-2 text-gray-700 min-w-0">
                               <Clock className="h-4 w-4 text-brand-blue" />
                               <span>{slot.startTime} - {slot.endTime}</span>
                             </div>
-                            <div className="flex items-center gap-2 text-gray-700">
+                            <div className="flex items-center gap-2 text-gray-700 min-w-0">
                               <MapPin className="h-4 w-4 text-brand-blue" />
                               <span>Sala {slot.room}</span>
                             </div>
                           </div>
                         </div>
                         
-                        {bookedSlots.includes(slot.id) ? (
-                          <Button 
-                            disabled 
-                            className="bg-green-600 hover:bg-green-600 text-white font-semibold gap-2 opacity-100"
-                          >
-                            <CheckCircle2 className="h-4 w-4" /> Rezervat
-                          </Button>
-                        ) : (
-                          <Button 
-                            onClick={() => confirmBooking(slot)}
-                            disabled={isBooking === slot.id}
-                            className="bg-brand-blue hover:bg-brand-blue-dark text-white font-semibold"
-                          >
-                            {isBooking === slot.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              "Rezervă slot"
-                            )}
-                          </Button>
-                        )}
+                        <div className="w-full lg:w-auto lg:min-w-45 shrink-0">
+                          {bookedSlots.includes(slot.id) ? (
+                            <Button 
+                              disabled 
+                              className="w-full bg-green-600 hover:bg-green-600 text-white font-semibold gap-2 opacity-100"
+                            >
+                              <CheckCircle2 className="h-4 w-4" /> Rezervat
+                            </Button>
+                          ) : (
+                            <Button 
+                              onClick={() => confirmBooking(slot)}
+                              disabled={isBooking === slot.id}
+                              className="w-full bg-brand-blue hover:bg-brand-blue-dark text-white font-semibold"
+                            >
+                              {isBooking === slot.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                "Rezervă slot"
+                              )}
+                            </Button>
+                          )}
+                        </div>
+
                       </div>
                     </CardContent>
                   </Card>
