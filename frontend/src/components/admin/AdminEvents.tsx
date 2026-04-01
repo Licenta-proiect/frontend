@@ -212,37 +212,40 @@ export function AdminEvents() {
                 {visibleSlots.map((slot) => (
                   <Card key={slot.id} className="border-l-4 border-l-brand-blue shadow-sm hover:bg-gray-50/50 transition-colors">
                     <CardContent className="pt-3">
-                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">   
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm font-medium">
-                          <div className="flex items-center gap-2 text-gray-700">
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 w-full">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-4 text-sm font-medium w-full">
+                          <div className="flex items-center gap-2 text-gray-700 min-w-0">
                             <Calendar className="h-4 w-4 text-brand-blue" />
                             <span>{format(parseISO(slot.date), "EEEE, d MMMM yyyy", { locale: ro })}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-gray-700">
+                          <div className="flex items-center gap-2 text-gray-700 min-w-0">
                             <Clock className="h-4 w-4 text-brand-blue" />
                             <span>{slot.start_time}:00 - {slot.end_time}:00</span>
                           </div>
-                          <div className="flex items-center gap-2 text-gray-700">
+                          <div className="flex items-center gap-2 text-gray-700 min-w-0">
                             <MapPin className="h-4 w-4 text-brand-blue" />
                             <span>Sala {slot.room_name}</span>
                           </div>
                         </div>
                         
-                        {/* Status Check for already booked slots */}
-                        {bookedSlots.includes(slot.id) ? (
-                          <Button disabled 
-                            className="bg-green-600 hover:bg-green-600 text-white font-semibold gap-2 opacity-100">
-                            <CheckCircle2 className="h-4 w-4" /> Confirmat
-                          </Button>
-                        ) : (
-                          <Button 
-                            onClick={() => confirmAdminBooking(slot)}
-                            disabled={isBooking === slot.id}
-                            className="bg-brand-blue hover:bg-brand-blue-dark text-white font-semibold"
-                          >
-                            {isBooking === slot.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirmă eveniment"}
-                          </Button>
-                        )}
+                        <div className="">
+                          {/* Status Check for already booked slots */}
+                          {bookedSlots.includes(slot.id) ? (
+                            <Button disabled 
+                              className="bg-green-600 hover:bg-green-600 text-white font-semibold gap-2 opacity-100">
+                              <CheckCircle2 className="h-4 w-4" /> Confirmat
+                            </Button>
+                          ) : (
+                            <Button 
+                              onClick={() => confirmAdminBooking(slot)}
+                              disabled={isBooking === slot.id}
+                              className="bg-brand-blue hover:bg-brand-blue-dark text-white font-semibold"
+                            >
+                              {isBooking === slot.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirmă eveniment"}
+                            </Button>
+                          )}
+                        </div>
+
                       </div>
                     </CardContent>
                   </Card>
