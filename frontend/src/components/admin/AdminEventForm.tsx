@@ -127,7 +127,6 @@ export function AdminEventForm({ onSearch }: AdminEventFormProps) {
           duration: parseInt(duration.split(" ")[0]),
           studentCount: studentCount || "0"
         }, response.data.days);
-        toast.success("Căutare finalizată cu succes!");
       }
     } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       toast.error(error.response?.data?.detail || "Eroare la căutarea sloturilor");
