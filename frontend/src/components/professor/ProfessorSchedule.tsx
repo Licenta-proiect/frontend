@@ -30,19 +30,21 @@ const DAYS_ORDER: Record<string, number> = {
 export type RawSlotsResponse = Record<string, BackendDay[]>;
 
 export function ProfessorSchedule() {
+  const step = 10;
   const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   
   const [filterDay, setFilterDay] = useState<string>("all");
   const [filterWeek, setFilterWeek] = useState<string>("all");
   const [filterRoom, setFilterRoom] = useState<string>("all");
+  const [displayLimit, setDisplayLimit] = useState(step);
 
   const [lastFilters, setLastFilters] = useState<SearchFilters | null>(null);
   const [isBooking, setIsBooking] = useState<string | null>(null);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
 
   // --- FILTERING LOGIC ---
-  const filteredSlots = useMemo(() => {
+  const allFilteredSlots = useMemo(() => {
     return availableSlots.filter((slot) => {
       const dayName = slot.date.toLocaleDateString("ro-RO", { weekday: "long" });
       const capitalizedDay = dayName.charAt(0).toUpperCase() + dayName.slice(1);
@@ -54,6 +56,10 @@ export function ProfessorSchedule() {
       return matchDay && matchWeek && matchRoom;
     });
   }, [availableSlots, filterDay, filterWeek, filterRoom]);
+
+  const visibleSlots = useMemo(() => {
+    return allFilteredSlots.slice(0, displayLimit);
+  }, [allFilteredSlots, displayLimit]);
 
   // Extract unique filter options from raw results
   const uniqueRooms = useMemo(() => 
@@ -110,6 +116,7 @@ export function ProfessorSchedule() {
     setFilterDay("all");
     setFilterWeek("all");
     setFilterRoom("all");
+    setDisplayLimit(step);
 
     if (!filters) {
       setHasSearched(false);
@@ -165,6 +172,7 @@ export function ProfessorSchedule() {
     setFilterDay("all");
     setFilterWeek("all");
     setFilterRoom("all");
+    setDisplayLimit(step); 
   };
 
   return (
@@ -178,7 +186,7 @@ export function ProfessorSchedule() {
               <div>
                 <CardTitle className="text-lg">Sloturi disponibile</CardTitle>
                 <CardDescription>
-                  {filteredSlots.length} opțiuni găsite conform filtrelor
+                  {allFilteredSlots.length} opțiuni găsite conform filtrelor
                 </CardDescription>
               </div>
             </div>
@@ -239,7 +247,7 @@ export function ProfessorSchedule() {
                   <Button 
                     variant="outline" 
                     onClick={resetLocalFilters}
-                    className="h-9 text-sm px-4 gap-2 border-gray-200 text-gray-700  hover:bg-gray-50"
+                    className="h-9 text-sm px-4 gap-2 border-gray-200 text-gray-700 hover:bg-gray-50"
                   >
                     <RotateCcw className="h-4 w-4" />
                     Resetează filtrele
@@ -250,21 +258,14 @@ export function ProfessorSchedule() {
           </CardHeader>
           
           <CardContent className="space-y-4">
-            {/* CASE 1: Initial search returned nothing from server */}
-            {availableSlots.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                <p className="font-medium">Nu s-au găsit sloturi disponibile</p>
+            {allFilteredSlots.length === 0 ? (
+              <div className="text-center py-12 bg-gray-50/50 rounded-lg border border-dashed">
+                <Filter className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                <p className="font-medium text-gray-600 italic">Nu există rezultate pentru filtrele selectate.</p>
               </div>
-            ) : /* CASE 2: We have data from the server, but the top filters (Day, Week, Room) removed everything */
-              filteredSlots.length === 0 ? (
-                <div className="text-center py-12 bg-gray-50/50 rounded-lg border border-dashed">
-                  <Filter className="h-12 w-12 mx-auto mb-3 opacity-20" />
-                  <p className="font-medium text-gray-600 italic">Nu există rezultate pentru filtrele selectate.</p>
-                </div>
-              ) : (
-                /* CASE 3: We have results that pass the filters */
+            ) : (
               <div className="grid gap-4">
-                {filteredSlots.map((slot) => (
+                {visibleSlots.map((slot) => (
                   <Card key={slot.id} className="border-l-4 border-l-brand-blue shadow-sm hover:bg-gray-50/50 transition-colors">
                     <CardContent className="pt-3">
                       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 w-full">
@@ -317,6 +318,29 @@ export function ProfessorSchedule() {
                     </CardContent>
                   </Card>
                 ))}
+
+                {/* SHOW MORE / LESS Buttons*/}
+                <div className="flex flex-col items-center gap-2 pt-2">
+                  {allFilteredSlots.length > displayLimit && (
+                    <Button 
+                      variant="ghost" 
+                      className="w-full font-semibold border-gray-200 text-brand-blue hover:bg-blue-50 transition-all active:scale-95"
+                      onClick={() => setDisplayLimit(prev => prev + step)}
+                    >
+                      Încarcă mai multe sloturi ({allFilteredSlots.length - displayLimit} rămase)
+                    </Button>
+                  )}
+
+                  {displayLimit > step && (
+                    <Button 
+                      variant="link" 
+                      className="text-gray-500"
+                      onClick={() => setDisplayLimit(step)}
+                    >
+                      Arată mai puține
+                    </Button>
+                  )}
+                </div>
               </div>
             )}
           </CardContent>
