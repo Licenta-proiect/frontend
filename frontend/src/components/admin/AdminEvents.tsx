@@ -5,7 +5,6 @@ import { AdminEventForm } from "./AdminEventForm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Calendar, Clock, MapPin, CheckCircle2, Loader2, RotateCcw, Filter } from "lucide-react";
 import { toast } from "sonner";
@@ -29,11 +28,11 @@ export function AdminEvents() {
   const [isBooking, setIsBooking] = useState<string | null>(null);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
 
-  // State pentru filtre locale
+  // States for local results filtering
   const [filterDate, setFilterDate] = useState<string>("all");
   const [filterRoom, setFilterRoom] = useState<string>("all");
 
-  // --- LOGICĂ FILTRARE ---
+  // --- FILTERING LOGIC ---
   const filteredSlots = useMemo(() => {
     return results.filter((slot) => {
       const matchDate = filterDate === "all" || slot.date === filterDate;
@@ -42,7 +41,7 @@ export function AdminEvents() {
     });
   }, [results, filterDate, filterRoom]);
 
-  // Extragerea datelor unice pentru dropdown (sortate cronologic)
+  // Extracting unique dates from results for the filter dropdown
   const uniqueDates = useMemo(() => {
     const dates = Array.from(new Set(results.map(s => s.date))).sort();
     return dates.map(d => ({
@@ -51,7 +50,7 @@ export function AdminEvents() {
     }));
   }, [results]);
 
-  // Extragerea sălilor unice
+  // Extracting unique room names from results for the filter dropdown
   const uniqueRooms = useMemo(() => 
     Array.from(new Set(results.map(s => s.room_name))).sort(), 
   [results]);
@@ -59,7 +58,7 @@ export function AdminEvents() {
   const handleSearchResponse = (filters: any | null, days: any[]) => {
     setLastFilters(filters);
     setBookedSlots([]);
-    setFilterDate("all"); // Resetăm filtrele la o nouă căutare
+    setFilterDate("all"); // Reset local filters on new search
     setFilterRoom("all");
     
     if (!filters || !days || days.length === 0) {
@@ -89,6 +88,7 @@ export function AdminEvents() {
     }
   };
 
+  // Logic to confirm and save the selected event slot to the database
   const confirmAdminBooking = async (slot: AdminSlot) => {
     if (!lastFilters) return;
     setIsBooking(slot.id);
@@ -132,9 +132,9 @@ export function AdminEvents() {
               {filteredSlots.length} opțiuni găsite conform filtrelor
             </CardDescription>
 
-            {/* TOOLBAR FILTRE */}
+            {/* TOOLBAR FILTERS */}
             <div className="flex flex-wrap items-end gap-4 p-4 w-fit">
-              {/* Filtru Data Calendaristică */}
+              {/* Calendar Date Filter */}
               <div className="space-y-1.5 min-w-48">
                 <Label className="text-xs font-semibold text-gray-500 flex items-center gap-1.5 ml-0.5">
                   <Calendar className="h-3.5 w-3.5" /> Data calendaristică
@@ -152,7 +152,7 @@ export function AdminEvents() {
                 </Select>
               </div>
 
-              {/* Filtru Sală */}
+              {/* Room Name Filter */}
               <div className="space-y-1.5 min-w-35">
                 <Label className="text-xs font-semibold text-gray-500 flex items-center gap-1.5 ml-0.5">
                   <MapPin className="h-3.5 w-3.5" /> Sala
@@ -170,6 +170,7 @@ export function AdminEvents() {
                 </Select>
               </div>
 
+              {/* Reset Local Filters Button */}
               {(filterDate !== "all" || filterRoom !== "all") && (
                 <div className="h-9 flex items-center">
                   <Button 
@@ -214,6 +215,7 @@ export function AdminEvents() {
                           </div>
                         </div>
                         
+                        {/* Status Check for already booked slots */}
                         {bookedSlots.includes(slot.id) ? (
                           <Button disabled 
                             className="bg-green-600 hover:bg-green-600 text-white font-semibold gap-2 opacity-100">
