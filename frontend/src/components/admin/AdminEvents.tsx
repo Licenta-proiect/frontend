@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Calendar, Clock, MapPin, CheckCircle2, Loader2, RotateCcw, Filter } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/services/api";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ro } from "date-fns/locale";
 
 interface AdminSlot {
@@ -22,10 +22,6 @@ interface AdminSlot {
   id: string;
 }
 
-const DAYS_ORDER: Record<string, number> = {
-  "Luni": 1, "Marți": 2, "Miercuri": 3, "Joi": 4, "Vineri": 5, "Sâmbătă": 6, "Duminică": 7
-};
-
 export function AdminEvents() {
   const [results, setResults] = useState<AdminSlot[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
@@ -33,40 +29,37 @@ export function AdminEvents() {
   const [isBooking, setIsBooking] = useState<string | null>(null);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
 
-  // Local filters state
-  const [filterDay, setFilterDay] = useState<string>("all");
+  // State pentru filtre locale
+  const [filterDate, setFilterDate] = useState<string>("all");
   const [filterRoom, setFilterRoom] = useState<string>("all");
 
-  // --- FILTERING LOGIC ---
+  // --- LOGICĂ FILTRARE ---
   const filteredSlots = useMemo(() => {
     return results.filter((slot) => {
-      const dateObj = new Date(slot.date);
-      const dayName = format(dateObj, "EEEE", { locale: ro });
-      const capitalizedDay = dayName.charAt(0).toUpperCase() + dayName.slice(1);
-      
-      const matchDay = filterDay === "all" || capitalizedDay === filterDay;
+      const matchDate = filterDate === "all" || slot.date === filterDate;
       const matchRoom = filterRoom === "all" || slot.room_name === filterRoom;
-      
-      return matchDay && matchRoom;
+      return matchDate && matchRoom;
     });
-  }, [results, filterDay, filterRoom]);
+  }, [results, filterDate, filterRoom]);
 
+  // Extragerea datelor unice pentru dropdown (sortate cronologic)
+  const uniqueDates = useMemo(() => {
+    const dates = Array.from(new Set(results.map(s => s.date))).sort();
+    return dates.map(d => ({
+      value: d,
+      label: format(parseISO(d), "d MMMM yyyy", { locale: ro })
+    }));
+  }, [results]);
+
+  // Extragerea sălilor unice
   const uniqueRooms = useMemo(() => 
     Array.from(new Set(results.map(s => s.room_name))).sort(), 
   [results]);
 
-  const availableDays = useMemo(() => {
-    const days = Array.from(new Set(results.map(s => {
-      const d = format(new Date(s.date), "EEEE", { locale: ro });
-      return d.charAt(0).toUpperCase() + d.slice(1);
-    })));
-    return days.sort((a, b) => (DAYS_ORDER[a] || 99) - (DAYS_ORDER[b] || 99));
-  }, [results]);
-
   const handleSearchResponse = (filters: any | null, days: any[]) => {
     setLastFilters(filters);
     setBookedSlots([]);
-    setFilterDay("all");
+    setFilterDate("all"); // Resetăm filtrele la o nouă căutare
     setFilterRoom("all");
     
     if (!filters || !days || days.length === 0) {
@@ -98,7 +91,6 @@ export function AdminEvents() {
 
   const confirmAdminBooking = async (slot: AdminSlot) => {
     if (!lastFilters) return;
-
     setIsBooking(slot.id);
     try {
       const payload = {
@@ -117,14 +109,14 @@ export function AdminEvents() {
       toast.success("Eveniment programat cu succes!");
       setBookedSlots(prev => [...prev, slot.id]);
     } catch (error: any) {
-      toast.error(error.response?.data?.detail || "Eroare la confirmarea rezervării");
+      toast.error(error.response?.data?.detail || "Eroare la confirmare");
     } finally {
       setIsBooking(null);
     }
   };
 
   const resetLocalFilters = () => {
-    setFilterDay("all");
+    setFilterDate("all");
     setFilterRoom("all");
   };
 
@@ -135,32 +127,32 @@ export function AdminEvents() {
       {hasSearched && (
         <Card className="border-gray-200 shadow-sm">
           <CardHeader className="pb-2">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <CardTitle className="text-lg">Sloturi optime identificate</CardTitle>
-                <CardDescription>
-                  {filteredSlots.length} opțiuni găsite conform filtrelor
-                </CardDescription>
-              </div>
-            </div>
+            <CardTitle className="text-lg">Sloturi optime identificate</CardTitle>
+            <CardDescription>
+              {filteredSlots.length} opțiuni găsite conform filtrelor
+            </CardDescription>
 
-            {/* FILTERS TOOLBAR */}
+            {/* TOOLBAR FILTRE */}
             <div className="flex flex-wrap items-end gap-4 p-4 w-fit">
-              <div className="space-y-1.5 min-w-35">
+              {/* Filtru Data Calendaristică */}
+              <div className="space-y-1.5 min-w-48">
                 <Label className="text-xs font-semibold text-gray-500 flex items-center gap-1.5 ml-0.5">
-                  <Calendar className="h-3.5 w-3.5" /> Ziua
+                  <Calendar className="h-3.5 w-3.5" /> Data calendaristică
                 </Label>
-                <Select value={filterDay} onValueChange={setFilterDay}>
+                <Select value={filterDate} onValueChange={setFilterDate}>
                   <SelectTrigger className="h-9 text-sm bg-white">
-                    <SelectValue placeholder="Toate zilele" />
+                    <SelectValue placeholder="Toate datele" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Toate zilele</SelectItem>
-                    {availableDays.map(day => <SelectItem key={day} value={day}>{day}</SelectItem>)}
+                    <SelectItem value="all">Toate datele</SelectItem>
+                    {uniqueDates.map(d => (
+                      <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
 
+              {/* Filtru Sală */}
               <div className="space-y-1.5 min-w-35">
                 <Label className="text-xs font-semibold text-gray-500 flex items-center gap-1.5 ml-0.5">
                   <MapPin className="h-3.5 w-3.5" /> Sala
@@ -171,12 +163,14 @@ export function AdminEvents() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Toate sălile</SelectItem>
-                    {uniqueRooms.map(room => <SelectItem key={room} value={room}>{room}</SelectItem>)}
+                    {uniqueRooms.map(room => (
+                      <SelectItem key={room} value={room}>{room}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              {(filterDay !== "all" || filterRoom !== "all") && (
+              {(filterDate !== "all" || filterRoom !== "all") && (
                 <div className="h-9 flex items-center">
                   <Button 
                     variant="outline" 
@@ -204,16 +198,13 @@ export function AdminEvents() {
                     <CardContent className="pt-3">
                       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                         <div className="space-y-3">
-                          <div className="flex items-center gap-2">
-                             {/* Am păstrat badge-ul, deși la admin week_number poate fi null uneori */}
-                            <Badge className="bg-blue-50 text-brand-blue border-blue-100 font-bold">
-                                Eveniment Nou
-                            </Badge>
-                          </div>
+                          <Badge className="bg-blue-50 text-brand-blue border-blue-100 font-bold">
+                            Eveniment Nou
+                          </Badge>
                           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm font-medium">
                             <div className="flex items-center gap-2 text-gray-700">
                               <Calendar className="h-4 w-4 text-brand-blue" />
-                              <span>{format(new Date(slot.date), "EEEE, d MMMM yyyy", { locale: ro })}</span>
+                              <span>{format(parseISO(slot.date), "EEEE, d MMMM yyyy", { locale: ro })}</span>
                             </div>
                             <div className="flex items-center gap-2 text-gray-700">
                               <Clock className="h-4 w-4 text-brand-blue" />
