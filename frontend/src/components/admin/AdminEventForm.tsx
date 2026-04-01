@@ -33,7 +33,7 @@ interface ProfessorData {
 }
 
 interface AdminEventFormProps {
-  onSearch: (filters: any | null, results: any) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
+  onSearch: (filters: any | null, results: any) => void; 
 }
 
 export function AdminEventForm({ onSearch }: AdminEventFormProps) {
@@ -128,7 +128,7 @@ export function AdminEventForm({ onSearch }: AdminEventFormProps) {
           studentCount: studentCount || "0"
         }, response.data.days);
       }
-    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+    } catch (error: any) { 
       toast.error(error.response?.data?.detail || "Eroare la căutarea sloturilor");
     } finally {
       setIsSearching(false);
