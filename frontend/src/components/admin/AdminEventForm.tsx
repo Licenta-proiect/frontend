@@ -32,8 +32,27 @@ interface ProfessorData {
   emailAddress: string;
 }
 
+export interface AdminFilters {
+  eventName: string;
+  selectedRooms: string[];
+  selectedProfessors: string[];
+  allSubgroupIds: number[];
+  duration: number;
+  studentCount: string;
+}
+
+export interface BackendDayResponse {
+  date: string;
+  options: {
+    room_id: number;
+    room_name: string;
+    start_time: number;
+    end_time: number;
+  }[];
+}
+
 interface AdminEventFormProps {
-  onSearch: (filters: any | null, results: any) => void; 
+  onSearch: (filters: AdminFilters | null, results: BackendDayResponse[]) => void;
 }
 
 export function AdminEventForm({ onSearch }: AdminEventFormProps) {
@@ -115,6 +134,8 @@ export function AdminEventForm({ onSearch }: AdminEventFormProps) {
 
       const response = await api.post("/reservations/search-admin-event", payload);
       
+      const days: BackendDayResponse[] = response.data.days || [];
+      
       if (response.data.info && (!response.data.days || response.data.days.length === 0)) {
         toast.info(response.data.info);
         onSearch(null, []);
@@ -126,14 +147,15 @@ export function AdminEventForm({ onSearch }: AdminEventFormProps) {
           allSubgroupIds,
           duration: parseInt(duration.split(" ")[0]),
           studentCount: studentCount || "0"
-        }, response.data.days);
+        }, days);
       }
-    } catch (error: any) { 
-      toast.error(error.response?.data?.detail || "Eroare la căutarea sloturilor");
-    } finally {
-      setIsSearching(false);
-    }
-  };
+    } catch (error: unknown) { 
+        const errorMessage = error instanceof Error ? error.message : "Eroare la căutarea sloturilor";
+        toast.error(errorMessage);
+      } finally {
+        setIsSearching(false);
+      }
+    };
 
   const handleReset = () => {
     setEventName(""); 

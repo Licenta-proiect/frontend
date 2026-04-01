@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { AdminEventForm } from "./AdminEventForm";
+import { AdminEventForm, AdminFilters, BackendDayResponse } from "./AdminEventForm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ interface AdminSlot {
 export function AdminEvents() {
   const [results, setResults] = useState<AdminSlot[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
-  const [lastFilters, setLastFilters] = useState<any>(null);
+  const [lastFilters, setLastFilters] = useState<AdminFilters | null>(null);
   const [isBooking, setIsBooking] = useState<string | null>(null);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
 
@@ -55,7 +55,7 @@ export function AdminEvents() {
     Array.from(new Set(results.map(s => s.room_name))).sort(), 
   [results]);
 
-  const handleSearchResponse = (filters: any | null, days: any[]) => {
+  const handleSearchResponse = (filters: AdminFilters | null, days: BackendDayResponse[]) => {
     setLastFilters(filters);
     setBookedSlots([]);
     setFilterDate("all"); // Reset local filters on new search
@@ -68,8 +68,8 @@ export function AdminEvents() {
     }
 
     const flattened: AdminSlot[] = [];
-    days.forEach((day: any) => {
-      day.options.forEach((opt: any, index: number) => {
+    days.forEach((day) => {
+      day.options.forEach((opt, index) => {
         flattened.push({
           date: day.date,
           room_id: opt.room_id,
@@ -108,8 +108,9 @@ export function AdminEvents() {
       await api.post("/reservations/confirm-admin-event", payload);
       toast.success("Eveniment programat cu succes!");
       setBookedSlots(prev => [...prev, slot.id]);
-    } catch (error: any) {
-      toast.error(error.response?.data?.detail || "Eroare la confirmare");
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Eroare la confirmare";
+      toast.error(errorMessage);
     } finally {
       setIsBooking(null);
     }
