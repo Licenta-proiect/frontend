@@ -22,18 +22,23 @@ interface AdminSlot {
 }
 
 export function AdminEvents() {
+  const step = 10; // Initial number of items to show
   const [results, setResults] = useState<AdminSlot[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [lastFilters, setLastFilters] = useState<AdminFilters | null>(null);
   const [isBooking, setIsBooking] = useState<string | null>(null);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
 
+  // State for pagination/display limit
+  const [displayLimit, setDisplayLimit] = useState(step);
+
   // States for local results filtering
   const [filterDate, setFilterDate] = useState<string>("all");
   const [filterRoom, setFilterRoom] = useState<string>("all");
 
   // --- FILTERING LOGIC ---
-  const filteredSlots = useMemo(() => {
+  // Get all slots that match the selected filters
+  const allFilteredSlots = useMemo(() => {
     return results.filter((slot) => {
       const matchDate = filterDate === "all" || slot.date === filterDate;
       const matchRoom = filterRoom === "all" || slot.room_name === filterRoom;
@@ -41,7 +46,12 @@ export function AdminEvents() {
     });
   }, [results, filterDate, filterRoom]);
 
-  // Extracting unique dates from results for the filter dropdown
+  // Slice the filtered results for display based on the displayLimit
+  const visibleSlots = useMemo(() => {
+    return allFilteredSlots.slice(0, displayLimit);
+  }, [allFilteredSlots, displayLimit]);
+
+  // Extract unique dates for the filter dropdown
   const uniqueDates = useMemo(() => {
     const dates = Array.from(new Set(results.map(s => s.date))).sort();
     return dates.map(d => ({
@@ -50,7 +60,7 @@ export function AdminEvents() {
     }));
   }, [results]);
 
-  // Extracting unique room names from results for the filter dropdown
+  // Extract unique room names for the filter dropdown
   const uniqueRooms = useMemo(() => 
     Array.from(new Set(results.map(s => s.room_name))).sort(), 
   [results]);
@@ -60,6 +70,7 @@ export function AdminEvents() {
     setBookedSlots([]);
     setFilterDate("all"); // Reset local filters on new search
     setFilterRoom("all");
+    setDisplayLimit(step); // Reset display limit on new search
     
     if (!filters || !days || days.length === 0) {
       setResults([]);
@@ -119,6 +130,7 @@ export function AdminEvents() {
   const resetLocalFilters = () => {
     setFilterDate("all");
     setFilterRoom("all");
+    setDisplayLimit(step); // Reset limit when clearing filters
   };
 
   return (
@@ -130,7 +142,7 @@ export function AdminEvents() {
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Sloturi disponibile</CardTitle>
             <CardDescription>
-              {filteredSlots.length} opțiuni găsite conform filtrelor
+              {allFilteredSlots.length} opțiuni găsite conform filtrelor
             </CardDescription>
 
             {/* TOOLBAR FILTERS */}
@@ -189,7 +201,7 @@ export function AdminEvents() {
 
           <CardContent className="space-y-4">
             {/* CASE 1: Initial search returned nothing from server */}
-            {filteredSlots.length === 0 ? (
+            {allFilteredSlots.length === 0 ? (
               <div className="text-center py-12 bg-gray-50/50 rounded-lg border border-dashed">
                 <Filter className="h-12 w-12 mx-auto mb-3 opacity-20" />
                 <p className="font-medium text-gray-600 italic">Nu există rezultate pentru filtrele selectate.</p>
@@ -197,7 +209,7 @@ export function AdminEvents() {
             ) : (
               /* CASE 2: We have results that pass the filters */
               <div className="grid gap-4">
-                {filteredSlots.map((slot) => (
+                {visibleSlots.map((slot) => (
                   <Card key={slot.id} className="border-l-4 border-l-brand-blue shadow-sm hover:bg-gray-50/50 transition-colors">
                     <CardContent className="pt-3">
                       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">   
@@ -235,6 +247,29 @@ export function AdminEvents() {
                     </CardContent>
                   </Card>
                 ))}
+
+                {/* SHOW MORE / SHOW LESS BUTTONS */}
+                <div className="flex flex-col items-center gap-2 pt-2">
+                  {allFilteredSlots.length > displayLimit && (
+                    <Button 
+                      variant="ghost" 
+                      className="w-full font-semibold border-gray-200 text-brand-blue hover:bg-blue-50 transition-all active:scale-95"
+                      onClick={() => setDisplayLimit(prev => prev + step)}
+                    >
+                      Încarcă mai multe sloturi ({allFilteredSlots.length - displayLimit} rămase)
+                    </Button>
+                  )}
+
+                  {displayLimit > step && (
+                    <Button 
+                      variant="link" 
+                      className="text-gray-500"
+                      onClick={() => setDisplayLimit(step)}
+                    >
+                      Arată mai puține
+                    </Button>
+                  )}
+                </div>
               </div>
             )}
           </CardContent>
