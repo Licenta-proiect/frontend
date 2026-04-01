@@ -32,13 +32,17 @@ interface ProfessorData {
   emailAddress: string;
 }
 
-export function AdminEventForm() {
+interface AdminEventFormProps {
+  onSearch: (filters: any | null, results: any) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
+}
+
+export function AdminEventForm({ onSearch }: AdminEventFormProps) {
   const [rooms, setRooms] = useState<SelectOption[]>([]);
   const [professors, setProfessors] = useState<SelectOption[]>([]);
   const [specializationOptions, setSpecializations] = useState<SelectOption[]>([]);
   const [selectedSpecsJson, setSelectedSpecsJson] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   // Form State
   const [eventName, setEventName] = useState<string>("");
@@ -84,13 +88,14 @@ export function AdminEventForm() {
     fetchData();
   }, []);
 
-  const handleCreateEvent = async () => {
+  const handleSearch = async () => {
     if (!eventName || !dateRange?.from || !dateRange?.to || selectedRooms.length === 0 || !duration) {
       toast.error("Vă rugăm să completați toate câmpurile obligatorii, inclusiv intervalul de date.");
       return;
     }
 
-    setIsSubmitting(true);
+    setIsSearching(true);
+    onSearch(null, []);
     try {
       const allSubgroupIds = Array.from(
         new Set(selectedSpecsJson.flatMap(json => JSON.parse(json) as number[]))
@@ -108,15 +113,27 @@ export function AdminEventForm() {
         activity_type: "event"
       };
 
-      console.log(JSON.stringify(payload, null, 2));
-
-      await api.post("/admin/reservations/events", payload);
-      toast.success("Eveniment creat cu succes!");
-      handleReset();
+      const response = await api.post("/reservations/search-admin-event", payload);
+      
+      if (response.data.info && (!response.data.days || response.data.days.length === 0)) {
+        toast.info(response.data.info);
+        onSearch(null, []);
+      } else {
+        // Trimitem filtrele și rezultatele către părinte
+        onSearch({
+          eventName,
+          selectedRooms,
+          selectedProfessors,
+          allSubgroupIds,
+          duration: parseInt(duration.split(" ")[0]),
+          studentCount: studentCount || "0"
+        }, response.data.days);
+        toast.success("Căutare finalizată cu succes!");
+      }
     } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-      toast.error(error.response?.data?.detail || "Eroare la crearea evenimentului");
+      toast.error(error.response?.data?.detail || "Eroare la căutarea sloturilor");
     } finally {
-      setIsSubmitting(false);
+      setIsSearching(false);
     }
   };
 
@@ -271,14 +288,26 @@ export function AdminEventForm() {
 
         <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-100">
           <Button 
-            onClick={handleCreateEvent} 
-            disabled={isSubmitting}
+            onClick={handleSearch} 
+            disabled={isSearching}
             className="bg-brand-blue hover:bg-brand-blue-dark text-white font-medium shadow-md transition-all active:scale-95 flex-1 sm:flex-none"
           >
-            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
-            Caută
+            {isSearching ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Se caută...
+              </>
+            ) : (
+              <>
+                <Search className="h-4 w-4 mr-2" /> 
+                Caută
+              </>
+            )}
           </Button>
-          <Button onClick={handleReset} variant="outline" className="border-gray-200 text-gray-700 font-medium hover:bg-gray-50 flex-1 sm:flex-none">
+          <Button onClick={handleReset}  
+            disabled={isSearching} 
+            variant="outline" 
+            className="border-gray-200 text-gray-700 font-medium hover:bg-gray-50 flex-1 sm:flex-none">
             <RotateCcw className="h-4 w-4 mr-2" /> Resetează
           </Button>
         </div>
