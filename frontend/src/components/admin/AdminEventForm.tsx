@@ -149,15 +149,27 @@ export function AdminEventForm({ onSearch }: AdminEventFormProps) {
           studentCount: studentCount || "0"
         }, days);
       }
-    } catch (error: any) { 
-        const errorMessage = error.response?.data?.detail || "Eroare la căutarea sloturilor";
-        
-        if (Array.isArray(errorMessage)) {
-          toast.error(errorMessage[0].msg || "Eroare de validare date");
-        } else {
-          toast.error(errorMessage);
+    } catch (error: unknown) { 
+        // 1. We convert the error to a type that allows us to access the Axios properties
+        const axiosError = error as { 
+          response?: { 
+            data?: { 
+              detail?: string | { msg: string }[] 
+            } 
+          } 
+        };
+
+        const detail = axiosError.response?.data?.detail;
+        let errorMessage = "Eroare la căutarea sloturilor";
+
+        // 2. We extract the message according to the format sent by FastAPI (string or list of Pydantic errors)
+        if (typeof detail === "string") {
+          errorMessage = detail;
+        } else if (Array.isArray(detail) && detail.length > 0) {
+          errorMessage = detail[0].msg || "Eroare de validare date";
         }
         
+        toast.error(errorMessage);
         onSearch(null, []);
       } finally {
         setIsSearching(false);
@@ -274,7 +286,7 @@ export function AdminEventForm({ onSearch }: AdminEventFormProps) {
                 selected={dateRange}
                 onSelect={setDateRange}
                 locale={ro}
-                //disabled={(date) => date < startOfToday()}
+                /*disabled={(date) => date < startOfToday()}*/
                  />
               </PopoverContent>
             </Popover>
