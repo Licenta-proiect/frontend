@@ -87,8 +87,19 @@ export function ProfessorReservations() {
     }
   };
 
+  const toSentenceCase = (str: string) => {
+    if (!str) return "";
+    const lower = str.toLowerCase();
+    return lower.charAt(0).toUpperCase() + lower.slice(1);
+  };
+
   const activityTypes = useMemo(() => {
-    const types = new Set(reservations.map(r => r.type.toLowerCase()));
+    const types = new Set(
+      reservations.map(r => {
+        const typeName = r.type.toLowerCase() === 'event' ? 'eveniment' : r.type;
+        return toSentenceCase(typeName);
+      })
+    );
     return Array.from(types).sort();
   }, [reservations]);
 
@@ -97,7 +108,11 @@ export function ProfessorReservations() {
       r.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.room.toLowerCase().includes(searchQuery.toLowerCase());
       
-    const matchesType = statusFilter === "all" || r.type.toLowerCase() === statusFilter;
+    const currentTypeFormatted = toSentenceCase(
+      r.type.toLowerCase() === 'event' ? 'eveniment' : r.type
+    );
+    
+    const matchesType = statusFilter === "all" || currentTypeFormatted === statusFilter;
 
     return matchesSearch && matchesType;
   });
@@ -127,8 +142,8 @@ export function ProfessorReservations() {
             <SelectContent>
               <SelectItem value="all">Toate tipurile</SelectItem>
               {activityTypes.map((type) => (
-                <SelectItem key={type} value={type} className="capitalize">
-                  {type === 'event' ? 'Eveniment' : type}
+                <SelectItem key={type} value={type}>
+                  {type}
                 </SelectItem>
               ))}
             </SelectContent>
