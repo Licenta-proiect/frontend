@@ -26,7 +26,7 @@ const DAYS_ORDER: Record<string, number> = {
 };
 
 export function SearchResults({ results, selectedSubject, selectedType }: SearchResultsProps) {
-  const step = 3;
+  const step = 10;
   const [sortBy, setSortBy] = useState<string>("time");
   const [filterDay, setFilterDay] = useState<string>("all");
   const [filterWeek, setFilterWeek] = useState<string>("all");
