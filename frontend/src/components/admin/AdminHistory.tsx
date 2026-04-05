@@ -133,14 +133,14 @@ export function AdminHistory() {
         </CardHeader>
         <CardContent>
           {/* Grid: 2 columns on any screen over mobile */}
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 items-end">
-            
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+      
             {/* Status */}
            <div className="space-y-2">
               <Label className="text-sm font-medium">Status</Label>
               <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="border-gray-200 w-full">
-                  <SelectValue placeholder="Toate" />
+                <SelectTrigger className="border-gray-200 w-full h-10 bg-white">
+                  <SelectValue placeholder="Toate statusurile" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Toate statusurile</SelectItem>
@@ -153,9 +153,9 @@ export function AdminHistory() {
 
             {/* Activity Type */}
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Tip Activitate</Label>
+              <Label className="text-sm font-medium">Tip activitate</Label>
               <Select value={filterType} onValueChange={setFilterType}>
-                <SelectTrigger className="border-gray-200 w-full">
+                <SelectTrigger className="border-gray-200 w-full h-10 bg-white">
                   <SelectValue placeholder="Toate tipurile" />
                 </SelectTrigger>
                 <SelectContent>
@@ -172,7 +172,7 @@ export function AdminHistory() {
               <Label className="text-sm font-medium">Sală</Label>
               <Popover open={openRoom} onOpenChange={setOpenRoom}>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" role="combobox" className="w-full justify-between font-normal border-gray-200 px-3">
+                  <Button variant="outline" role="combobox" className="w-full h-10 justify-between font-normal border-gray-200 px-3 bg-white">
                     <span className="truncate">
                       {filterRoom === "all" ? "Toate sălile" : filterRoom}
                     </span>
@@ -202,10 +202,14 @@ export function AdminHistory() {
               </Popover>
             </div>
 
-            <Button onClick={handleReset} variant="outline" className="flex-1 border-gray-200" title="Resetează filtrele">
-              <RefreshCcw className="h-4 w-4" /> Resetează
+            <Button 
+              onClick={handleReset} 
+              variant="outline" 
+              className="bg-brand-blue hover:bg-brand-blue-dark text-white hover:text-white font-medium shadow-md transition-all active:scale-95 flex-1 sm:flex-none"
+            >
+              <RefreshCcw className="h-4 w-4" />
+              Resetează
             </Button>
-          
           </div>
         </CardContent>
       </Card>
