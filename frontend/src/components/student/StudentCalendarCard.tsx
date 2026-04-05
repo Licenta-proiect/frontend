@@ -24,11 +24,10 @@ export function StudentCalendarCard({ session }: StudentCalendarCardProps) {
 
   return (
     <Card 
-    key={session.id} 
-    className={cn(
+      className={cn( 
         "border shadow-xs group transition-all duration-300 border-l-4 border-l-brand-blue",
         isCanceled ? "opacity-85 grayscale-[0.2]" : "hover:border-brand-blue"
-    )}
+      )}
     >
     <CardContent className="p-5 space-y-4">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
