@@ -61,26 +61,29 @@ export function StudentCalendar() {
   }, []);
 
   const groupOptions = useMemo(() => {
-    const subgroupIds = Object.keys(data);
-    
-    const options = subgroupIds.map((id) => {
-      const fullName = data[id][0]?.participating_groups.find(name => name.length > 0) || "";
-  
-      let label = `Subgrupa ${id}`;
-      if (fullName) {
-        const match = fullName.match(/(.*an\s\d+)/i);
-        if (match && match[1]) {
-          label = match[1].trim();
-        }
-      }
+    const specializations = new Set<string>();
 
-      return { label: label, value: id };
+    Object.values(data).forEach((reservationsList) => {
+      reservationsList.forEach((res) => {
+
+        res.participating_groups.forEach((groupFullName) => {
+          const match = groupFullName.match(/^(.*?\ban\s\d+)/i);
+          if (match && match[1]) {
+            specializations.add(match[1].trim());
+          } else {
+            specializations.add(groupFullName.trim());
+          }
+        });
+      });
     });
 
-    const uniqueOptions = Array.from(new Map(options.map(item => [item.label, item])).values());
+    const options = Array.from(specializations).map((spec) => ({
+      label: spec,
+      value: spec, 
+    }));
 
-    const sortedOptions = uniqueOptions.sort((a, b) => 
-      a.label.localeCompare(b.label, 'ro', { sensitivity: 'base' })
+    const sortedOptions = options.sort((a, b) =>
+      a.label.localeCompare(b.label, "ro", { sensitivity: "base" })
     );
 
     return [{ label: "Toate subgrupele", value: "all" }, ...sortedOptions];
@@ -94,17 +97,12 @@ export function StudentCalendar() {
   const filteredSessions = useMemo(() => {
     if (selectedGroupId === "all") return allUniqueReservations;
 
-    const selectedOption = groupOptions.find(opt => opt.value === selectedGroupId);
-    if (!selectedOption) return [];
-
-    const matchingSubgroupIds = Object.keys(data).filter(id => {
-      const fullName = data[id][0]?.participating_groups[0] || "";
-      return fullName.startsWith(selectedOption.label);
-    });
-
-    const combined = matchingSubgroupIds.flatMap(id => data[id]);
-    return Array.from(new Map(combined.map(item => [item.id, item])).values());
-  }, [selectedGroupId, data, allUniqueReservations, groupOptions]);
+    return allUniqueReservations.filter((session) =>
+      session.participating_groups.some((groupName) =>
+        groupName.trim().startsWith(selectedGroupId)
+      )
+    );
+  }, [selectedGroupId, allUniqueReservations]);
 
   const sessionsOnSelectedDate = useMemo(() => {
     if (!selectedDate) return [];
