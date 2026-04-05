@@ -23,12 +23,12 @@ export default function Home() {
             <Calendar className="h-7 w-7 md:h-9 md:w-9 text-brand-blue" />
             {/* Short Version: Visible on mobile, hidden from 'md' up */}
             <span className="text-xl md:text-2xl font-bold text-black tracking-tight leading-none md:hidden">
-              SGR
+              SGRD
             </span>
                 
             {/* Long Version: Hidden on mobile, visible from 'md' up */}
             <span className="hidden md:block text-xl md:text-xl font-semibold text-black tracking-tight leading-none">
-              Sistem de gestionare a recuperărilor
+              Sistem de gestionare a recuperărilor didactice
             </span>
           </div>
           
@@ -98,7 +98,7 @@ export default function Home() {
       <footer className="border-t bg-white/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-6 md:py-8">
           <div className="text-center text-sm md:text-base text-gray-600 font-medium">
-            <p>© 2026 SGR - Sistem de gestionare a recuperărilor</p>
+            <p>© 2026 SGRD - Sistem de gestionare a recuperărilor didactice</p>
           </div>
         </div>
       </footer>

@@ -110,7 +110,7 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
               <SheetContent side="left" className="w-80 font-sans">
                 <SheetHeader>
                   <SheetTitle className="flex items-center gap-2 text-brand-blue font-bold">
-                    <Calendar className="h-6 w-6" /> Sistem de gestionare a recuperărilor
+                    <Calendar className="h-6 w-6" /> Sistem de gestionare a recuperărilor didactice
                   </SheetTitle>
                   <SheetDescription className="sr-only">
                     Meniu de navigare pentru Sistemul de gestionare a recuperărilor.
@@ -144,16 +144,16 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
             </Sheet>
             
             <div className="flex items-center gap-2 shrink-0">
-              <Calendar className="h-7 w-7 md:h-9 md:w-9 text-brand-blue" />
+              <Calendar className="h-7 w-7 md:h-9 md:w-9 text-brand-blue shrink-0" />
               <div className="flex flex-col justify-center">
                 {/* Short Version: Visible on mobile, hidden from 'md' up */}
                 <span className="text-xl md:text-2xl font-bold text-black tracking-tight leading-none md:hidden">
-                  SGR
+                  SGRD
                 </span>
                 
                 {/* Long Version: Hidden on mobile, visible from 'md' up */}
                 <span className="hidden md:block text-xl md:text-xl font-semibold text-black tracking-tight leading-none">
-                  Sistem de gestionare a recuperărilor
+                  Sistem de gestionare a recuperărilor didactice
                 </span>
                 <span className="text-sm md:text-xs font-semibold text-brand-blue tracking-tight leading-none mt-1">
                   {activeTabLabel} 
