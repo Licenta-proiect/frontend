@@ -57,7 +57,10 @@ export function ReservationCard({ reservation, onCancel }: ReservationCardProps)
               {/* Day + Date + Week number */}
               <div className="flex items-center gap-1.5">
                 <Calendar className="h-4 w-4 text-brand-blue" />
-                <span className="capitalize">{dayName}, {dateObj.toLocaleDateString("ro-RO")}, Săptămâna {reservation.week}</span>
+                <span className="capitalize">
+                  {dayName}, {dateObj.toLocaleDateString("ro-RO")}
+                  {reservation.week ? `, Săptămâna ${reservation.week}` : ""}
+                </span>
               </div>
 
               {/* Time interval */}
