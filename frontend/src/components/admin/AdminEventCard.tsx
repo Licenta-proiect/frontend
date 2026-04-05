@@ -10,23 +10,7 @@ import {
 import { format, parseISO } from "date-fns";
 import { ro } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-
-interface Reservation {
-  id: number;
-  professor: string;
-  professor_email: string;
-  additional_professors: string[];
-  subject: string;
-  type: string;
-  room: string;
-  groups: string[];
-  date: string;
-  start_hour: number;
-  duration: number;
-  status: string;
-  cancellation_reason: string | null;
-  week_number?: number;
-}
+import { Reservation } from "./AdminHistory";
 
 interface AdminEventCardProps {
   session: Reservation;

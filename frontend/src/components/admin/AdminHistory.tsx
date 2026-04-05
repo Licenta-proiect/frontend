@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import api from "@/services/api";
 import { cn } from "@/lib/utils";
 
-interface Reservation {
+export interface Reservation {
   id: number;
   professor: string;
   professor_email: string;
@@ -232,7 +232,7 @@ export function AdminHistory() {
           </div>
         </CardHeader>
 
-        <CardContent className="pt-6">
+        <CardContent>
           {allFilteredRecords.length === 0 ? (
             <div className="text-center py-20 bg-slate-50/50 rounded-xl border-2 border-dashed">
               <Search className="h-12 w-12 mx-auto mb-4 text-slate-300" />
