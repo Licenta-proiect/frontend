@@ -134,9 +134,9 @@ export function ProfessorReservations() {
       {/* Toolbar: Search + Filter Type */}
       <div className="flex flex-col sm:flex-row justify-end gap-3">
         {/* Activity Type Filter */}
-        <div className="w-full sm:w-48">
+        <div className="w-full sm:w-64">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="h-10 border-gray-200 shadow-xs text-sm bg-white">
+            <SelectTrigger className="h-10 border-gray-200 shadow-xs text-sm bg-white w-full">
               <SelectValue placeholder="Tip activitate" />
             </SelectTrigger>
             <SelectContent>
@@ -157,7 +157,7 @@ export function ProfessorReservations() {
             placeholder="Caută după materie sau sală..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 h-10 border-gray-200 shadow-xs text-sm bg-white"
+            className="pl-9 h-10 border-gray-200 shadow-xs text-sm bg-white w-full"
           />
         </div>
       </div>
