@@ -261,7 +261,7 @@ export function ProfessorReservations() {
       <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
         <AlertDialogContent className="rounded-xl border-gray-200 shadow-xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-semibold text-xl text-gray-900">Confirmare anulare rezervare</AlertDialogTitle>
+            <AlertDialogTitle className="font-semibold text-xl text-gray-900">Anulare rezervare</AlertDialogTitle>
             <AlertDialogDescription>
               Sunteți sigur că doriți să anulați? Această acțiune va elibera sala pentru alți colegi.
             </AlertDialogDescription>
@@ -288,7 +288,7 @@ export function ProfessorReservations() {
                 variant="ghost" 
                 className="font-semibold rounded-lg border-gray-200 text-gray-600 hover:bg-gray-100"
               >
-                Anulează
+                Înapoi
               </Button>
             </AlertDialogCancel>
             <AlertDialogAction asChild>
@@ -296,7 +296,7 @@ export function ProfessorReservations() {
                 onClick={handleCancelConfirm} 
                 className="bg-brand-red hover:bg-red-700 text-white font-semibold rounded-lg shadow-md transition-all active:scale-95"
               >
-                Confirmă
+                Confirmă anularea
               </Button>
             </AlertDialogAction>
           </AlertDialogFooter>

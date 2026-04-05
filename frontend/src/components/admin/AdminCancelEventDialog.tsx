@@ -50,7 +50,7 @@ export function AdminCancelEventDialog({ open, onOpenChange, reservationId, onSu
 
         <div className="py-2 space-y-2">
           <Label className="text-sm font-semibold text-gray-700 ml-1">
-            Motivul anulării
+            Motivul anulării (opțional)
           </Label>
           <textarea
             value={cancelReason}

@@ -230,7 +230,7 @@ export function AdminHistory() {
           </div>
         </CardHeader>
 
-        <CardContent className="pt-6">
+        <CardContent>
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20">
               <div className="animate-spin rounded-full h-8 w-8 border-brand-blue border-b-2 mb-4"></div>
@@ -284,28 +284,27 @@ export function AdminHistory() {
                           </div>
 
                           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium text-gray-700">
-                            {/* Data & Săptămâna */}
+                            {/* Date */}
                             <div className="flex items-center gap-1.5">
                               <CalendarIcon className="h-4 w-4 text-brand-blue" />
                               <span>
                                 {format(sessionDate, "dd MMM yyyy", { locale: ro })} 
-                                {session.week_number ? ` (Săpt. ${session.week_number})` : ""}
                               </span>
                             </div>
 
-                            {/* Ora */}
+                            {/* Duration */}
                             <div className="flex items-center gap-1.5">
                               <Clock className="h-4 w-4 text-brand-blue" />
                               <span>{String(session.start_hour).padStart(2, '0')}:00 - {String(session.start_hour + session.duration).padStart(2, '0')}:00</span>
                             </div>
 
-                            {/* Sala */}
+                            {/* Room */}
                             <div className="flex items-center gap-1.5">
                               <MapPin className="h-4 w-4 text-brand-blue" />
                               <span>Sala {session.room}</span>
                             </div>
 
-                            {/* Profesori Adiționali */}
+                            {/* Additional Professors */}
                             {session.additional_professors && session.additional_professors.length > 0 && (
                               <div className="flex items-center gap-1.5">
                                 <UserCheck className="h-4 w-4 text-brand-blue shrink-0" />
@@ -315,7 +314,7 @@ export function AdminHistory() {
                               </div>
                             )}
 
-                            {/* Grupe */}
+                            {/* Groups */}
                             {session.groups.length > 0 && (
                               <div className="flex items-start gap-1.5">
                                 <Users className="h-4 w-4 text-brand-blue shrink-0 mt-0.5" />
@@ -325,14 +324,14 @@ export function AdminHistory() {
                           </div>
                         </div>
 
-                        {/* Buton Anulare (pentru Admin apare la orice rezervare viitoare) */}
+                        {/* Cancel button */}
                         <div className="shrink-0">
-                          {isUpcoming && (
+                          {isEvent && !isCanceled && isUpcoming && (
                             <Button 
                               size="sm" 
                               variant="outline" 
                               onClick={() => { setSelectedId(session.id); setCancelDialogOpen(true); }}
-                              className="text-brand-red border-red-100 hover:bg-red-50 font-bold uppercase text-[11px]"
+                              className="text-brand-red shadow-xs border-red-100 hover:bg-red-50 hover:text-brand-red font-bold uppercase text-[11px]"
                             >
                               <Trash2 className="h-3.5 w-3.5 mr-2" /> Anulează
                             </Button>
@@ -340,7 +339,7 @@ export function AdminHistory() {
                         </div>
                       </div>
 
-                      {/* Motiv Anulare */}
+                      {/* Cancellation Reason */}
                       {isCanceled && session.cancellation_reason && (
                         <div className="text-xs p-3 rounded-lg bg-red-50/50 border border-red-100 flex items-start gap-2">
                           <AlertCircle className="h-3.5 w-3.5 text-brand-red shrink-0 mt-0.5" />
