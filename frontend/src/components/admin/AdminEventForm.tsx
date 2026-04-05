@@ -10,7 +10,7 @@ import { MultiSelect } from "@/components/ui/multi-select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search, RotateCcw, Loader2, CalendarIcon, InfoIcon } from "lucide-react";
-import { format, startOfToday } from "date-fns";
+import { format } from "date-fns";
 import { ro } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -318,9 +318,9 @@ export function AdminEventForm({ onSearch }: AdminEventFormProps) {
         <div className="relative w-full rounded-lg border border-amber-200 bg-amber-50 p-4 [&>svg~*]:pl-7 [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-amber-600">
           <InfoIcon className="h-4 w-4" />
           <div className="text-xs sm:text-sm font-medium text-amber-800 leading-relaxed">
-            Rezultatele sunt generate pe baza disponibilității orarului general, însă este esențial să le verificați. 
+            Rezultatele sunt generate pe baza orarului general.
             <span className="block">
-              Notă: Puteți planifica recuperări exclusiv pentru grupele la care sunteți titularul activității respective.
+              Notă: Puteți planifica evenimente în orice perioadă a anului, pentru organizatori din cadrul facultății sau din exterior.
             </span>
           </div>
         </div>

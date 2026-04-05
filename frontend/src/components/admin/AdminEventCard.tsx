@@ -105,7 +105,7 @@ export function AdminEventCard({ session, onCancelClick }: AdminEventCardProps) 
               {session.groups.length > 0 && (
                 <div className="flex items-start gap-1.5">
                   <Users className="h-4 w-4 text-brand-blue shrink-0 mt-0.5" />
-                  <span className="leading-tight">{session.groups.join(", ")}</span>
+                  <span className="text-gray-600 leading-tight">{session.groups.join(", ")}</span>
                 </div>
               )}
             </div>

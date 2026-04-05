@@ -390,10 +390,13 @@ export function StudentSearch() {
           <div className="relative w-full rounded-lg border border-amber-200 bg-amber-50 p-4 [&>svg~*]:pl-7 [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-amber-600">
             <InfoIcon className="h-4 w-4" />
             <div className="text-xs sm:text-sm font-medium text-amber-800 leading-relaxed">
-              Rezultatele sunt bazate pe orarul general și includ opțiuni din Modulul Psihopedagogic.
-              <span className="block">
-                Notă: Modificările punctuale sau recuperările programate separat nu sunt reflectate aici.
-              </span>
+                Aceste opțiuni sunt extrase din orarul general și includ orele din Modulul Psihopedagogic.
+               <span className="block">
+                  Consultați cadrul didactic înainte de a participa la o activitate cu o altă grupă pentru a asigura disponibilitatea locurilor în sală.
+                </span>
+                <span className="block">
+                  Notă: Modificările punctuale sau recuperările programate separat nu sunt reflectate aici.
+                </span>
             </div>
           </div>
 
