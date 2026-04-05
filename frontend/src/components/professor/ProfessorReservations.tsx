@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Calendar, History, Loader2, Search } from "lucide-react";
@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import api from "@/services/api";
 import { ReservationCard } from "./ReservationCard";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "../ui/button";
 import { AxiosError } from "axios";
 
@@ -34,6 +35,8 @@ export function ProfessorReservations() {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [reservationToCancel, setReservationToCancel] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState("");
+
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const fetchReservations = async () => {
     try {
@@ -84,10 +87,20 @@ export function ProfessorReservations() {
     }
   };
 
-  const filtered = reservations.filter(r => 
-    r.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    r.room.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const activityTypes = useMemo(() => {
+    const types = new Set(reservations.map(r => r.type.toLowerCase()));
+    return Array.from(types).sort();
+  }, [reservations]);
+
+  const filtered = reservations.filter(r => {
+    const matchesSearch = 
+      r.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.room.toLowerCase().includes(searchQuery.toLowerCase());
+      
+    const matchesType = statusFilter === "all" || r.type.toLowerCase() === statusFilter;
+
+    return matchesSearch && matchesType;
+  });
 
   const activeReservations = filtered.filter(r => r.status === "reserved");
   const historyReservations = filtered.filter(r => r.status !== "reserved");
@@ -103,15 +116,33 @@ export function ProfessorReservations() {
 
   return (
     <div className="max-w-6xl mx-auto pb-10 space-y-6">
-      {/* Search bar */}
-      <div className="flex justify-end">
+      {/* Toolbar: Search + Filter Type */}
+      <div className="flex flex-col sm:flex-row justify-end gap-3">
+        {/* Activity Type Filter */}
+        <div className="w-full sm:w-48">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="h-10 border-gray-200 shadow-xs text-sm bg-white">
+              <SelectValue placeholder="Tip activitate" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toate tipurile</SelectItem>
+              {activityTypes.map((type) => (
+                <SelectItem key={type} value={type} className="capitalize">
+                  {type === 'event' ? 'Eveniment' : type}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Search bar */}
         <div className="relative w-full sm:w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input 
             placeholder="Caută după materie sau sală..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 h-10 border-gray-200 shadow-xs text-sm"
+            className="pl-9 h-10 border-gray-200 shadow-xs text-sm bg-white"
           />
         </div>
       </div>
