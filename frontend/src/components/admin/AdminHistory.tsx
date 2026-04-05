@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { 
   FileText, Filter, Calendar as CalendarIcon, Clock, 
-  MapPin, Search, Download, Users, AlertCircle, RefreshCcw,
+  MapPin, Search, Users, AlertCircle, RefreshCcw,
   Check, ChevronsUpDown, 
   Mail
 } from "lucide-react";
@@ -41,36 +41,29 @@ interface Reservation {
 
 export function AdminHistory() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [professors, setProfessors] = useState<{ id: number; lastName: string; firstName: string }[]>([]);
   const [rooms, setRooms] = useState<{ id: number; name: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Filter States
   const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [filterProfessor, setFilterProfessor] = useState<string>("all");
   const [filterRoom, setFilterRoom] = useState<string>("all");
-  const [filterGroup, setFilterGroup] = useState<string>("all");
   const [filterType, setFilterType] = useState<string>("all");
   
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   // UI States
-  const [openProf, setOpenProf] = useState(false);
   const [openRoom, setOpenRoom] = useState(false);
-  const [openGroup, setOpenGroup] = useState(false);
 
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const [resReq, profReq, roomReq] = await Promise.all([
+      const [resReq, roomReq] = await Promise.all([
         api.get("/admin/reservations"),
-        api.get("/data/professors"),
         api.get("/data/rooms")
       ]);
       
       setReservations(resReq.data);
-      setProfessors(profReq.data);
       setRooms(roomReq.data);
     } catch (error) {
       console.error(error);
@@ -79,26 +72,6 @@ export function AdminHistory() {
       setIsLoading(false);
     }
   };
-
-  // Inside the AdminHistory component
-  const groupOptions = useMemo(() => {
-    const groupsSet = new Set<string>();
-    
-    reservations.forEach(r => {
-        r.groups.forEach(groupFullName => {
-        const match = groupFullName.match(/(.*an\s\d+)/i);
-        if (match && match[1]) {
-            groupsSet.add(match[1].trim());
-        } else {
-            groupsSet.add(groupFullName); 
-        }
-        });
-    });
-
-    return Array.from(groupsSet).sort((a, b) => 
-        a.localeCompare(b, 'ro', { sensitivity: 'base' })
-    );
-  }, [reservations]);
 
   useEffect(() => {
     fetchData();
@@ -118,22 +91,18 @@ export function AdminHistory() {
  const filteredRecords = useMemo(() => {
     return reservations.filter((r) => {
       const matchStatus = filterStatus === "all" || r.status.toLowerCase() === filterStatus.toLowerCase();
-      const matchProf = filterProfessor === "all" || r.professor === filterProfessor;
       const matchRoom = filterRoom === "all" || r.room === filterRoom;
-      const matchGroup = filterGroup === "all" || r.groups.some(g => g.startsWith(filterGroup));
       
       const formattedType = toSentenceCase(r.type === 'event' ? 'eveniment' : r.type);
       const matchType = filterType === "all" || formattedType === filterType;
       
-      return matchStatus && matchProf && matchRoom && matchGroup && matchType;
+      return matchStatus && matchRoom && matchType;
     });
-  }, [reservations, filterStatus, filterProfessor, filterRoom, filterGroup, filterType]);
+  }, [reservations, filterStatus, filterRoom, filterType]);
 
   const handleReset = () => {
     setFilterStatus("all");
-    setFilterProfessor("all");
     setFilterRoom("all");
-    setFilterGroup("all");
     setFilterType("all");
   };
 
@@ -144,34 +113,6 @@ export function AdminHistory() {
       case "cancelled": return "bg-red-50 text-brand-red border-red-100 font-bold";
       default: return "bg-gray-50 text-gray-700 border-gray-100 font-bold";
     }
-  };
-
-  const handleExportCSV = () => {
-    if (filteredRecords.length === 0) {
-      toast.error("Nu există date de exportat");
-      return;
-    }
-    const headers = ["Data", "Ora", "Materie", "Tip", "Profesor", "Sala", "Grupe", "Status", "Motiv Anulare"];
-    const rows = filteredRecords.map(r => [
-      format(parseISO(r.date), "yyyy-MM-dd"),
-      `${r.start_hour}:00 - ${r.start_hour + r.duration}:00`,
-      r.subject,
-      r.type,
-      r.professor,
-      r.room,
-      r.groups.join(" | "),
-      r.status,
-      r.cancellation_reason || "-"
-    ]);
-
-    const csvContent = "\ufeff" + [headers.join(","), ...rows.map(row => row.map(cell => `"${cell}"`).join(","))].join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `istoric_admin_${format(new Date(), "dd-MM-yyyy")}.csv`);
-    link.click();
-    toast.success("Fișierul CSV a fost generat.");
   };
 
   return (
@@ -261,18 +202,10 @@ export function AdminHistory() {
               </Popover>
             </div>
 
-            <div className="flex gap-2 w-full">
-              {/* Reset button */}
-              <Button onClick={handleReset} variant="outline" className="flex-1 border-gray-200" title="Resetează filtrele">
-                <RefreshCcw className="h-4 w-4" />
-              </Button>
-              
-              {/* Export button */}
-              <Button onClick={handleExportCSV} className="flex-1 bg-brand-blue hover:bg-brand-blue-dark shadow-md" title="Export CSV">
-                <Download className="h-4 w-4" />
-              </Button>
-            </div>
-
+            <Button onClick={handleReset} variant="outline" className="flex-1 border-gray-200" title="Resetează filtrele">
+              <RefreshCcw className="h-4 w-4" /> Resetează
+            </Button>
+          
           </div>
         </CardContent>
       </Card>

@@ -42,7 +42,7 @@ export function AdminCancelEventDialog({ open, onOpenChange, reservationId, onSu
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="rounded-xl border-gray-200 shadow-xl">
         <AlertDialogHeader>
-          <AlertDialogTitle className="font-semibold text-xl text-gray-900">Anulare Activitate (Admin)</AlertDialogTitle>
+          <AlertDialogTitle className="font-semibold text-xl text-gray-900">Anulare eveniment</AlertDialogTitle>
           <AlertDialogDescription>
             Sunteți sigur că doriți să anulați această rezervare? Această acțiune este ireversibilă și va elibera intervalul orar.
           </AlertDialogDescription>
@@ -72,7 +72,7 @@ export function AdminCancelEventDialog({ open, onOpenChange, reservationId, onSu
               disabled={isSubmitting}
               className="bg-brand-red hover:bg-red-700 text-white font-semibold rounded-lg shadow-md transition-all active:scale-95"
             >
-              {isSubmitting ? "Se anulează..." : "Confirmă Anularea"}
+              {isSubmitting ? "Se anulează..." : "Confirmă anularea"}
             </Button>
           </AlertDialogAction>
         </AlertDialogFooter>
