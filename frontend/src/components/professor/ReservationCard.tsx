@@ -18,8 +18,7 @@ export function ReservationCard({ reservation, onCancel }: ReservationCardProps)
   const isEvent = reservation.type.toLowerCase() === "event";
 
   const dateObj = new Date(reservation.date);
-  const dayName = new Intl.DateTimeFormat('ro-RO', { weekday: 'long' }).format(dateObj);
-
+  
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "reserved": return "bg-blue-50 text-brand-blue border-blue-100 font-bold";
