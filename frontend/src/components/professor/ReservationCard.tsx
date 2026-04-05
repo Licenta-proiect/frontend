@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Calendar, Clock, MapPin, Trash2, Users } from "lucide-react";
+import { AlertCircle, Calendar, Clock, MapPin, Trash2, Users, UserCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Reservation } from "./ProfessorReservations";
 
@@ -15,6 +15,7 @@ interface ReservationCardProps {
 export function ReservationCard({ reservation, onCancel }: ReservationCardProps) {
   const isUpcoming = reservation.status === "reserved";
   const isCanceled = reservation.status === "cancelled";
+  const isEvent = reservation.type.toLowerCase() === "event";
 
   const dateObj = new Date(reservation.date);
   const dayName = new Intl.DateTimeFormat('ro-RO', { weekday: 'long' }).format(dateObj);
@@ -45,7 +46,7 @@ export function ReservationCard({ reservation, onCancel }: ReservationCardProps)
                     reservation.status === "completed" ? "FINALIZATĂ" : "ANULATĂ"}
                   </Badge>
                   <Badge variant="secondary" className="bg-gray-100 text-gray-700 border-gray-200 font-bold text-[10px]">
-                    {reservation.type.toUpperCase()}
+                    {isEvent ? "EVENIMENT" : reservation.type.toUpperCase()}
                   </Badge>
                 </div>
             </div>
@@ -73,17 +74,30 @@ export function ReservationCard({ reservation, onCancel }: ReservationCardProps)
                 <span>Sala {reservation.room}</span>
               </div>
 
-              {/* Groups */} 
-              <div className="flex items-center gap-1.5">
-                <Users className="h-4 w-4 text-brand-blue shrink-0 mt-0.5" />
-                <span className="text-gray-600 leading-tight">{reservation.groups.join(", ")}</span>
-              </div>
+              {/* Additional Teachers - Shown only if available */}
+              {reservation.additional_professors && reservation.additional_professors.length > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <UserCheck className="h-4 w-4 text-brand-blue shrink-0" />
+                  <span className="text-gray-600 leading-tight">
+                    {reservation.additional_professors.join(", ")}
+                  </span>
+                </div>
+              )}
+
+              {/* Groups - Display icon only if there are subgroups */}
+              {reservation.groups.length > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <Users className="h-4 w-4 text-brand-blue shrink-0 mt-0.5" />
+                  <span className="text-gray-600 leading-tight">{reservation.groups.join(", ")}</span>
+                </div>
+              )}
+              
             </div>
           </div>
 
           {/* Cancel button — only for upcoming reservations */}
           <div className="flex gap-2 shrink-0">
-            {isUpcoming && onCancel && (
+            {isUpcoming && onCancel && !isEvent && (
               <Button 
                 size="sm" 
                 variant="outline" 

@@ -17,6 +17,7 @@ export interface Reservation {
   type: string;          
   room: string;         
   groups: string[];      
+  additional_professors?: string[]; 
   week: number;    
   day: string;           
   date: string;         
