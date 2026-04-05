@@ -29,15 +29,18 @@ export interface Reservation {
 }
 
 export function ProfessorReservations() {
+  const step = 5;
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [reservationToCancel, setReservationToCancel] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState("");
-
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
+  const [activeLimit, setActiveLimit] = useState(step);
+  const [historyLimit, setHistoryLimit] = useState(step);
+  
   const fetchReservations = async () => {
     try {
       setLoading(true);
@@ -103,22 +106,26 @@ export function ProfessorReservations() {
     return Array.from(types).sort();
   }, [reservations]);
 
-  const filtered = reservations.filter(r => {
-    const matchesSearch = 
-      r.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.room.toLowerCase().includes(searchQuery.toLowerCase());
+  const filtered = useMemo(() => {
+    return reservations.filter(r => {
+      const matchesSearch = 
+        r.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.room.toLowerCase().includes(searchQuery.toLowerCase());
+        
+      const currentTypeFormatted = toSentenceCase(
+        r.type.toLowerCase() === 'event' ? 'eveniment' : r.type
+      );
       
-    const currentTypeFormatted = toSentenceCase(
-      r.type.toLowerCase() === 'event' ? 'eveniment' : r.type
-    );
-    
-    const matchesType = statusFilter === "all" || currentTypeFormatted === statusFilter;
+      const matchesType = statusFilter === "all" || currentTypeFormatted === statusFilter;
+      return matchesSearch && matchesType;
+    });
+  }, [reservations, searchQuery, statusFilter]);
 
-    return matchesSearch && matchesType;
-  });
+  const allActive = useMemo(() => filtered.filter(r => r.status === "reserved"), [filtered]);
+  const allHistory = useMemo(() => filtered.filter(r => r.status !== "reserved"), [filtered]);
 
-  const activeReservations = filtered.filter(r => r.status === "reserved");
-  const historyReservations = filtered.filter(r => r.status !== "reserved");
+  const visibleActive = useMemo(() => allActive.slice(0, activeLimit), [allActive, activeLimit]);
+  const visibleHistory = useMemo(() => allHistory.slice(0, historyLimit), [allHistory, historyLimit]);
 
   if (loading) {
     return (
@@ -135,16 +142,14 @@ export function ProfessorReservations() {
       <div className="flex flex-col sm:flex-row justify-end gap-3">
         {/* Activity Type Filter */}
         <div className="w-full sm:w-64">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select value={statusFilter} onValueChange={(val) => { setStatusFilter(val); setActiveLimit(step); setHistoryLimit(step); }}>
             <SelectTrigger className="h-10 border-gray-200 shadow-xs text-sm bg-white w-full">
               <SelectValue placeholder="Tip activitate" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Toate tipurile</SelectItem>
               {activityTypes.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
-                </SelectItem>
+                <SelectItem key={type} value={type}>{type}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -156,7 +161,7 @@ export function ProfessorReservations() {
           <Input 
             placeholder="Caută după materie sau sală..." 
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => { setSearchQuery(e.target.value); setActiveLimit(step); setHistoryLimit(step); }}
             className="pl-9 h-10 border-gray-200 shadow-xs text-sm bg-white w-full"
           />
         </div>
@@ -168,21 +173,43 @@ export function ProfessorReservations() {
           <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
             <Calendar className="h-5 w-5 text-brand-blue" /> Rezervări viitoare
           </CardTitle>
-          <CardDescription className="text-gray-600 font-medium">{activeReservations.length} rezervări programate</CardDescription>
+          <CardDescription className="text-gray-600 font-medium">{allActive.length} rezervări programate</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {activeReservations.length === 0 ? (
+          {allActive.length === 0 ? (
             <div className="text-center py-12 bg-gray-50/50 rounded-lg border border-dashed">
               <p className="font-medium text-gray-600 italic">Nicio rezervare activă</p>
             </div>
           ) : (
-            activeReservations.map((res) => (
-              <ReservationCard 
-                key={res.id} 
-                reservation={res}
-                onCancel={(id) => { setReservationToCancel(id); setCancelDialogOpen(true); }} 
-              />
-            ))
+            <>
+              <div className="grid gap-4">
+                {visibleActive.map((res) => (
+                  <ReservationCard 
+                    key={res.id} 
+                    reservation={res}
+                    onCancel={(id) => { setReservationToCancel(id); setCancelDialogOpen(true); }} 
+                  />
+                ))}
+              </div>
+
+              {/* Show More/Less */}
+              <div className="flex flex-col items-center gap-2 pt-2">
+                {allActive.length > activeLimit && (
+                  <Button 
+                    variant="ghost" 
+                    className="w-full font-semibold border-gray-200 text-brand-blue hover:bg-blue-50 transition-all active:scale-95"
+                    onClick={() => setActiveLimit(prev => prev + step)}
+                  >
+                    Încarcă mai multe rezervări ({allActive.length - activeLimit} rămase)
+                  </Button>
+                )}
+                {activeLimit > step && (
+                  <Button variant="link" className="text-gray-500" onClick={() => setActiveLimit(step)}>
+                    Arată mai puține
+                  </Button>
+                )}
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
@@ -196,19 +223,41 @@ export function ProfessorReservations() {
           <CardDescription className="text-gray-600 font-medium">Rezervări finalizate sau anulate</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {historyReservations.length === 0 ? (
+          {allHistory.length === 0 ? (
             <div className="text-center py-12 bg-gray-50/50 rounded-lg border border-dashed">
               <p className="font-medium text-gray-600 italic">Istoric gol</p>
             </div>
           ) : (
-            historyReservations.map((res) => (
-              <ReservationCard key={res.id} reservation={res} />
-            ))
+            <>
+              <div className="grid gap-4">
+                {visibleHistory.map((res) => (
+                  <ReservationCard key={res.id} reservation={res} />
+                ))}
+              </div>
+
+              {/* Show More/Less */}
+              <div className="flex flex-col items-center gap-2 pt-2">
+                {allHistory.length > historyLimit && (
+                  <Button 
+                    variant="ghost" 
+                    className="w-full font-semibold border-gray-200 text-brand-blue hover:bg-blue-50 transition-all active:scale-95"
+                    onClick={() => setHistoryLimit(prev => prev + step)}
+                  >
+                    Încarcă mai multe din istoric ({allHistory.length - historyLimit} rămase)
+                  </Button>
+                )}
+                {historyLimit > step && (
+                  <Button variant="link" className="text-gray-500" onClick={() => setHistoryLimit(step)}>
+                    Arată mai puține
+                  </Button>
+                )}
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
 
-        {/* Cancel confirmation dialog */}
+      {/* Cancel confirmation dialog */}
       <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
         <AlertDialogContent className="rounded-xl border-gray-200 shadow-xl">
           <AlertDialogHeader>
