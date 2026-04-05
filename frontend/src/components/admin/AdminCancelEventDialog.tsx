@@ -22,12 +22,12 @@ export function AdminCancelEventDialog({ open, onOpenChange, reservationId, onSu
     if (!reservationId) return;
     setIsSubmitting(true);
     try {
-      await api.post("/reservations/cancel-admin-event", {
+      const response = await api.post("/reservations/cancel-admin-event", {
         reservationId: reservationId, 
         reason: cancelReason || "Anulat de administrator"
       });
 
-      toast.success("Evenimentul/Rezervarea a fost anulată cu succes.");
+      toast.success(response.data.success || "Evenimentul a fost anulat cu succes.");
       setCancelReason("");
       onOpenChange(false);
       onSuccess();
