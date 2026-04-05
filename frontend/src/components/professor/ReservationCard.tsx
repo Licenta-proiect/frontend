@@ -54,12 +54,11 @@ export function ReservationCard({ reservation, onCancel }: ReservationCardProps)
             {/* Detail row */}
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium text-gray-700">
 
-              {/* Day + Date + Week number */}
+              {/* Date */}
               <div className="flex items-center gap-1.5">
                 <Calendar className="h-4 w-4 text-brand-blue" />
                 <span className="capitalize">
-                  {dayName}, {dateObj.toLocaleDateString("ro-RO")}
-                  {reservation.week ? `, Săptămâna ${reservation.week}` : ""}
+                  {dateObj.toLocaleDateString("ro-RO")}
                 </span>
               </div>
 
