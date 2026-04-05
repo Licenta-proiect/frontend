@@ -226,44 +226,6 @@ export function AdminHistory() {
               </Select>
             </div>
 
-            {/* Professor */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Profesor</Label>
-              <Popover open={openProf} onOpenChange={setOpenProf}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" role="combobox" className="w-full justify-between font-normal border-gray-200 px-3">
-                    <span className="truncate">
-                      {filterProfessor === "all" ? "Toți profesorii" : filterProfessor}
-                    </span>
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
-                  <Command>
-                    <CommandInput placeholder="Caută profesor..." />
-                    <CommandList className="max-h-64">
-                      <CommandEmpty>Nu a fost găsit.</CommandEmpty>
-                      <CommandGroup>
-                        <CommandItem onSelect={() => { setFilterProfessor("all"); setOpenProf(false); }}>
-                          <Check className={cn("mr-2 h-4 w-4", filterProfessor === "all" ? "opacity-100" : "opacity-0")} />
-                          Toți profesorii
-                        </CommandItem>
-                        {professors.map((p) => {
-                          const name = `${p.lastName} ${p.firstName}`;
-                          return (
-                            <CommandItem key={p.id} value={name} onSelect={() => { setFilterProfessor(name); setOpenProf(false); }}>
-                              <Check className={cn("mr-2 h-4 w-4", filterProfessor === name ? "opacity-100" : "opacity-0")} />
-                              {name}
-                            </CommandItem>
-                          );
-                        })}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
-
             {/* Room */}
             <div className="space-y-2">
               <Label className="text-sm font-medium">Sală</Label>
@@ -290,45 +252,6 @@ export function AdminHistory() {
                           <CommandItem key={r.id} value={r.name} onSelect={() => { setFilterRoom(r.name); setOpenRoom(false); }}>
                             <Check className={cn("mr-2 h-4 w-4", filterRoom === r.name ? "opacity-100" : "opacity-0")} />
                             {r.name}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* Group */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Grupă</Label>
-              <Popover open={openGroup} onOpenChange={setOpenGroup}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" role="combobox" className="w-full justify-between font-normal border-gray-200 px-3">
-                    <span className="truncate">
-                      {filterGroup === "all" ? "Toate grupele" : filterGroup}
-                    </span>
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
-                  <Command>
-                    <CommandInput placeholder="Caută grupă..." />
-                    <CommandList className="max-h-64">
-                      <CommandEmpty>Nu a fost găsită.</CommandEmpty>
-                      <CommandGroup>
-                        <CommandItem onSelect={() => { setFilterGroup("all"); setOpenGroup(false); }}>
-                          <Check className={cn("mr-2 h-4 w-4", filterGroup === "all" ? "opacity-100" : "opacity-0")} />
-                          Toate grupele
-                        </CommandItem>
-                        {groupOptions.map((groupLabel) => (
-                          <CommandItem 
-                            key={groupLabel} 
-                            value={groupLabel} 
-                            onSelect={() => { setFilterGroup(groupLabel); setOpenGroup(false); }}
-                          >
-                            <Check className={cn("mr-2 h-4 w-4", filterGroup === groupLabel ? "opacity-100" : "opacity-0")} />
-                            {groupLabel}
                           </CommandItem>
                         ))}
                       </CommandGroup>
