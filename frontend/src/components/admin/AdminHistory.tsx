@@ -5,21 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { 
-  FileText, Filter, Calendar as CalendarIcon, Clock, 
-  MapPin, Search, Users, AlertCircle, RefreshCcw,
-  Check, ChevronsUpDown, 
-  Mail
+  FileText, Filter, Search, RefreshCcw,
+  Check, ChevronsUpDown
 } from "lucide-react";
 import { AdminCancelEventDialog } from "./AdminCancelEventDialog";
 import { AdminEventCard } from "./AdminEventCard";
-import { UserCheck, Trash2 } from "lucide-react"; 
 import { toast } from "sonner";
-import { format, parseISO } from "date-fns";
-import { ro } from "date-fns/locale";
 import api from "@/services/api";
 import { cn } from "@/lib/utils";
 
@@ -41,9 +35,11 @@ interface Reservation {
 }
 
 export function AdminHistory() {
+  const step = 10;
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [rooms, setRooms] = useState<{ id: number; name: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [displayLimit, setDisplayLimit] = useState(step);
 
   // Filter States
   const [filterStatus, setFilterStatus] = useState<string>("all");
@@ -89,7 +85,7 @@ export function AdminHistory() {
     return Array.from(types).sort();
   }, [reservations]);
 
- const filteredRecords = useMemo(() => {
+ const allFilteredRecords = useMemo(() => {
     return reservations.filter((r) => {
       const matchStatus = filterStatus === "all" || r.status.toLowerCase() === filterStatus.toLowerCase();
       const matchRoom = filterRoom === "all" || r.room === filterRoom;
@@ -101,20 +97,25 @@ export function AdminHistory() {
     });
   }, [reservations, filterStatus, filterRoom, filterType]);
 
+  const visibleRecords = useMemo(() => {
+    return allFilteredRecords.slice(0, displayLimit);
+  }, [allFilteredRecords, displayLimit]);
+
   const handleReset = () => {
     setFilterStatus("all");
     setFilterRoom("all");
     setFilterType("all");
+    setDisplayLimit(step); 
   };
 
-  const getStatusStyle = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "reserved": return "bg-blue-50 text-brand-blue border-blue-100 font-bold";
-      case "completed": return "bg-green-50 text-green-700 border-green-100 font-bold";
-      case "cancelled": return "bg-red-50 text-brand-red border-red-100 font-bold";
-      default: return "bg-gray-50 text-gray-700 border-gray-100 font-bold";
-    }
-  };
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-3 text-gray-500">
+        <div className="animate-spin rounded-full h-8 w-8 border-brand-blue border-b-2"></div>
+        <p className="font-medium">Se încarcă istoricul...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -139,7 +140,7 @@ export function AdminHistory() {
             {/* Status */}
            <div className="space-y-2">
               <Label className="text-sm font-medium">Status</Label>
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <Select value={filterStatus} onValueChange={(val) => { setFilterStatus(val); setDisplayLimit(step); }}>
                 <SelectTrigger className="border-gray-200 w-full h-10 bg-white">
                   <SelectValue placeholder="Toate statusurile" />
                 </SelectTrigger>
@@ -155,7 +156,7 @@ export function AdminHistory() {
             {/* Activity Type */}
             <div className="space-y-2">
               <Label className="text-sm font-medium">Tip activitate</Label>
-              <Select value={filterType} onValueChange={setFilterType}>
+              <Select value={filterType} onValueChange={(val) => { setFilterType(val); setDisplayLimit(step); }}>
                 <SelectTrigger className="border-gray-200 w-full h-10 bg-white">
                   <SelectValue placeholder="Toate tipurile" />
                 </SelectTrigger>
@@ -186,12 +187,12 @@ export function AdminHistory() {
                     <CommandList className="max-h-64">
                       <CommandEmpty>Nu a fost găsită.</CommandEmpty>
                       <CommandGroup>
-                        <CommandItem onSelect={() => { setFilterRoom("all"); setOpenRoom(false); }}>
+                        <CommandItem onSelect={() => { setFilterRoom("all"); setOpenRoom(false); setDisplayLimit(step); }}>
                           <Check className={cn("mr-2 h-4 w-4", filterRoom === "all" ? "opacity-100" : "opacity-0")} />
                           Toate sălile
                         </CommandItem>
                         {rooms.map((r) => (
-                          <CommandItem key={r.id} value={r.name} onSelect={() => { setFilterRoom(r.name); setOpenRoom(false); }}>
+                          <CommandItem key={r.id} value={r.name} onSelect={() => { setFilterRoom(r.name); setOpenRoom(false); setDisplayLimit(step); }}>
                             <Check className={cn("mr-2 h-4 w-4", filterRoom === r.name ? "opacity-100" : "opacity-0")} />
                             {r.name}
                           </CommandItem>
@@ -206,17 +207,17 @@ export function AdminHistory() {
             <Button 
               onClick={handleReset} 
               variant="outline" 
-              className="bg-brand-blue hover:bg-brand-blue-dark text-white hover:text-white font-medium shadow-md transition-all active:scale-95 flex-1 sm:flex-none"
+              className="bg-brand-blue hover:bg-brand-blue-dark text-white hover:text-white font-medium shadow-md transition-all active:scale-95 h-10"
             >
-              <RefreshCcw className="h-4 w-4" />
-              Resetează
+              <RefreshCcw className="h-4 w-4 mr-2" />
+              Resetează filtrele
             </Button>
           </div>
         </CardContent>
       </Card>
 
       {/* Results section */}
-        <Card className="border-gray-200 shadow-sm overflow-hidden">
+      <Card className="border-gray-200 shadow-sm overflow-hidden">
         <CardHeader className="pt-4 pb-0">
           <div className="flex justify-between items-center">
             <div className="space-y-1">
@@ -225,35 +226,55 @@ export function AdminHistory() {
                 Istoric rezervări și anulări
               </CardTitle>
               <CardDescription className="text-gray-600 font-medium">
-                {filteredRecords.length} înregistrări găsite
+                {allFilteredRecords.length} înregistrări găsite
               </CardDescription>
             </div>
           </div>
         </CardHeader>
 
-        <CardContent>
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <div className="animate-spin rounded-full h-8 w-8 border-brand-blue border-b-2 mb-4"></div>
-              <p className="text-slate-500">Se încarcă datele din server...</p>
-            </div>
-          ) : filteredRecords.length === 0 ? (
+        <CardContent className="pt-6">
+          {allFilteredRecords.length === 0 ? (
             <div className="text-center py-20 bg-slate-50/50 rounded-xl border-2 border-dashed">
               <Search className="h-12 w-12 mx-auto mb-4 text-slate-300" />
               <p className="text-slate-500 font-medium italic">Nu s-a găsit nicio înregistrare conform filtrelor.</p>
             </div>
           ) : (
-            <div className="grid gap-4">
-              {filteredRecords.map((session) => (
-                <AdminEventCard 
-                  key={session.id} 
-                  session={session} 
-                  onCancelClick={(id) => {
-                    setSelectedId(id);
-                    setCancelDialogOpen(true);
-                  }} 
-                />
-              ))}
+            <div className="space-y-6">
+              <div className="grid gap-4">
+                {visibleRecords.map((session) => (
+                  <AdminEventCard 
+                    key={session.id} 
+                    session={session} 
+                    onCancelClick={(id) => {
+                      setSelectedId(id);
+                      setCancelDialogOpen(true);
+                    }} 
+                  />
+                ))}
+              </div>
+
+              {/* SHOW MORE / LESS */}
+              <div className="flex flex-col items-center gap-2 pt-2">
+                {allFilteredRecords.length > displayLimit && (
+                  <Button 
+                    variant="ghost" 
+                    className="w-full font-semibold border-gray-200 text-brand-blue hover:bg-blue-50 transition-all active:scale-95"
+                    onClick={() => setDisplayLimit(prev => prev + step)}
+                  >
+                    Încarcă mai multe înregistrări ({allFilteredRecords.length - displayLimit} rămase)
+                  </Button>
+                )}
+
+                {displayLimit > step && (
+                  <Button 
+                    variant="link" 
+                    className="text-gray-500"
+                    onClick={() => setDisplayLimit(step)}
+                  >
+                    Arată mai puține
+                  </Button>
+                )}
+              </div>
             </div>
           )}
         </CardContent>
