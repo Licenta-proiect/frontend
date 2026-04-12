@@ -46,7 +46,7 @@ export default function Home() {
       </header>
 
       <main className="grow flex flex-col items-center">
-        {/* HERO SECTION - Titlu simplificat și buton integrat imediat sub text */}
+        {/* HERO SECTION - Simplified title and integrated button immediately below the text */}
         <section className="container mx-auto px-4 pt-12 pb-10 md:pt-20 md:pb-16 max-w-4xl text-center">
           <div className="flex flex-col items-center space-y-8">
             <div className="space-y-4">
@@ -60,7 +60,7 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Butonul de Login repoziționat sub descriere pentru un flux "Hero" compact */}
+            {/* Login button */}
             <Button
               size="lg"
               onClick={handleGoogleLogin}
@@ -71,11 +71,11 @@ export default function Home() {
           </div>
         </section>
 
-        {/* DESCRIERE FUNCȚIONALITĂȚI PE ROLURI */}
+        {/* DESCRIPTION OF FUNCTIONALITIES BY ROLES */}
         <section className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-10 text-left w-full max-w-6xl border-y border-slate-100 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-10 text-left w-full max-w-6xl border-y border-slate-100 py-12">
             {/* STUDENT */}
-            <div className="space-y-4">
+            <div className="space-y-3 p-6 rounded-2xl border border-transparent hover:border-blue-100 hover:bg-blue-50/50 transition-all">
               <div className="flex items-center gap-2 text-brand-blue font-bold uppercase text-xs tracking-widest">
                  Student
               </div>
@@ -91,8 +91,8 @@ export default function Home() {
               </div>
             </div>
 
-            {/* PROFESOR */}
-            <div className="space-y-4">
+            {/* PROFESSOR */}
+            <div className="space-y-4 p-6 rounded-2xl border border-transparent hover:border-blue-100 hover:bg-blue-50/50 transition-all">
               <div className="flex items-center gap-2 text-brand-blue font-bold uppercase text-xs tracking-widest">
                  Profesor
               </div>
@@ -109,7 +109,7 @@ export default function Home() {
             </div>
 
             {/* ADMIN */}
-            <div className="space-y-4">
+            <div className="space-y-4 p-6 rounded-2xl border border-transparent hover:border-blue-100 hover:bg-blue-50/50 transition-all">
               <div className="flex items-center gap-2 text-brand-blue font-bold uppercase text-xs tracking-widest">
                  Administrator
               </div>
@@ -127,7 +127,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* SECȚIUNE DE INFORMARE EVENIMENTE */}
+        {/* EVENTS INFORMATION SECTION */}
         <section className="container mx-auto px-4 pb-20">
           <div className="max-w-4xl mx-auto pt-16">
             <div className="flex flex-col items-center text-center space-y-6">
