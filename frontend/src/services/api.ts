@@ -18,7 +18,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     // If the server indicates that the token is no longer valid
-    if (error.response?.status === 401) {
+    const isVerify2FA = error.config?.url?.includes("/auth/verify-2fa");
+
+    if (error.response?.status === 401 && !isVerify2FA) {
       Cookies.remove("access_token");
       localStorage.clear();
       if (typeof window !== "undefined") {
