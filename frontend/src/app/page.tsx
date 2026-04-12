@@ -17,7 +17,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 to-white flex flex-col font-sans selection:bg-blue-100">
-      {/* HEADER - Rămâne banda de sus originală */}
+      {/* HEADER - Păstrat neschimbat */}
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3 md:py-4 flex justify-between items-center">
           <div className="flex items-center gap-2 shrink-0">
@@ -46,20 +46,20 @@ export default function Home() {
       </header>
 
       <main className="grow flex flex-col items-center">
-        {/* HERO SECTION - Titlu cu numele complet al facultății */}
+        {/* HERO SECTION - Titlu redimensionat la 2xl/4xl (mai mic și elegant) */}
         <section className="container mx-auto px-4 pt-16 pb-12 md:pt-24 md:pb-16 max-w-5xl text-center space-y-10">
           <div className="space-y-6">
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight">
+            <h1 className="text-2xl md:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight">
               Management digital pentru <br />
               <span className="text-brand-blue">Facultatea de Inginerie Electrică și Știința Calculatoarelor</span>
             </h1>
             
-            <p className="text-lg md:text-xl text-slate-500 max-w-3xl mx-auto leading-relaxed italic">
+            <p className="text-base md:text-lg text-slate-500 max-w-3xl mx-auto leading-relaxed italic">
               O soluție unificată pentru planificarea, vizualizarea și gestionarea eficientă a activităților didactice și extra-curriculare.
             </p>
           </div>
 
-          {/* DESCRIERE FUNCȚIONALITĂȚI REALE */}
+          {/* DESCRIERE FUNCȚIONALITĂȚI REALE - Păstrate conform cerinței */}
           <div className="flex flex-col items-center space-y-12">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-10 text-left w-full max-w-6xl border-y border-slate-100 py-12">
               {/* STUDENT */}
@@ -124,7 +124,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* SECȚIUNE DE INFORMARE EVENIMENTE - Design integrat (fără card separat) */}
+        {/* SECȚIUNE DE INFORMARE EVENIMENTE - Design natural, fără chenar la iconiță */}
         <section className="container mx-auto px-4 pb-24">
           <div className="max-w-4xl mx-auto border-t border-slate-100 pt-16">
             <div className="flex flex-col items-center text-center space-y-6">
@@ -133,25 +133,24 @@ export default function Home() {
               </div>
               
               <div className="max-w-2xl space-y-4">
-                <h2 className="text-2xl md:text-3xl font-bold text-slate-900 leading-tight">
+                <h2 className="text-xl md:text-2xl font-bold text-slate-900 leading-tight">
                   Aveți nevoie de o planificare personalizată?
                 </h2>
-                <p className="text-slate-600 leading-relaxed text-lg">
-                  Pentru a planifica evenimente speciale, workshop-uri sau recuperări care necesită o configurare personalizată a resurselor, vă rugăm să trimiteți detaliile direct către administratorul sistemului prin email:
+                <p className="text-slate-600 leading-relaxed text-base md:text-lg">
+                  Pentru a planifica evenimente speciale, workshop-uri sau recuperări care necesită o configurare personalizată a resurselor, vă rugăm să trimiteți detaliile direct către administratorul sistemului:
                 </p>
               </div>
 
-              <a 
-                href={`mailto:${adminEmail}`}
-                className="group flex items-center gap-3 text-brand-blue font-black text-xl md:text-2xl transition-all"
-              >
-                <div className="bg-white p-2 rounded-lg border border-slate-200 group-hover:border-brand-blue group-hover:bg-blue-50 transition-colors">
-                  <Mail className="h-5 w-5" />
-                </div>
-                <span className="underline underline-offset-8 decoration-2 decoration-blue-200 group-hover:decoration-brand-blue">
+              {/* Email link cu iconiță integrată natural */}
+              <div className="flex items-center justify-center gap-3 pt-2">
+                <Mail className="h-5 w-5 text-brand-blue" />
+                <a 
+                  href={`mailto:${adminEmail}`}
+                  className="text-brand-blue font-black text-lg md:text-xl hover:text-brand-blue-dark transition-colors underline underline-offset-8 decoration-2 decoration-blue-100 hover:decoration-brand-blue"
+                >
                   {adminEmail}
-                </span>
-              </a>
+                </a>
+              </div>
             </div>
           </div>
         </section>
