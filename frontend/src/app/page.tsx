@@ -156,12 +156,17 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="border-t bg-white py-10 mt-auto">
+      {/* FOOTER */}
+      <footer className="border-t bg-slate-50/80 py-12 mt-auto">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-sm text-slate-400 font-medium">
-            © 2026 SGRD - Facultatea de Inginerie Electrică și Știința Calculatoarelor
+          <p className="text-slate-600 font-bold mb-1">
+            © 2026 SGRD - Sistem de gestionare a recuperărilor didactice
           </p>
-          <p className="text-xs text-slate-300 mt-1 uppercase tracking-widest">
+          <p className="text-sm text-slate-400 font-medium">
+            Facultatea de Inginerie Electrică și Știința Calculatoarelor
+          </p>
+          <div className="h-px w-12 bg-slate-200 mx-auto my-4" />
+          <p className="text-[10px] text-slate-400 uppercase tracking-[0.3em] font-semibold">
             Universitatea Ștefan cel Mare din Suceava
           </p>
         </div>
