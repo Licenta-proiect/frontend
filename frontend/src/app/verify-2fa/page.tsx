@@ -91,8 +91,8 @@ function Verify2FAContent() {
             onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))} 
             placeholder="000000" 
             disabled={remainingAttempts <= 0}
-            className="text-center text-2xl font-mono tracking-[0.5em] border-slate-200 focus:ring-brand-blue"
-          />
+            className="text-center text-2xl md:text-2xl font-mono h-16 tracking-[0.5em] border-slate-200 focus:ring-brand-blue bg-white"
+            />
           
           <div className="flex items-center justify-center gap-2 text-sm font-medium text-amber-600 bg-amber-50 py-2 rounded-lg border border-amber-100">
             <AlertCircle className="h-4 w-4" />
@@ -103,7 +103,7 @@ function Verify2FAContent() {
         <Button 
           onClick={handleVerification} 
           disabled={isPending || remainingAttempts <= 0}
-          className="w-full bg-brand-blue hover:bg-brand-blue-dark h-12 text-lg font-semibold"
+          className="w-full bg-brand-blue hover:bg-brand-blue-dark h-12 text-md font-semibold"
         >
           {isPending ? <Loader2 className="animate-spin mr-2" /> : null}
           Verifică și conectează-te
