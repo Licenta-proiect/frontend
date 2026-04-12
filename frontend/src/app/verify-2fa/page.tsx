@@ -52,7 +52,7 @@ function Verify2FAContent() {
       // Navigate to the appropriate dashboard based on user role
       const destination = role === "ADMIN" ? "/admin" : "/profesor";
       router.push(destination);
-    } catch (error: any) {
+    } catch {
       const updatedAttempts = remainingAttempts - 1;
       setRemainingAttempts(updatedAttempts);
       setOtpCode(""); // Reset input on failure
