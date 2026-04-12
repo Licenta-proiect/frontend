@@ -1,26 +1,71 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import api from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import Cookies from "js-cookie";
-import { ShieldCheck, Loader2, AlertCircle } from "lucide-react";
+import { ShieldCheck, Loader2, Timer } from "lucide-react";
+import { jwtDecode, JwtPayload } from "jwt-decode";
 
-/**
- * Component for handling the Two-Factor Authentication verification logic.
- * Uses a temporary token from the URL to validate the OTP code sent via email.
- */
+// Definim structura token-ului pentru a evita eroarea "any"
+interface CustomJwtPayload extends JwtPayload {
+  iat_2fa: number;
+  pending_2fa?: boolean;
+}
+
 function Verify2FAContent() {
   const [otpCode, setOtpCode] = useState("");
   const [isPending, setIsPending] = useState(false);
   const [remainingAttempts, setRemainingAttempts] = useState(3);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  
+  const hasNotifiedExpiration = useRef(false);
   
   const searchParams = useSearchParams();
   const router = useRouter();
   const tempToken = searchParams.get("temp_token");
+
+  useEffect(() => {
+    if (!tempToken) return;
+
+    try {
+      // Folosim interfața definită în loc de any
+      const decoded = jwtDecode<CustomJwtPayload>(tempToken);
+      const issuedAt = decoded.iat_2fa * 1000; 
+      const expiresAt = issuedAt + (5 * 60 * 1000); 
+
+      const updateTimer = () => {
+        const now = new Date().getTime();
+        const difference = expiresAt - now;
+        
+        if (difference <= 0) {
+          setTimeLeft(0);
+          // Declanșează toast-ul de expirare o singură dată
+          if (!hasNotifiedExpiration.current) {
+            toast.error("Codul de verificare a expirat. Te rugăm să te autentifici din nou.");
+            hasNotifiedExpiration.current = true;
+          }
+          return;
+        }
+        setTimeLeft(Math.floor(difference / 1000));
+      };
+
+      updateTimer();
+      const interval = setInterval(updateTimer, 1000);
+      return () => clearInterval(interval);
+    } catch (e) {
+      console.error("Token invalid", e);
+    }
+  }, [tempToken]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+  };
 
   const handleVerification = async () => {
     if (otpCode.length < 6) {
@@ -30,7 +75,6 @@ function Verify2FAContent() {
 
     setIsPending(true);
     try {
-      // API call to verify the OTP code using the temporary session token
       const response = await api.post("/auth/verify-2fa", {
         temp_token: tempToken,
         code: otpCode
@@ -38,7 +82,6 @@ function Verify2FAContent() {
 
       const { access_token, role, firstName, lastName, email } = response.data;
 
-      // Persist authentication data in Cookies and LocalStorage
       Cookies.set("access_token", access_token, { expires: 7 });
       Cookies.set("user_role", role, { expires: 7 });
       localStorage.setItem("access_token", access_token);
@@ -48,23 +91,23 @@ function Verify2FAContent() {
       localStorage.setItem("userLastName", lastName);
 
       toast.success("Autentificare reușită!");
-      
-      // Navigate to the appropriate dashboard based on user role
       const destination = role === "ADMIN" ? "/admin" : "/profesor";
       router.push(destination);
-    } catch {
+    } catch (error: unknown) {
+      // Tratăm eroarea ca fiind de tip Axios pentru a accesa proprietățile de răspuns
+      const axiosError = error as { response?: { data?: { detail?: string } } };
+      const backendMessage = axiosError.response?.data?.detail || "Cod invalid";
+      
       const updatedAttempts = remainingAttempts - 1;
       setRemainingAttempts(updatedAttempts);
-      setOtpCode(""); // Reset input on failure
+      setOtpCode("");
 
       if (updatedAttempts <= 0) {
-        toast.error("Prea multe încercări eșuate. Veți fi redirecționat la pagina principală.");
-        // Delay redirection to allow the user to read the error message
-        setTimeout(() => {
-          router.push("/");
-        }, 2000);
+        toast.error("Prea multe încercări eșuate. Veți fi redirecționat.");
+        setTimeout(() => router.push("/"), 2000);
       } else {
-        toast.error(`Cod invalid. Mai aveți ${updatedAttempts} ${updatedAttempts === 1 ? 'încercare' : 'încercări'}.`);
+        toast.error(`Mai aveți ${updatedAttempts} încercări.`);
+        console.log(backendMessage);
       }
     } finally {
       setIsPending(false);
@@ -80,9 +123,7 @@ function Verify2FAContent() {
         
         <div className="space-y-2">
           <h1 className="text-2xl font-bold text-slate-900">Verificare securitate</h1>
-          <p className="text-slate-500 text-sm">
-            Am trimis un cod de 6 cifre pe adresa dvs. de email. Introduceți-l mai jos pentru a continua.
-          </p>
+          <p className="text-slate-500 text-sm">Codul a fost trimis pe email.</p>
         </div>
 
         <div className="space-y-4">
@@ -90,23 +131,28 @@ function Verify2FAContent() {
             value={otpCode} 
             onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))} 
             placeholder="000000" 
-            disabled={remainingAttempts <= 0}
-            className="text-center text-2xl md:text-2xl font-mono h-16 tracking-[0.5em] border-slate-200 focus:ring-brand-blue bg-white"
+            disabled={remainingAttempts <= 0 || timeLeft === 0}
+            className="text-center text-xl md:text-xl font-mono h-16 tracking-[0.5em] border-slate-200 focus:ring-brand-blue bg-white"
             />
           
-          <div className="flex items-center justify-center gap-2 text-sm font-medium text-amber-600 bg-amber-50 py-2 rounded-lg border border-amber-100">
-            <AlertCircle className="h-4 w-4" />
-            <span>Încercări rămase: {remainingAttempts}</span>
+          <div className="flex justify-center">
+            <div className={`w-full flex items-center gap-2 text-sm font-medium px-6 py-2 rounded-lg border justify-center 
+                ${timeLeft !== null && timeLeft < 60 ? 
+                'text-red-600 bg-red-50 border-red-100' : 
+                'text-blue-600 bg-blue-50 border-blue-100'}`}>
+              <Timer className="h-4 w-4" />
+              <span>{timeLeft !== null ? formatTime(timeLeft) : "--:--"}</span>
+            </div>
           </div>
         </div>
 
         <Button 
           onClick={handleVerification} 
-          disabled={isPending || remainingAttempts <= 0}
-          className="w-full bg-brand-blue hover:bg-brand-blue-dark h-12 text-md font-semibold"
+          disabled={isPending || remainingAttempts <= 0 || timeLeft === 0}
+          className="w-full bg-brand-blue hover:bg-brand-blue-dark h-14 text-lg font-semibold"
         >
           {isPending ? <Loader2 className="animate-spin mr-2" /> : null}
-          Verifică și conectează-te
+          {timeLeft === 0 ? "Cod expirat" : "Verifică și conectează-te"}
         </Button>
       </div>
     </div>
