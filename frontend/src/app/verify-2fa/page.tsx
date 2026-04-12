@@ -43,10 +43,14 @@ function Verify2FAContent() {
         
         if (difference <= 0) {
           setTimeLeft(0);
-          // Declanșează toast-ul de expirare o singură dată
           if (!hasNotifiedExpiration.current) {
-            toast.error("Codul de verificare a expirat. Te rugăm să te autentifici din nou.");
+            toast.error("Codul de verificare a expirat. Veți fi redirecționat la pagina principală.");
             hasNotifiedExpiration.current = true;
+            
+            // Redirecționare automată la homepage după 2 secunde de la expirare
+            setTimeout(() => {
+              router.push("/");
+            }, 2000);
           }
           return;
         }
@@ -59,7 +63,7 @@ function Verify2FAContent() {
     } catch (e) {
       console.error("Token invalid", e);
     }
-  }, [tempToken]);
+  }, [tempToken, router]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
