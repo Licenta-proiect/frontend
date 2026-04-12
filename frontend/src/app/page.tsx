@@ -46,48 +46,70 @@ export default function Home() {
       </header>
 
       <main className="grow flex flex-col items-center">
-        {/* HERO SECTION - Minimalist și Modern */}
-        <section className="container mx-auto px-4 pt-16 pb-12 md:pt-28 md:pb-20 max-w-4xl text-center space-y-10">
+        {/* HERO SECTION - Titlu cu numele complet al facultății */}
+        <section className="container mx-auto px-4 pt-16 pb-12 md:pt-24 md:pb-16 max-w-5xl text-center space-y-10">
           <div className="space-y-6">
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight">
               Management digital pentru <br />
-              <span className="text-brand-blue">activitățile didactice FIESC</span>
+              <span className="text-brand-blue">Facultatea de Inginerie Electrică și Știința Calculatoarelor</span>
             </h1>
             
-            <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed">
-              O soluție unificată pentru planificarea și vizualizarea recuperărilor, dezvoltată pentru a elimina erorile de programare și suprapunerile de orar.
+            <p className="text-lg md:text-xl text-slate-500 max-w-3xl mx-auto leading-relaxed italic">
+              O soluție unificată pentru planificarea, vizualizarea și gestionarea eficientă a activităților didactice și extra-curriculare.
             </p>
           </div>
 
-          {/* CE FACE APLICAȚIA - Prezentare directă */}
-          <div className="flex flex-col items-center space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 text-left w-full max-w-3xl">
-              <div className="flex items-start gap-3">
-                <div className="mt-1 bg-blue-50 p-1 rounded-full"><CheckCircle2 className="h-5 w-5 text-brand-blue" /></div>
-                <div>
-                  <p className="font-bold text-slate-800">Programarea recuperărilor</p>
-                  <p className="text-sm text-slate-500">Identifică sloturile libere și rezervă săli în timp real.</p>
+          {/* DESCRIERE FUNCȚIONALITĂȚI REALE */}
+          <div className="flex flex-col items-center space-y-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-10 text-left w-full max-w-6xl border-y border-slate-100 py-12">
+              {/* STUDENT */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-brand-blue font-bold uppercase text-xs tracking-widest">
+                   Student
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-brand-blue shrink-0 mt-0.5" />
+                    <p className="text-sm text-slate-600">Caută <strong>sloturi alternative</strong> de recuperare în cazul în care nu poți participa la activitatea programată inițial.</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-brand-blue shrink-0 mt-0.5" />
+                    <p className="text-sm text-slate-600">Vizualizează centralizat <strong>toate recuperările didactice</strong> planificate în cadrul facultății.</p>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
-                <div className="mt-1 bg-blue-50 p-1 rounded-full"><CheckCircle2 className="h-5 w-5 text-brand-blue" /></div>
-                <div>
-                  <p className="font-bold text-slate-800">Mediu unificat de vizualizare</p>
-                  <p className="text-sm text-slate-500">Toate modificările de orar centralizate într-un singur loc.</p>
+
+              {/* PROFESOR */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-brand-blue font-bold uppercase text-xs tracking-widest">
+                   Profesor
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-brand-blue shrink-0 mt-0.5" />
+                    <p className="text-sm text-slate-600">Planifică și gestionează <strong>recuperările pentru grupele</strong> la care predai, evitând suprapunerile.</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-brand-blue shrink-0 mt-0.5" />
+                    <p className="text-sm text-slate-600">Monitorizează orarul personal și <strong>evenimentele la care ești asociat</strong> în timp real.</p>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
-                <div className="mt-1 bg-blue-50 p-1 rounded-full"><CheckCircle2 className="h-5 w-5 text-brand-blue" /></div>
-                <div>
-                  <p className="font-bold text-slate-800">Gestionarea resurselor</p>
-                  <p className="text-sm text-slate-500">Sincronizare completă cu materiile și grupele alocate.</p>
+
+              {/* ADMIN */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-brand-blue font-bold uppercase text-xs tracking-widest">
+                   Administrator
                 </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="mt-1 bg-blue-50 p-1 rounded-full"><CheckCircle2 className="h-5 w-5 text-brand-blue" /></div>
-                <div>
-                  <p className="font-bold text-slate-800">Planificare evenimente</p>
-                  <p className="text-sm text-slate-500">Suport pentru conferințe, workshop-uri sau sesiuni speciale.</p>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-brand-blue shrink-0 mt-0.5" />
+                    <p className="text-sm text-slate-600">Planifică și coordonează <strong>evenimente speciale</strong> și fluxul administrativ al facultății.</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-brand-blue shrink-0 mt-0.5" />
+                    <p className="text-sm text-slate-600">Gestionează utilizatorii, drepturile de acces și <strong>integritatea datelor</strong> din sistem.</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -95,43 +117,41 @@ export default function Home() {
             <Button
               size="lg"
               onClick={handleGoogleLogin}
-              className="bg-brand-blue hover:bg-brand-blue-dark h-14 px-12 text-lg font-bold transition-all active:scale-95 shadow-xl shadow-blue-200/50 rounded-2xl"
+              className="bg-brand-blue hover:bg-brand-blue-dark h-14 px-12 text-base font-extrabold transition-all active:scale-95 shadow-lg shadow-blue-200/40 rounded-xl"
             >
               Intră în platformă <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </div>
         </section>
 
-        {/* SECȚIUNE DE INFORMARE EVENIMENTE - Rafinată și Sugestivă */}
+        {/* SECȚIUNE DE INFORMARE EVENIMENTE - Design integrat (fără card separat) */}
         <section className="container mx-auto px-4 pb-24">
           <div className="max-w-4xl mx-auto border-t border-slate-100 pt-16">
-            <div className="bg-slate-50/50 rounded-[2rem] p-8 md:p-12 border border-slate-100/80">
-              <div className="flex flex-col md:flex-row gap-10 items-center">
-                <div className="space-y-4 flex-1">
-                  <div className="inline-flex items-center gap-2 text-brand-blue bg-blue-50 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-                    <Sparkles className="h-3 w-3" /> Solicitări Speciale
-                  </div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-slate-900 leading-tight">
-                    Aveți nevoie de o planificare personalizată?
-                  </h2>
-                  <p className="text-slate-600 leading-relaxed">
-                    Pentru a planifica evenimente speciale, workshop-uri sau recuperări care necesită o configurare personalizată a resurselor, vă rugăm să trimiteți detaliile direct către administratorul sistemului.
-                  </p>
-                </div>
-                
-                <div className="shrink-0 w-full md:w-auto">
-                  <a 
-                    href={`mailto:${adminEmail}`}
-                    className="flex flex-col items-center gap-3 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-brand-blue hover:shadow-md transition-all group"
-                  >
-                    <div className="bg-blue-50 p-3 rounded-xl group-hover:bg-brand-blue transition-colors">
-                      <Mail className="h-6 w-6 text-brand-blue group-hover:text-white" />
-                    </div>
-                    <span className="font-bold text-slate-900">{adminEmail}</span>
-                    <span className="text-xs text-slate-400 font-medium">Click pentru a trimite email</span>
-                  </a>
-                </div>
+            <div className="flex flex-col items-center text-center space-y-6">
+              <div className="inline-flex items-center gap-2 text-brand-blue bg-blue-50 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                <Sparkles className="h-3 w-3" /> Solicitări Speciale
               </div>
+              
+              <div className="max-w-2xl space-y-4">
+                <h2 className="text-2xl md:text-3xl font-bold text-slate-900 leading-tight">
+                  Aveți nevoie de o planificare personalizată?
+                </h2>
+                <p className="text-slate-600 leading-relaxed text-lg">
+                  Pentru a planifica evenimente speciale, workshop-uri sau recuperări care necesită o configurare personalizată a resurselor, vă rugăm să trimiteți detaliile direct către administratorul sistemului prin email:
+                </p>
+              </div>
+
+              <a 
+                href={`mailto:${adminEmail}`}
+                className="group flex items-center gap-3 text-brand-blue font-black text-xl md:text-2xl transition-all"
+              >
+                <div className="bg-white p-2 rounded-lg border border-slate-200 group-hover:border-brand-blue group-hover:bg-blue-50 transition-colors">
+                  <Mail className="h-5 w-5" />
+                </div>
+                <span className="underline underline-offset-8 decoration-2 decoration-blue-200 group-hover:decoration-brand-blue">
+                  {adminEmail}
+                </span>
+              </a>
             </div>
           </div>
         </section>
