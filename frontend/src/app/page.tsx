@@ -73,7 +73,7 @@ export default function Home() {
 
         {/* DESCRIPTION OF FUNCTIONALITIES BY ROLES */}
         <section className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-10 text-left w-full max-w-6xl border-y border-slate-100 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-10 text-left w-full max-w-6xl border-y border-slate-100 py-12 items-stretch">
             {/* STUDENT */}
             <div className="space-y-3 p-6 rounded-2xl border border-transparent hover:border-blue-100 hover:bg-blue-50/50 transition-all">
               <div className="flex items-center gap-2 text-brand-blue font-bold uppercase text-xs tracking-widest">
