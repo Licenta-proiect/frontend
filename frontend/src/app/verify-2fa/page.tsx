@@ -10,18 +10,21 @@ import Cookies from "js-cookie";
 import { ShieldCheck, Loader2, Timer } from "lucide-react";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 
-// Definim structura token-ului pentru a evita eroarea "any"
 interface CustomJwtPayload extends JwtPayload {
   iat_2fa: number;
   pending_2fa?: boolean;
 }
 
+/**
+ * Main component handling the Two-Factor Authentication verification process.
+ */
 function Verify2FAContent() {
   const [otpCode, setOtpCode] = useState("");
   const [isPending, setIsPending] = useState(false);
   const [remainingAttempts, setRemainingAttempts] = useState(3);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   
+  // Ref to ensure the expiration toast is only triggered once
   const hasNotifiedExpiration = useRef(false);
   
   const searchParams = useSearchParams();
@@ -32,10 +35,9 @@ function Verify2FAContent() {
     if (!tempToken) return;
 
     try {
-      // Folosim interfața definită în loc de any
       const decoded = jwtDecode<CustomJwtPayload>(tempToken);
       const issuedAt = decoded.iat_2fa * 1000; 
-      const expiresAt = issuedAt + (5 * 60 * 1000); 
+      const expiresAt = issuedAt + (5 * 60 * 1000); // 5-minute validity
 
       const updateTimer = () => {
         const now = new Date().getTime();
@@ -47,7 +49,7 @@ function Verify2FAContent() {
             toast.error("Codul de verificare a expirat. Veți fi redirecționat la pagina principală.");
             hasNotifiedExpiration.current = true;
             
-            // Redirecționare automată la homepage după 2 secunde de la expirare
+            // Auto-redirect to homepage after 2 seconds
             setTimeout(() => {
               router.push("/");
             }, 2000);
@@ -79,6 +81,7 @@ function Verify2FAContent() {
 
     setIsPending(true);
     try {
+        // API call to finalize 2FA authentication
       const response = await api.post("/auth/verify-2fa", {
         temp_token: tempToken,
         code: otpCode
@@ -86,8 +89,10 @@ function Verify2FAContent() {
 
       const { access_token, role, firstName, lastName, email } = response.data;
 
+      // Persist session tokens and user data
       Cookies.set("access_token", access_token, { expires: 7 });
       Cookies.set("user_role", role, { expires: 7 });
+
       localStorage.setItem("access_token", access_token);
       localStorage.setItem("userRole", role);
       localStorage.setItem("userEmail", email);
@@ -97,8 +102,9 @@ function Verify2FAContent() {
       toast.success("Autentificare reușită!");
       const destination = role === "ADMIN" ? "/admin" : "/profesor";
       router.push(destination);
+
     } catch (error: unknown) {
-      // Tratăm eroarea ca fiind de tip Axios pentru a accesa proprietățile de răspuns
+      // Parse backend error messages
       const axiosError = error as { response?: { data?: { detail?: string } } };
       const backendMessage = axiosError.response?.data?.detail || "Cod invalid";
       
