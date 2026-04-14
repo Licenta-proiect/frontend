@@ -120,7 +120,7 @@ export function AdminEvents() {
       toast.success("Eveniment programat cu succes!");
       setBookedSlots(prev => [...prev, slot.id]);
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Eroare la confirmare";
+      const errorMessage = (error as { response?: { data?: { detail?: string } } }).response?.data?.detail || "Eroare la rezervare";
       toast.error(errorMessage);
     } finally {
       setIsBooking(null);
