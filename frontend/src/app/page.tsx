@@ -50,9 +50,8 @@ export default function Home() {
         <section className="container mx-auto px-4 pt-12 pb-10 md:pt-20 md:pb-16 max-w-4xl text-center">
           <div className="flex flex-col items-center space-y-8">
             <div className="space-y-4">
-              <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
-                Planifică și gestionează <br />
-                <span className="text-brand-blue italic">activitățile didactice ale facultății</span>
+              <h1 className="text-3xl md:text-5xl font-black text-slate-900">
+                Sistem de gestionare a recuperărilor didactice 
               </h1>
               
               <p className="text-base md:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed font-medium">
