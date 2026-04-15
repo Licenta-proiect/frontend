@@ -106,7 +106,7 @@ export default function Home() {
               size="lg"
               onClick={handleGoogleLogin}
               disabled={isLoading}
-              className="bg-brand-blue hover:bg-brand-blue-dark h-12 md:h-14 px-8 md:px-12 text-base font-bold transition-all active:scale-95 shadow-lg shadow-blue-200/40 rounded-xl"
+              className="bg-brand-blue hover:bg-brand-blue-dark h-12 md:h-12 px-8 md:px-12 text-base font-bold transition-all active:scale-95 shadow-lg shadow-blue-200/40 rounded-xl"
             >
               {isLoading ? (
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -119,7 +119,7 @@ export default function Home() {
 
         {/* FUNCTIONALITIES BY ROLES */}
         <section className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mx-auto border-y border-slate-100 py-12 items-stretch">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mx-auto border-slate-100 py-12 items-stretch">
             {/* STUDENT */}
             <div className="group bg-white p-8 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-blue-200 transition-all duration-300 flex flex-col space-y-4">
               <div className="flex items-center gap-2 text-brand-blue font-bold uppercase text-xs tracking-widest">
@@ -186,8 +186,8 @@ export default function Home() {
         </section>
 
         {/* CONTACT SECTION */}
-        <section className="container mx-auto px-4 pb-20">
-          <div className="max-w-4xl mx-auto pt-16">
+        <section className="container mx-auto px-4 pb-16">
+          <div className="max-w-4xl mx-auto pt-12">
             <div className="flex flex-col items-center text-center space-y-6">
               <div className="inline-flex items-center gap-2 text-brand-blue bg-blue-50 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
                 <Sparkles className="h-3 w-3" /> Solicitări speciale
