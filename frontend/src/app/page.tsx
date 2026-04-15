@@ -90,7 +90,7 @@ export default function Home() {
 
       <main className="grow flex flex-col items-center">
         {/* HERO SECTION */}
-        <section className="container mx-auto px-4 pt-6 pb-10 md:pt-20 md:pb-16 max-w-4xl text-center">
+        <section className="container mx-auto px-4 pt-6 pb-4 md:pt-16 md:pb-8 max-w-4xl text-center">
           <div className="flex flex-col items-center space-y-8">
             <div className="space-y-4">
               <h1 className="text-3xl md:text-5xl font-black text-slate-900">
@@ -119,7 +119,7 @@ export default function Home() {
 
         {/* FUNCTIONALITIES BY ROLES */}
         <section className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mx-auto border-slate-100 py-12 items-stretch">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mx-auto border-slate-100 py-8 items-stretch">
             {/* STUDENT */}
             <div className="group bg-white p-8 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-blue-200 transition-all duration-300 flex flex-col space-y-4">
               <div className="flex items-center gap-2 text-brand-blue font-bold uppercase text-xs tracking-widest">
@@ -187,7 +187,7 @@ export default function Home() {
 
         {/* CONTACT SECTION */}
         <section className="container mx-auto px-4 pb-16">
-          <div className="max-w-4xl mx-auto pt-12">
+          <div className="max-w-4xl mx-auto pt-4">
             <div className="flex flex-col items-center text-center space-y-6">
               <div className="inline-flex items-center gap-2 text-brand-blue bg-blue-50 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
                 <Sparkles className="h-3 w-3" /> Solicitări speciale
@@ -222,7 +222,7 @@ export default function Home() {
           <p className="text-slate-600 font-bold mb-1">
             © 2026 SGRD - Facultatea de Inginerie Electrică și Știința Calculatoarelor
           </p>
-          <p className="text-xs text-slate-300 mt-1 uppercase tracking-widest font-semibold">
+          <p className="text-xs text-slate-400 mt-1 uppercase tracking-widest font-semibold">
             Universitatea Ștefan cel Mare din Suceava
           </p>
         </div>
