@@ -69,9 +69,9 @@ export function AdminSync() {
       if (prevSyncActive.current && !filteredLogs.some((l: SyncLog) => l.status === "In progress")) {
         const lastLog = filteredLogs[0];
         if (lastLog.status === "Success") {
-          toast.success(`Sincronizarea ${lastLog.syncType} s-a finalizat cu succes!`);
+          toast.success(`Sincronizarea s-a finalizat cu succes!`);
         } else if (lastLog.status === "Error") {
-          toast.error(`Eroare la sincronizarea ${lastLog.syncType}!`);
+          toast.error(`Eroare la sincronizare!`);
         }
       }
       
