@@ -1,16 +1,31 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Calendar, LogIn, Mail, CheckCircle2, ArrowRight, Sparkles } from "lucide-react";
+import { Calendar, LogIn, Mail, CheckCircle2, ArrowRight, Sparkles, Loader2 } from "lucide-react"; 
 import { ProfessorAccessRequest } from "@/components/ProfessorAccessRequest";
+import api from "@/services/api"; 
+import { useState } from "react";
 
 export default function Home() {
-  /**
-   * Triggers the Google OAuth flow via the backend endpoint
-   */
-  const handleGoogleLogin = () => {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL;
-    window.location.href = `${backendUrl}/login`;
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    try {
+      // Verificăm statusul printr-un apel API simplu
+      // Interceptorul va detecta dacă e 503 și va trimite userul la /maintenance automat
+      await api.get("/admin/sync/status");
+      
+      // Dacă am ajuns aici, înseamnă că nu e mentenanță (nu am primit 503)
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL;
+      window.location.href = `${backendUrl}/login`;
+    } catch (error: any) {
+      // Dacă eroarea este 503, interceptorul din api.ts se va ocupa de redirect.
+      // Oprim loading-ul doar dacă e altă eroare
+      if (error.response?.status !== 503) {
+        setIsLoading(false);
+      }
+    }
   };
 
   const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@usv.ro";
@@ -34,10 +49,15 @@ export default function Home() {
             <ProfessorAccessRequest />
             <Button 
               onClick={handleGoogleLogin} 
+              disabled={isLoading}
               size="sm"
               className="bg-brand-blue hover:bg-brand-blue-dark active:scale-95 md:h-11 md:px-6 gap-2 text-xs md:text-base px-3 text-white font-medium transition-all shadow-sm"
             >
-              <LogIn className="h-4 w-4 md:h-5 md:w-5" />
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <LogIn className="h-4 w-4 md:h-5 md:w-5" />
+              )}
               <span className="hidden xs:inline">Autentificare Google</span>
               <span className="xs:hidden">Autentificare</span>
             </Button>
@@ -53,7 +73,7 @@ export default function Home() {
               <h1 className="text-3xl md:text-5xl font-black text-slate-900">
                 Sistem de gestionare a recuperărilor didactice 
               </h1>
-              
+
               <p className="text-base md:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed font-medium">
                 O soluție unificată pentru planificarea, vizualizarea și gestionarea eficientă a activităților didactice și extra-curriculare.
               </p>
@@ -63,9 +83,14 @@ export default function Home() {
             <Button
               size="lg"
               onClick={handleGoogleLogin}
+              disabled={isLoading}
               className="bg-brand-blue hover:bg-brand-blue-dark h-12 md:h-14 px-8 md:px-12 text-base font-extrabold transition-all active:scale-95 shadow-lg shadow-blue-200/40 rounded-xl"
             >
-              Intră în platformă <ArrowRight className="ml-2 h-5 w-5" />
+              {isLoading ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
+                <>Intră în platformă <ArrowRight className="ml-2 h-5 w-5" /></>
+              )}
             </Button>
           </div>
         </section>
