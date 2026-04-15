@@ -22,13 +22,20 @@ export default function Home() {
   const handleGoogleLogin = async (): Promise<void> => {
     setIsLoading(true);
     try {
-      // Trigger a status check request. 
-      // The Axios interceptor in api.ts will handle a 503 response by redirecting to /maintenance.
-      await api.get("/admin/sync/status");
-      
-      // If the promise resolves, the system is operational.
+      // 1. Perform a status check
+      // If the backend returns a 503, the Axios interceptor handles the redirect.
+      const response = await api.get("/admin/sync/status");
+
+      // 2. Double-check the payload flag (as a fail-safe)
+      if (response.data.is_updating) {
+        window.location.href = "/maintenance";
+        return;
+      }
+
+      // 3. Only if the system is NOT updating, allow the browser to leave the app
       const backendUrl = process.env.NEXT_PUBLIC_API_URL;
       window.location.href = `${backendUrl}/login`;
+      
     } catch (error: unknown) {
       // Handle the error using Type Guards to avoid 'any'
       if (axios.isAxiosError(error)) {

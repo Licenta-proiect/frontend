@@ -34,6 +34,8 @@ api.interceptors.response.use(
         // 2. We are NOT admin on the sync tab
         if (!isMaintenancePage && !(isAdminPath && isSyncTab)) {
           window.location.href = "/maintenance";
+          // Block the error propagation to stop the calling code from executing
+          return new Promise(() => {}); 
         }
       }
       return Promise.reject(error);
