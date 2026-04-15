@@ -5,24 +5,40 @@ import { Calendar, LogIn, Mail, CheckCircle2, ArrowRight, Sparkles, Loader2 } fr
 import { ProfessorAccessRequest } from "@/components/ProfessorAccessRequest";
 import api from "@/services/api"; 
 import { useState } from "react";
+import axios from "axios";
 
+/**
+ * Landing Page Component
+ * Handles user introduction to the platform and the initial authentication check.
+ */
 export default function Home() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleGoogleLogin = async () => {
+  /**
+   * Orchestrates the login flow.
+   * First checks if the system is in maintenance mode via the interceptor-enabled API instance.
+   * If available, redirects to the Google OAuth provider.
+   */
+  const handleGoogleLogin = async (): Promise<void> => {
     setIsLoading(true);
     try {
-      // Verificăm statusul printr-un apel API simplu
-      // Interceptorul va detecta dacă e 503 și va trimite userul la /maintenance automat
+      // Trigger a status check request. 
+      // The Axios interceptor in api.ts will handle a 503 response by redirecting to /maintenance.
       await api.get("/admin/sync/status");
       
-      // Dacă am ajuns aici, înseamnă că nu e mentenanță (nu am primit 503)
+      // If the promise resolves, the system is operational.
       const backendUrl = process.env.NEXT_PUBLIC_API_URL;
       window.location.href = `${backendUrl}/login`;
-    } catch (error: any) {
-      // Dacă eroarea este 503, interceptorul din api.ts se va ocupa de redirect.
-      // Oprim loading-ul doar dacă e altă eroare
-      if (error.response?.status !== 503) {
+    } catch (error: unknown) {
+      // Handle the error using Type Guards to avoid 'any'
+      if (axios.isAxiosError(error)) {
+        // If the error is 503, the interceptor handles navigation, 
+        // so we only reset loading for other types of failures.
+        if (error.response?.status !== 503) {
+          setIsLoading(false);
+        }
+      } else {
+        // Fallback for non-Axios errors
         setIsLoading(false);
       }
     }
@@ -66,7 +82,7 @@ export default function Home() {
       </header>
 
       <main className="grow flex flex-col items-center">
-        {/* HERO SECTION - Simplified title and integrated button immediately below the text */}
+        {/* HERO SECTION */}
         <section className="container mx-auto px-4 pt-12 pb-10 md:pt-20 md:pb-16 max-w-4xl text-center">
           <div className="flex flex-col items-center space-y-8">
             <div className="space-y-4">
@@ -79,7 +95,6 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Login button */}
             <Button
               size="lg"
               onClick={handleGoogleLogin}
@@ -95,7 +110,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* DESCRIPTION OF FUNCTIONALITIES BY ROLES */}
+        {/* FUNCTIONALITIES BY ROLES */}
         <section className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-10 text-left w-full max-w-6xl border-y border-slate-100 py-12 items-stretch">
             {/* STUDENT */}
@@ -151,7 +166,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* EVENTS INFORMATION SECTION */}
+        {/* CONTACT SECTION */}
         <section className="container mx-auto px-4 pb-20">
           <div className="max-w-4xl mx-auto pt-16">
             <div className="flex flex-col items-center text-center space-y-6">
