@@ -1,26 +1,26 @@
-# Folosim Node 20 (LTS) pentru stabilitate cu React 19/Next 16
-# alpine este o versiune foarte mică și rapidă de Linux
+# Use Node 20 (LTS) for stability with React 19/Next 16
+# alpine is a very small and fast Linux distribution
 FROM node:20-alpine
 
-# Setăm folderul de lucru în container
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copiem fișierele de dependențe
-# Copiem și package-lock.json pentru a păstra versiunile exacte ale librăriilor
+# Copy dependency files
+# We also copy package-lock.json to maintain exact versions of the libraries
 COPY package*.json ./
 
-# Instalăm dependențele
-# Folosim --frozen-lockfile dacă ai avea pnpm/yarn, dar pentru npm e standard install
+# Install dependencies
+# Standard install for npm to process the package.json
 RUN npm install
 
-# Copiem restul codului sursă din folderul src în container
+# Copy the rest of the source code into the container
 COPY . .
 
-# Construim aplicația pentru producție (Next.js build)
+# Build the application for production (Next.js build)
 RUN npm run build
 
-# Expunem portul 3000 (portul default Next.js)
+# Expose port 3000 (default Next.js port)
 EXPOSE 3000
 
-# Comanda care pornește aplicația
+# Command to start the application
 CMD ["npm", "run", "start"]
