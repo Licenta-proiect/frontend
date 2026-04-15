@@ -3,13 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import api from "@/services/api";
-import { Button } from "@/components/ui/button";
 import { Hammer, RefreshCw, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 /**
  * MaintenancePage Component
- * Handles the UI and logic when the system is in maintenance mode (is_updating = true).
+ * Handles the UI and logic when the system is in maintenance mode.
  * Automatically redirects the user once the synchronization process finishes.
  */
 export default function MaintenancePage() {
@@ -85,26 +84,14 @@ export default function MaintenancePage() {
               <span className="h-2 w-2 bg-amber-500 rounded-full animate-bounce"></span>
             </div>
             <span className="text-xs font-semibold text-slate-600 tracking-wider">
-              Verificăm starea sistemului...
+              Sincronizare în fundal...
             </span>
           </div>
         )}
 
-        {/* Action Button */}
-        <div className="pt-4">
-          <Button 
-            onClick={() => window.location.reload()} 
-            disabled={isRedirecting}
-            className="w-full bg-brand-blue hover:bg-brand-blue-dark h-14 text-lg font-semibold shadow-md transition-all active:scale-95"
-          >
-            <RefreshCw className={`mr-2 h-5 w-5 ${isRedirecting ? '' : 'animate-spin'}`} />
-            Reîncearcă accesul
-          </Button>
-        </div>
-
         {/* Footer info */}
-        <p className="text-[10px] text-slate-400 italic">
-          Această procedură poate dura câteva minute. Pagina se va reîmprospăta automat.
+        <p className="text-[10px] text-slate-400 italic pt-4">
+          Pagina se va reîmprospăta automat la finalizarea procesului.
         </p>
       </div>
     </div>
