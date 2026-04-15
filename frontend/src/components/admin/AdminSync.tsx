@@ -138,7 +138,22 @@ export function AdminSync() {
     }
   };
 
-  const handleToggleAutoSync = () => setAutoSyncEnabled(!autoSyncEnabled);
+  const handleToggleAutoSync = async () => {
+      const newValue = !autoSyncEnabled;
+      setAutoSyncEnabled(newValue);
+      
+      try {
+        await api.post("/admin/sync/settings", {
+          auto_sync_enabled: newValue,
+          sync_interval: syncInterval,
+          sync_time: syncTime
+        });
+        toast.success(newValue ? "Sincronizare activată" : "Sincronizare dezactivată");
+      } catch {
+        toast.error("Eroare la actualizarea statusului");
+        setAutoSyncEnabled(!newValue); // rollback UI if fails
+      }
+  };
 
   const handleExportCSV = () => {
     const csvContent = [
