@@ -20,6 +20,25 @@ api.interceptors.response.use(
     // If the server indicates that the token is no longer valid
     const isVerify2FA = error.config?.url?.includes("/auth/verify-2fa");
 
+    // If the error is 503, we don't delete cookies! 
+    // Just return the error so the interface shows "Maintenance"
+    if (error.response?.status === 503) {
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href);
+        const isAdminPath = url.pathname.includes("/admin");
+        const isSyncTab = url.searchParams.get("tab") === "sync";
+        const isMaintenancePage = url.pathname.includes("/maintenance");
+
+        // Route to maintenance ONLY if:
+        // 1. We are not already on the maintenance page
+        // 2. We are NOT admin on the sync tab
+        if (!isMaintenancePage && !(isAdminPath && isSyncTab)) {
+          window.location.href = "/maintenance";
+        }
+      }
+      return Promise.reject(error);
+    }
+
     if (error.response?.status === 401 && !isVerify2FA) {
       Cookies.remove("access_token");
       localStorage.clear();
