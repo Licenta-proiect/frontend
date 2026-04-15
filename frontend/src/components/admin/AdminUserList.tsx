@@ -161,16 +161,30 @@ export function AdminUserList({
               );
             })}
       
-            {/* "See more" button - only appears if there are more users to show */}
-            {filtered.length > displayLimit && (
-              <Button 
-                variant="ghost" 
-                className="w-full font-semibold border-gray-200 text-brand-blue hover:bg-blue-50 transition-all active:scale-95"
-                onClick={() => setDisplayLimit(prev => prev + step)}
-              >
-                Încarcă mai mulți utilizatori ({filtered.length - displayLimit} rămași)
-              </Button>
-            )}
+            <div className="flex flex-col items-center gap-2 pt-2">
+              {/* "See more" button */}
+              {filtered.length > displayLimit && (
+                <Button 
+                  variant="ghost" 
+                  className="w-full font-semibold border-gray-200 text-brand-blue hover:bg-blue-50 transition-all active:scale-95"
+                  onClick={() => setDisplayLimit(prev => prev + step)}
+                >
+                  Încarcă mai mulți utilizatori ({filtered.length - displayLimit} rămași)
+                </Button>
+              )}
+
+              {/* "See less" button */}
+              {displayLimit > step && (
+                <Button 
+                  variant="link" 
+                  className="text-gray-500"
+                  onClick={() => {setDisplayLimit(step)}}
+                >
+                  Arată mai puține
+                </Button>
+              )}
+            </div>
+
           </>
         )}
       </CardContent>

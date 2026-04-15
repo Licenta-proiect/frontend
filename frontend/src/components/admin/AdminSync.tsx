@@ -357,16 +357,29 @@ export function AdminSync() {
                 );
               })}
 
-              {/* Load more button */}
-              {syncLogs.length > displayLimit && (
-                <Button 
-                  variant="ghost" 
-                  className="w-full font-semibold border-gray-200 text-brand-blue hover:bg-blue-50 transition-all active:scale-95"
-                  onClick={() => setDisplayLimit(prev => prev + step)}
-                >
-                  Încarcă mai multe înregistrări ({syncLogs.length - displayLimit} rămase)
-                </Button>
-              )}
+              <div className="flex flex-col items-center gap-2 pt-2">
+                {/* Load more button */}
+                {syncLogs.length > displayLimit && (
+                  <Button 
+                    variant="ghost" 
+                    className="w-full font-semibold border-gray-200 text-brand-blue hover:bg-blue-50 transition-all active:scale-95"
+                    onClick={() => setDisplayLimit(prev => prev + step)}
+                  >
+                    Încarcă mai multe înregistrări ({syncLogs.length - displayLimit} rămase)
+                  </Button>
+                )}
+
+                {/* Load less button */}
+                {displayLimit > step && (
+                  <Button 
+                    variant="link" 
+                    className="text-gray-500"
+                    onClick={() => { setDisplayLimit(step)}}
+                  >
+                    Arată mai puține
+                  </Button>
+                )}
+              </div>
             </>
           )}
         </CardContent>

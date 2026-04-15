@@ -226,29 +226,30 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
               </Card>
             ))}
 
-            {/* "See more" button */}
-            {allProcessed.length > displayLimit && (
-              <Button 
-                variant="ghost" 
-                className="w-full font-semibold border-gray-200 text-brand-blue hover:bg-blue-50 transition-all active:scale-95"
-                onClick={() => setDisplayLimit(prev => prev + step)}
-              >
-                Încarcă mai multe cereri ({allProcessed.length - displayLimit} rămase)
-              </Button>
-            )}
+            <div className="flex flex-col items-center gap-2 pt-2">
+              {/* "See more" button */}
+              {allProcessed.length > displayLimit && (
+                <Button 
+                  variant="ghost" 
+                  className="w-full font-semibold border-gray-200 text-brand-blue hover:bg-blue-50 transition-all active:scale-95"
+                  onClick={() => setDisplayLimit(prev => prev + step)}
+                >
+                  Încarcă mai multe cereri ({allProcessed.length - displayLimit} rămase)
+                </Button>
+              )}
 
-            {/* "See less" button */}
-            {displayLimit > step && (
-              <Button 
-                variant="link" 
-                onClick={() => {
-                  setDisplayLimit(step);
-                  //window.scrollTo({ top: 0, behavior: 'smooth' }); // Opțional, pentru a reveni sus
-                }}
-              >
-                Arată mai puține
-              </Button>
-            )}
+              {/* "See less" button */}
+              {displayLimit > step && (
+                <Button 
+                  variant="link" 
+                  className="text-gray-500"
+                  onClick={() => {setDisplayLimit(step)}}
+                >
+                  Arată mai puține
+                </Button>
+              )}
+            </div>
+    
           </>
         )}
       </CardContent>

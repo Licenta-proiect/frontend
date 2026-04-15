@@ -90,7 +90,7 @@ export default function Home() {
 
       <main className="grow flex flex-col items-center">
         {/* HERO SECTION */}
-        <section className="container mx-auto px-4 pt-12 pb-10 md:pt-20 md:pb-16 max-w-4xl text-center">
+        <section className="container mx-auto px-4 pt-6 pb-10 md:pt-20 md:pb-16 max-w-4xl text-center">
           <div className="flex flex-col items-center space-y-8">
             <div className="space-y-4">
               <h1 className="text-3xl md:text-5xl font-black text-slate-900">
@@ -106,7 +106,7 @@ export default function Home() {
               size="lg"
               onClick={handleGoogleLogin}
               disabled={isLoading}
-              className="bg-brand-blue hover:bg-brand-blue-dark h-12 md:h-14 px-8 md:px-12 text-base font-extrabold transition-all active:scale-95 shadow-lg shadow-blue-200/40 rounded-xl"
+              className="bg-brand-blue hover:bg-brand-blue-dark h-12 md:h-14 px-8 md:px-12 text-base font-bold transition-all active:scale-95 shadow-lg shadow-blue-200/40 rounded-xl"
             >
               {isLoading ? (
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -119,54 +119,66 @@ export default function Home() {
 
         {/* FUNCTIONALITIES BY ROLES */}
         <section className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-10 text-left w-full max-w-6xl border-y border-slate-100 py-12 items-stretch">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mx-auto border-y border-slate-100 py-12 items-stretch">
             {/* STUDENT */}
-            <div className="space-y-3 p-6 rounded-2xl border border-transparent hover:border-blue-100 hover:bg-blue-50/50 transition-all">
+            <div className="group bg-white p-8 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-blue-200 transition-all duration-300 flex flex-col space-y-4">
               <div className="flex items-center gap-2 text-brand-blue font-bold uppercase text-xs tracking-widest">
-                 Student
+                Student
               </div>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5 text-brand-blue shrink-0 mt-0.5" />
-                  <p className="text-sm text-slate-600">Caută <strong>sloturi alternative</strong> de recuperare în cazul în care nu poți participa la activitatea programată inițial.</p>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    Caută <strong className="text-slate-900">sloturi alternative</strong> de recuperare în cazul în care nu poți participa la activitatea programată inițial.
+                  </p>
                 </div>
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5 text-brand-blue shrink-0 mt-0.5" />
-                  <p className="text-sm text-slate-600">Vizualizează centralizat <strong>toate recuperările didactice</strong> planificate în cadrul facultății.</p>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    Vizualizează centralizat <strong className="text-slate-900">toate recuperările didactice</strong> planificate în cadrul facultății.
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* PROFESSOR */}
-            <div className="space-y-4 p-6 rounded-2xl border border-transparent hover:border-blue-100 hover:bg-blue-50/50 transition-all">
+            <div className="group bg-white p-8 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-blue-200 transition-all duration-300 flex flex-col space-y-4">
               <div className="flex items-center gap-2 text-brand-blue font-bold uppercase text-xs tracking-widest">
-                 Profesor
+                Profesor
               </div>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5 text-brand-blue shrink-0 mt-0.5" />
-                  <p className="text-sm text-slate-600">Planifică și gestionează <strong>recuperările pentru grupele</strong> la care predai, evitând suprapunerile.</p>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    Planifică și gestionează <strong className="text-slate-900">recuperările pentru grupele</strong> la care predai, evitând suprapunerile.
+                  </p>
                 </div>
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5 text-brand-blue shrink-0 mt-0.5" />
-                  <p className="text-sm text-slate-600">Monitorizează orarul personal și <strong>evenimentele la care ești asociat</strong> în timp real.</p>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    Monitorizează orarul personal și <strong className="text-slate-900">evenimentele la care ești asociat</strong> în timp real.
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* ADMIN */}
-            <div className="space-y-4 p-6 rounded-2xl border border-transparent hover:border-blue-100 hover:bg-blue-50/50 transition-all">
+            <div className="group bg-white p-8 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-blue-200 transition-all duration-300 flex flex-col space-y-4">
               <div className="flex items-center gap-2 text-brand-blue font-bold uppercase text-xs tracking-widest">
-                 Administrator
+                Administrator
               </div>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5 text-brand-blue shrink-0 mt-0.5" />
-                  <p className="text-sm text-slate-600">Planifică și coordonează <strong>evenimente speciale</strong> și fluxul administrativ al facultății.</p>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    Planifică și coordonează <strong className="text-slate-900">evenimente speciale</strong> și fluxul administrativ al facultății.
+                  </p>
                 </div>
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5 text-brand-blue shrink-0 mt-0.5" />
-                  <p className="text-sm text-slate-600">Gestionează utilizatorii, drepturile de acces și <strong>integritatea datelor</strong> din sistem.</p>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    Gestionează utilizatorii, drepturile de acces și <strong className="text-slate-900">integritatea datelor</strong> din sistem.
+                  </p>
                 </div>
               </div>
             </div>
@@ -205,7 +217,7 @@ export default function Home() {
       </main>
 
       {/* FOOTER */}
-      <footer className="border-t bg-slate-50/80 py-10 mt-auto">
+      <footer className="border-t bg-white py-10 mt-auto">
         <div className="container mx-auto px-4 text-center">
           <p className="text-slate-600 font-bold mb-1">
             © 2026 SGRD - Facultatea de Inginerie Electrică și Știința Calculatoarelor
