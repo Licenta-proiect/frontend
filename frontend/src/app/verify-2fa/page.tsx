@@ -101,7 +101,7 @@ function Verify2FAContent() {
 
       toast.success("Autentificare reușită!");
       const destination = role === "ADMIN" ? "/admin" : "/profesor";
-      router.push(destination);
+      setTimeout(() => router.push(destination), 2000);
 
     } catch (error: unknown) {
       // Parse backend error messages
