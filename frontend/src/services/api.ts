@@ -41,13 +41,17 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    if (error.response?.status === 401 && !isVerify2FA) {
+    if ((error.response?.status === 401 || error.response?.status === 403) && !isVerify2FA) {
+      // Clear all auth data
       Cookies.remove("access_token");
+      Cookies.remove("user_role");
       localStorage.clear();
+
       if (typeof window !== "undefined") {
         window.location.href = "/";
       }
     }
+
     return Promise.reject(error);
   }
 );

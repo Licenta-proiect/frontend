@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Calendar, LogOut, Menu } from "lucide-react";
@@ -25,9 +25,31 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children, userRole, userName, userEmail, activeTab, tabs }: DashboardLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const [sheetOpen, setSheetOpen] = useState(false);
+  
+  /**
+   * Handles the logout process by calling the backend /auth/logout
+   * and clearing local state/cookies.
+   */
+  const handleLogout = useCallback(async () => {
+    try {
+      await api.get("/logout");
+    } catch (err) {
+      console.log("Backend logout failed:", err);
+    } finally {
+      localStorage.clear();
+      Cookies.remove("access_token");
+      Cookies.remove("user_role");
+      toast.success("Deconectare reușită!");
+
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 2500);
+    }
+  }, []);
 
   useEffect(() => {
-    // 1. Fast local check for tokens and basic user data
+    // Fast local check for tokens and basic user data
     const token = Cookies.get("access_token");
     const userFirstName = localStorage.getItem("userFirstName");
     
@@ -39,51 +61,30 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
     }
 
     /**
-     * 2. Server-side identity verification (Who Am I)
+     * Server-side identity verification (Who Am I)
      * This forces the backend to verify if the session is still valid
      * and if the user still exists in the Database.
      */
     const verifyAuth = async () => {
       try {
-        // Updated route to match backend /auth/me or a profile endpoint
-        await api.get("/me");
+        const response = await api.get("/me");
+        const serverRole = response.data.role.toUpperCase();
+        const expectedRole = userRole.toUpperCase();
+
+        // SECURITY CHECK: If the server role doesn't match the UI role, force logout
+        if (serverRole !== expectedRole) {
+          console.log("Conflict de roluri detectat!");
+          toast.error("Acces neautorizat: Rol invalid.");
+          handleLogout();
+        }
       } catch {
-        /**
-         * If 401 is returned, the interceptor in services/api.ts 
-         * should automatically clear storage and redirect.
-         * We add a fallback console log here for debugging.
-         */
-        console.error("Invalid session detected by server.");
+        // Interceptor handles 401/403, but we log for safety
+        console.log("Session verification failed.");
       }
     };
 
     verifyAuth();
-  }, [router]);
-
-  const [sheetOpen, setSheetOpen] = useState(false);
-
-  /**
-   * Handles the logout process by calling the backend /auth/logout
-   * and clearing local state/cookies.
-   */
-  const handleLogout = async () => {
-    try {
-      // Updated route to match backend /auth/logout
-      await api.get("/logout");
-    } catch (error) {
-      console.error("Backend logout failed:", error);
-    } finally {
-      localStorage.clear();
-      Cookies.remove("access_token");
-      Cookies.remove("user_role");
-      toast.success("Deconectare reușită!");
-
-      // Small delay to allow the user to see the toast message
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 1500);
-    }
-  };
+  }, [router, userRole, handleLogout]);
 
   const getRoleName = (role: string) => {
     const roles = { student: "Student", professor: "Profesor", admin: "Administrator" };
