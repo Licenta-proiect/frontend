@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState, useEffect, useCallback } from "react";
+import { ReactNode, useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Calendar, LogOut, Menu } from "lucide-react";
@@ -26,12 +26,14 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
   const router = useRouter();
   const pathname = usePathname();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const isVerifying = useRef(false);
+  const hasErrorShown = useRef(false);
   
   /**
    * Handles the logout process by calling the backend /auth/logout
    * and clearing local state/cookies.
    */
-  const handleLogout = useCallback(async () => {
+  const handleLogout = useCallback(async (silent = false) => {
     try {
       await api.get("/logout");
     } catch (err) {
@@ -40,7 +42,10 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
       localStorage.clear();
       Cookies.remove("access_token");
       Cookies.remove("user_role");
-      toast.success("Deconectare reușită!");
+
+      if (!silent && !hasErrorShown.current) {
+        toast.success("Deconectare reușită!");
+      }
 
       setTimeout(() => {
         window.location.href = "/";
@@ -66,20 +71,28 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
      * and if the user still exists in the Database.
      */
     const verifyAuth = async () => {
+      if (isVerifying.current) return;
+      isVerifying.current = true;
+
       try {
         const response = await api.get("/me");
         const serverRole = response.data.role.toUpperCase();
         const expectedRole = userRole.toUpperCase();
 
         // SECURITY CHECK: If the server role doesn't match the UI role, force logout
-        if (serverRole !== expectedRole) {
-          console.log("Conflict de roluri detectat!");
-          toast.error("Acces neautorizat: Rol invalid.");
-          handleLogout();
+        if (serverRole && serverRole !== expectedRole) {
+          if (!hasErrorShown.current) {
+            hasErrorShown.current = true; 
+            console.log("Conflict de roluri detectat!");
+            toast.error("Acces neautorizat: Rol invalid.");
+            handleLogout(true); 
+          }
         }
       } catch {
         // Interceptor handles 401/403, but we log for safety
         console.log("Session verification failed.");
+      } finally {
+        isVerifying.current = false;
       }
     };
 
@@ -134,7 +147,7 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
                 ))}
                   <div className="pt-4 mt-4 border-t">
                     <button 
-                      onClick={handleLogout} 
+                      onClick={() => handleLogout(false)}
                       className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-black hover:bg-gray-100 hover:text-brand-blue active:scale-95 font-medium transition-colors"
                     >
                       <LogOut className="h-5 w-5" /> <span>Deconectare</span>
@@ -187,7 +200,7 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="my-2" />
                 <DropdownMenuItem 
-                  onClick={handleLogout} 
+                  onClick={() => handleLogout(false)}
                   className="text-black focus:bg-gray-100 focus:text-brand-blue cursor-pointer p-3 rounded-md transition-colors font-semibold"
                 >
                   <LogOut className="mr-3 h-4 w-4" /> Deconectare
