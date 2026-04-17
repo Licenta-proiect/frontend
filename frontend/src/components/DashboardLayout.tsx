@@ -3,7 +3,7 @@
 import { ReactNode, useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, LogOut, Menu } from "lucide-react";
+import { Calendar, Loader2, LogOut, Menu } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from "@/components/ui/sheet";
@@ -26,6 +26,7 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
   const router = useRouter();
   const pathname = usePathname();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false);
   const isVerifying = useRef(false);
   const hasErrorShown = useRef(false);
   
@@ -45,10 +46,9 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
 
       if (!silent && !hasErrorShown.current) {
         toast.success("Deconectare reușită!");
-        setTimeout(() => { window.location.href = "/"; }, 2500);
-      } else {
-        window.location.href = "/";
-      }
+      } 
+
+      setTimeout(() => { window.location.href = "/"; }, 2500);
     }
   }, []);
 
@@ -79,17 +79,19 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
         const expectedRole = userRole.toUpperCase();
 
         // SECURITY CHECK: If the server role doesn't match the UI role, force logout
-        if (serverRole && serverRole !== expectedRole) {
+        if (serverRole && serverRole === expectedRole) {
+          setIsAuthorized(true);
+        } else {
           if (!hasErrorShown.current) {
             hasErrorShown.current = true; 
             console.log("Conflict de roluri detectat!");
-            toast.error("Acces neautorizat: Rol invalid.");
+            toast.error("Acces neautorizat: Rol invalid.", {duration: 8000,});
             handleLogout(true); 
           }
         }
       } catch {
-        // Interceptor handles 401/403, but we log for safety
         console.log("Session verification failed.");
+        handleLogout(true);
       } finally {
         isVerifying.current = false;
       }
@@ -108,6 +110,15 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
   };
 
   const activeTabLabel = tabs.find(tab => tab.id === activeTab)?.label || "";
+
+  if (!isAuthorized) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center">
+        <Loader2 className="h-10 w-10 text-brand-blue animate-spin" />
+        <p className="mt-4 text-gray-500 font-medium">Se verifică autorizarea...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 to-white font-sans">
