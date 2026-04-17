@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -17,11 +16,7 @@ import { toast } from "sonner";
 import api from "@/services/api";
 import { ApiRoom } from "@/components/professor/ProfessorScheduleForm";
 import { DateRange } from "react-day-picker";
-
-interface SpecializationOption {
-  label: string;
-  ids: number[];
-}
+import { Group  as SubgroupData } from "@/components/student/StudentSearch";
 
 interface SelectOption { label: string; value: string; }
 
@@ -58,8 +53,8 @@ interface AdminEventFormProps {
 export function AdminEventForm({ onSearch }: AdminEventFormProps) {
   const [rooms, setRooms] = useState<SelectOption[]>([]);
   const [professors, setProfessors] = useState<SelectOption[]>([]);
-  const [specializationOptions, setSpecializations] = useState<SelectOption[]>([]);
-  const [selectedSpecsJson, setSelectedSpecsJson] = useState<string[]>([]);
+  const [subgroupOptions, setSubgroupOptions] = useState<SelectOption[]>([]);
+  const [selectedSubgroupIds, setSelectedSubgroupIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
 
@@ -79,10 +74,10 @@ export function AdminEventForm({ onSearch }: AdminEventFormProps) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [roomsResp, profsResp, specsResp] = await Promise.all([
+        const [roomsResp, profsResp, groupsResp] = await Promise.all([
           api.get("/data/rooms"),
           api.get("/data/professors"),
-          api.get("/data/groups-specialization")
+          api.get("/data/groups")
         ]);
         
         setRooms(roomsResp.data.map((r: ApiRoom) => ({ label: r.name, value: r.id.toString() })));
@@ -91,11 +86,11 @@ export function AdminEventForm({ onSearch }: AdminEventFormProps) {
           value: p.id.toString() 
         })));
 
-        const specsMapped = specsResp.data.map((s: SpecializationOption) => ({
-          label: s.label,
-          value: JSON.stringify(s.ids) 
+        const groupsMapped = groupsResp.data.map((g: SubgroupData) => ({
+          label: `${g.specializationShortName} • an ${g.studyYear} • ${g.name}${g.subgroupIndex ? `${g.subgroupIndex}` : ""}`,
+          value: g.id.toString() 
         }));
-        setSpecializations(specsMapped);
+        setSubgroupOptions(groupsMapped);
       } catch {
         toast.error("Eroare la încărcarea datelor");
       } finally {
@@ -114,14 +109,10 @@ export function AdminEventForm({ onSearch }: AdminEventFormProps) {
     setIsSearching(true);
     onSearch(null, []);
     try {
-      const allSubgroupIds = Array.from(
-        new Set(selectedSpecsJson.flatMap(json => JSON.parse(json) as number[]))
-      );
-
       const payload = {
         subject: eventName,
         room_ids: selectedRooms.map(Number),
-        subgroup_ids: allSubgroupIds,
+        subgroup_ids: selectedSubgroupIds.map(Number),
         professor_ids: selectedProfessors.map(Number),
         start_date: format(dateRange.from, "yyyy-MM-dd"),
         end_date: format(dateRange.to, "yyyy-MM-dd"),
@@ -142,8 +133,8 @@ export function AdminEventForm({ onSearch }: AdminEventFormProps) {
           eventName,
           selectedRooms,
           selectedProfessors,
-          allSubgroupIds,
-          duration: parseInt(duration.split(" ")[0]),
+          allSubgroupIds: selectedSubgroupIds.map(Number),
+          duration: parseInt(duration),
           studentCount: studentCount || "0"
         }, days);
       }
@@ -177,7 +168,7 @@ export function AdminEventForm({ onSearch }: AdminEventFormProps) {
   const handleReset = () => {
     setEventName(""); 
     setSelectedRooms([]); 
-    setSelectedSpecsJson([]);
+    setSelectedSubgroupIds([]);
     setSelectedProfessors([]); 
     setDateRange({ from: undefined, to: undefined });
     setDuration("");
@@ -237,14 +228,14 @@ export function AdminEventForm({ onSearch }: AdminEventFormProps) {
             />
           </div>
 
-          {/* Specializations */}
+          {/* Subgroups */}
           <div className="space-y-2">
-            <Label className="text-sm font-semibold text-gray-900">Specializări pe ani</Label>
+            <Label className="text-sm font-semibold text-gray-900">Subgrupe participante</Label>
             <MultiSelect
-              options={specializationOptions} 
-              selected={selectedSpecsJson}
-              onChange={setSelectedSpecsJson}
-              placeholder="Selectați specializările"
+              options={subgroupOptions} 
+              selected={selectedSubgroupIds}
+              onChange={setSelectedSubgroupIds}
+              placeholder="Selectați subgrupele"
               className={inputClasses}
             />
           </div>
