@@ -108,10 +108,11 @@ export default function Home() {
               disabled={isLoading}
               className="bg-brand-blue hover:bg-brand-blue-dark h-12 md:h-12 px-8 md:px-12 text-base font-bold transition-all active:scale-95 shadow-lg shadow-blue-200/40 rounded-xl"
             >
+              Intră în platformă
               {isLoading ? (
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                <Loader2 className="ml-2 h-5 w-5 animate-spin" />
               ) : (
-                <>Intră în platformă <ArrowRight className="ml-2 h-5 w-5" /></>
+                <ArrowRight className="ml-2 h-5 w-5" />
               )}
             </Button>
           </div>

@@ -287,6 +287,7 @@ export function ProfessorReservations() {
               <Button 
                 variant="ghost" 
                 className="font-semibold rounded-lg border-gray-200 text-gray-600 hover:bg-gray-100"
+                onClick={() => setCancelReason("")}
               >
                 Înapoi
               </Button>

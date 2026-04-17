@@ -62,7 +62,12 @@ export function AdminCancelEventDialog({ open, onOpenChange, reservationId, onSu
 
         <AlertDialogFooter>
           <AlertDialogCancel asChild>
-            <Button variant="ghost" disabled={isSubmitting} className="font-semibold rounded-lg">
+            <Button 
+            variant="ghost" 
+            disabled={isSubmitting} 
+            className="font-semibold rounded-lg"
+            onClick={() => setCancelReason("")}
+            >
               Înapoi
             </Button>
           </AlertDialogCancel>

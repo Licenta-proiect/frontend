@@ -120,39 +120,41 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
               {visiblePending.map((request) => (
                 <Card key={request.id} className="shadow-xs group hover:border-brand-blue/50 transition-all duration-300">
                   <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5">
-                    <div className="space-y-2 w-full">
-                      <div className="flex items-center gap-3">
-                        <span className="font-semibold text-gray-900 text-md">
+                    <div className="space-y-2 flex-1 min-w-0 w-full">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <span className="font-semibold text-gray-900 text-md truncate">
                           {request.last_name} {request.first_name}
                         </span>
-                        <Badge className={getStatusBadge(request.status)}>ÎN AȘTEPTARE</Badge>
+                        <Badge className={cn("shrink-0", getStatusBadge(request.status))}>ÎN AȘTEPTARE</Badge>
                       </div>
 
-                      <div className="flex items-center gap-2 text-brand-blue font-semibold">
-                        <Mail className="h-4 w-4" />
-                        <span className="text-sm">{request.email}</span>
+                      <div className="flex items-center gap-2 text-brand-blue font-semibold truncate">
+                        <Mail className="h-4 w-4 shrink-0" />
+                        <span className="text-sm truncate">{request.email}</span>
                       </div>
 
                       <p className="text-sm text-gray-500 font-medium flex items-center gap-2">
-                        <Clock className="h-3.5 w-3.5" /> Trimisă la: {formatDate(request.request_date)}
+                        <Clock className="h-3.5 w-3.5 shrink-0" /> Trimisă la: {formatDate(request.request_date)}
                       </p>
                     </div>
 
-                    <div className="flex gap-2 shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
+                    <div className="flex gap-2 shrink-0 w-full sm:w-auto mt-2 sm:mt-0 items-center">
                       <Button 
                         disabled={processingId === request.id}
                         onClick={() => handleAction(request.id, 'approve')} 
-                        className="bg-green-600 hover:bg-green-700 text-white font-semibold flex-1 sm:flex-none active:scale-95 shadow-sm"
+                        className="bg-green-600 hover:bg-green-700 text-white font-semibold flex-1 sm:w-28 active:scale-95 shadow-sm"
                       >
-                        <CheckCircle2 className="h-4 w-4 mr-2" /> {processingId === request.id ? "Se procesează..." : "Aprobă"}
+                        {processingId === request.id ? <RefreshCw className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />} 
+                        {processingId === request.id ? "" : "Aprobă"}
                       </Button>
                       <Button 
                         variant="outline" 
                         disabled={processingId === request.id}
                         onClick={() => handleAction(request.id, 'reject')} 
-                        className="text-brand-red hover:text-brand-red border-red-100 hover:bg-red-50 font-semibold flex-1 sm:flex-none active:scale-95 shadow-sm"
+                        className="text-brand-red hover:text-brand-red border-red-100 hover:bg-red-50 font-semibold flex-1 sm:w-28 active:scale-95 shadow-sm"
                       >
-                        <XCircle className="h-4 w-4 mr-2" /> {processingId === request.id ? "Se procesează..." : "Respinge"} 
+                        {processingId === request.id ? <RefreshCw className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4 mr-2" />} 
+                        {processingId === request.id ? "" : "Respinge"} 
                       </Button>
                     </div>
                   </CardContent>
@@ -204,23 +206,26 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
             <>
             {visibleProcessed.map((request) => (
               <Card key={request.id} className="shadow-xs group hover:border-brand-blue/50 transition-all duration-300">
-                <CardContent className="p-4 flex flex-col sm:flex-row items-start justify-between gap-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                      <span className="font-bold text-gray-900 text-md">
+                <CardContent className="p-4 flex flex-row items-center justify-between gap-4">
+                  <div className="space-y-1.5 flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-gray-900 text-md truncate">
                         {request.last_name} {request.first_name}
                       </span>
-                      <Badge className={cn(getStatusBadge(request.status))}>
-                        {request.status === "approved" ? "APROBATĂ" : "RESPINSĂ"}
-                      </Badge>
                     </div>
-                    <div className="flex items-center gap-2 text-brand-blue font-semibold">
-                      <Mail className="h-4 w-4" />
-                      <span className="text-sm">{request.email}</span>
+                    <div className="flex items-center gap-2 text-brand-blue font-semibold truncate">
+                      <Mail className="h-3.5 w-3.5 shrink-0" />
+                      <span className="text-sm truncate">{request.email}</span>
                     </div>
-                    <p className="text-xs text-gray-500 font-semibold">
-                      Solicitat la: {formatDate(request.request_date)}
+                    
+                    <p className="text-[11px] text-gray-500 font-bold flex items-center gap-1">
+                      <Clock className="h-3 w-3 shrink-0" /> Solicitat la: {formatDate(request.request_date)}
                     </p>
+                  </div>
+                  <div className="shrink-0">
+                    <Badge className={cn("px-2.5 py-0.5 text-[10px] sm:text-xs", getStatusBadge(request.status))}>
+                      {request.status === "approved" ? "APROBATĂ" : "RESPINSĂ"}
+                    </Badge>
                   </div>
                 </CardContent>
               </Card>
