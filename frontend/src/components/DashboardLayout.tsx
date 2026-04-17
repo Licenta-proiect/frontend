@@ -45,11 +45,10 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
 
       if (!silent && !hasErrorShown.current) {
         toast.success("Deconectare reușită!");
-      }
-
-      setTimeout(() => {
+        setTimeout(() => { window.location.href = "/"; }, 2500);
+      } else {
         window.location.href = "/";
-      }, 2500);
+      }
     }
   }, []);
 
