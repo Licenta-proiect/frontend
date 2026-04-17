@@ -76,8 +76,6 @@ export function AdminEventForm({ onSearch }: AdminEventFormProps) {
   const [duration, setDuration] = useState<string>("");
   const [studentCount, setStudentCount] = useState<string>("");
 
-  const durations = ["1 oră", "2 ore", "3 ore", "4 ore", "5 ore"];
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -127,7 +125,7 @@ export function AdminEventForm({ onSearch }: AdminEventFormProps) {
         professor_ids: selectedProfessors.map(Number),
         start_date: format(dateRange.from, "yyyy-MM-dd"),
         end_date: format(dateRange.to, "yyyy-MM-dd"),
-        duration: parseInt(duration.split(" ")[0]),
+        duration: parseInt(duration),
         number_of_people: studentCount ? parseInt(studentCount) : 0,
         activity_type: "event"
       };
@@ -295,16 +293,21 @@ export function AdminEventForm({ onSearch }: AdminEventFormProps) {
           {/* Duration */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">Durata <span className="text-brand-red">*</span></Label>
-            <Select value={duration} onValueChange={setDuration}>
-              <SelectTrigger className={inputClasses}>
-                <SelectValue placeholder="Selectați durata" />
-              </SelectTrigger>
-              <SelectContent>
-                {durations.map((d) => (
-                  <SelectItem key={d} value={d}>{d}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Input 
+              type="number" 
+              min="1" 
+              max="13" 
+              placeholder="Exemplu: 3" 
+              value={duration} 
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === "" || (parseInt(val) >= 1 && parseInt(val) <= 24)) {
+                  setDuration(val);
+                }
+              }}
+              onKeyDown={(e) => ["e", "E", ".", ",", "-"].includes(e.key) && e.preventDefault()}
+              className={cn(inputClasses, "px-3")}
+            />
           </div>
 
            {/*Number of people*/}
