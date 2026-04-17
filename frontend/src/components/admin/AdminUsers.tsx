@@ -70,7 +70,10 @@ export function AdminUsers() {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    const load = async () => {
+      await fetchData();
+    };
+    load();
   }, [fetchData, currentView]);
 
   const pendingCount = useMemo(() => 

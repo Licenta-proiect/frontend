@@ -71,7 +71,10 @@ export function AdminHistory() {
   };
 
   useEffect(() => {
-    fetchData();
+    const load = async () => {
+      await fetchData();
+    };
+    load();
   }, []);
 
   const toSentenceCase = (str: string) => {

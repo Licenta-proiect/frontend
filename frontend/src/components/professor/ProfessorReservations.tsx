@@ -63,7 +63,12 @@ export function ProfessorReservations() {
     }
   };
 
-  useEffect(() => { fetchReservations(); }, []);
+  useEffect(() => {
+    const load = async () => {
+      await fetchReservations();
+    };
+    load();
+  }, []);
 
   const handleCancelConfirm = async () => {
     if (!reservationToCancel) return;

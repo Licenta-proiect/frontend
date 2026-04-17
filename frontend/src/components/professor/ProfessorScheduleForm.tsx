@@ -223,11 +223,15 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
   };
 
   useEffect(() => {
-    if (selectedGroups.length > 0) {
-      fetchValidWeeks(selectedGroups);
-    } else {
-      setAllWeeks([]);
-    }
+    const load = async () => {
+      if (selectedGroups.length > 0) {
+        await fetchValidWeeks(selectedGroups);
+      } else {
+        setAllWeeks([]);
+      }
+    };
+
+    load();
   }, [selectedGroups]);
 
   const handleSearch = async () => {
