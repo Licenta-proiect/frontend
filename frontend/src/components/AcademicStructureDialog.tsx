@@ -87,9 +87,9 @@ export function AcademicStructureDialog() {
             <Table>
               <TableHeader className="bg-gray-50">
                 <TableRow>
-                  <TableHead className="w-20 font-bold text-gray-700">Semestru</TableHead>
+                  <TableHead className="w-20 font-bold text-gray-700">Semestrul</TableHead>
                   <TableHead className="w-20 font-bold text-gray-700 text-center">Săptămâna</TableHead>
-                  <TableHead className="font-bold text-gray-700">Perioadă</TableHead>
+                  <TableHead className="font-bold text-gray-700">Perioada</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -110,7 +110,11 @@ export function AcademicStructureDialog() {
                       {entry.weekNumber}
                     </TableCell>
                     <TableCell className={cn("text-sm", entry.isCurrent ? "font-bold text-brand-blue" : "text-gray-600")}>
-                      {entry.period}
+                      {entry.period.split(';').map((segment, sIdx) => (
+                        <span key={sIdx} className="block">
+                          {segment.trim()}
+                        </span>
+                      ))}
                     </TableCell>
                   </TableRow>
                 ))}
