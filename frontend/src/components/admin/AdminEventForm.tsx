@@ -38,6 +38,7 @@ export interface AdminFilters {
 
 export interface BackendDayResponse {
   date: string;
+  week: number;
   options: {
     room_id: number;
     room_name: string;

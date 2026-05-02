@@ -11,9 +11,11 @@ import { toast } from "sonner";
 import api from "@/services/api";
 import { format, parseISO } from "date-fns";
 import { ro } from "date-fns/locale";
+import { Badge } from "../ui/badge";
 
 interface AdminSlot {
   date: string;
+  week?: number | null;
   room_id: number;
   room_name: string;
   start_time: number;
@@ -83,6 +85,7 @@ export function AdminEvents() {
       day.options.forEach((opt, index) => {
         flattened.push({
           date: day.date,
+          week: day.week,
           room_id: opt.room_id,
           room_name: opt.room_name,
           start_time: opt.start_time,
@@ -213,21 +216,33 @@ export function AdminEvents() {
                   <Card key={slot.id} className="border-l-4 border-l-brand-blue shadow-sm hover:bg-gray-50/50 transition-colors">
                     <CardContent className="pt-3">
                       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 w-full">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-4 text-sm font-medium grow">
-                          <div className="flex items-center gap-2 text-gray-700 min-w-0">
-                            <Calendar className="h-4 w-4 text-brand-blue" />
-                            <span>{format(parseISO(slot.date), "EEEE, d MMMM yyyy", { locale: ro })}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-gray-700 min-w-0">
-                            <Clock className="h-4 w-4 text-brand-blue" />
-                            <span>{slot.start_time}:00 - {slot.end_time}:00</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-gray-700 min-w-0">
-                            <MapPin className="h-4 w-4 text-brand-blue" />
-                            <span>Sala {slot.room_name}</span>
+                        
+                        <div className="space-y-3 grow">
+                          
+                          {slot.week && (
+                            <div className="flex items-center gap-2">
+                              <Badge className="bg-blue-50 text-brand-blue border-blue-100 font-bold hover:bg-blue-50">
+                                Săptămâna {slot.week}
+                              </Badge>
+                            </div>
+                          )}
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-4 text-sm font-medium grow">
+                            <div className="flex items-center gap-2 text-gray-700 min-w-0">
+                              <Calendar className="h-4 w-4 text-brand-blue" />
+                              <span>{format(parseISO(slot.date), "EEEE, d MMMM yyyy", { locale: ro })}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-700 min-w-0">
+                              <Clock className="h-4 w-4 text-brand-blue" />
+                              <span>{slot.start_time}:00 - {slot.end_time}:00</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-700 min-w-0">
+                              <MapPin className="h-4 w-4 text-brand-blue" />
+                              <span>Sala {slot.room_name}</span>
+                            </div>
                           </div>
                         </div>
-                        
+
                         <div className="w-full lg:w-auto lg:min-w-45 shrink-0">
                           {/* Status Check for already booked slots */}
                           {bookedSlots.includes(slot.id) ? (
