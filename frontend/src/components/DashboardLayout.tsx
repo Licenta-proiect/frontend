@@ -111,6 +111,14 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
 
   const activeTabLabel = tabs.find(tab => tab.id === activeTab)?.label || "";
 
+  useEffect(() => {
+    if (activeTabLabel) {
+      document.title = `${activeTabLabel} | SGRD`;
+    } else {
+      document.title = "Sistem de gestionare a recuperărilor didactice";
+    }
+  }, [activeTabLabel]);
+
   if (!isAuthorized) {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center">
