@@ -17,6 +17,7 @@ import api from "@/services/api";
 import { ApiRoom } from "@/components/professor/ProfessorScheduleForm";
 import { DateRange } from "react-day-picker";
 import { Group  as SubgroupData } from "@/components/student/StudentSearch";
+import { AcademicStructureDialog } from "../AcademicStructureDialog";
 
 interface SelectOption { label: string; value: string; }
 
@@ -183,13 +184,21 @@ export function AdminEventForm({ onSearch }: AdminEventFormProps) {
   return (
     <Card className="border-gray-200 shadow-sm">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
-          <Search className="h-5 w-5 text-brand-blue" />
-          Programare eveniment
-        </CardTitle>
-        <CardDescription className="text-gray-600 font-medium text-sm">
-          Planificați activități academice, administrative, conferințe sau ședințe
-        </CardDescription>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
+              <Search className="h-5 w-5 text-brand-blue" />
+              Programare eveniment
+            </CardTitle>
+            <CardDescription className="text-gray-600 font-medium text-sm">
+              Planificați activități academice, administrative, conferințe sau ședințe
+            </CardDescription>
+          </div>
+          
+          <div className="shrink-0">
+            <AcademicStructureDialog />
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

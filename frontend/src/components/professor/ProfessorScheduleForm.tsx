@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import api from "@/services/api";
 import { Group  as ApiGroup } from "@/components/student/StudentSearch";
 import { RawSlotsResponse } from "./ProfessorSchedule";
+import { AcademicStructureDialog } from "../AcademicStructureDialog";
 
 // Type definitions
 export interface ApiRoom { id: number; name: string; }
@@ -306,13 +307,21 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
   return (
     <Card className="border-gray-200 shadow-sm">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
-          <Search className="h-5 w-5 text-brand-blue" />
-          Programare recuperare
-        </CardTitle>
-        <CardDescription className="text-gray-600 font-medium text-sm">
-          Completați detaliile pentru a găsi sloturile disponibile pentru recuperare
-        </CardDescription>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
+              <Search className="h-5 w-5 text-brand-blue" />
+              Programare recuperare
+            </CardTitle>
+            <CardDescription className="text-gray-600 font-medium text-sm">
+              Completați detaliile pentru a găsi sloturile disponibile pentru recuperare
+            </CardDescription>
+          </div>
+          
+          <div className="shrink-0">
+            <AcademicStructureDialog />
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

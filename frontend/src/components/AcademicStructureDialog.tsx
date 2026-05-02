@@ -58,10 +58,11 @@ export function AcademicStructureDialog() {
         <Button 
           variant="outline" 
           size="sm" 
-          className="h-8 border-brand-blue text-brand-blue hover:bg-blue-50 gap-2 font-semibold"
+          className="
+          h-8 gap-2 font-bold text-brand-blue shadow-xs border-blue-100 hover:bg-blue-50 hover:text-brand-blue uppercase text-xs"
         >
           <CalendarDays className="h-4 w-4" />
-          Structură An
+          Structură an
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">

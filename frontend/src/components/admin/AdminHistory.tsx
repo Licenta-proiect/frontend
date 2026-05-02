@@ -9,7 +9,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { 
   FileText, Filter, Search, RefreshCcw,
-  Check, ChevronsUpDown
+  Check, ChevronsUpDown,
+  Loader2
 } from "lucide-react";
 import { AdminCancelEventDialog } from "./AdminCancelEventDialog";
 import { AdminEventCard } from "./AdminEventCard";
@@ -111,14 +112,7 @@ export function AdminHistory() {
     setDisplayLimit(step); 
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 gap-3 text-gray-500">
-        <div className="animate-spin rounded-full h-8 w-8 border-brand-blue border-b-2"></div>
-        <p className="font-medium">Se încarcă istoricul...</p>
-      </div>
-    );
-  }
+  if (isLoading) return <div className="flex justify-center p-12"><Loader2 className="h-8 w-8 animate-spin text-brand-blue" /></div>;
 
   return (
     <div className="space-y-6">
