@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 import api from "@/services/api";
 import { cn } from "@/lib/utils";
+import { AcademicStructureDialog } from "../AcademicStructureDialog";
 
 export interface AlternativeOption {
   group: string;
@@ -217,13 +218,21 @@ export function StudentSearch() {
     <div className="space-y-6">
       <Card className="border-gray-200 shadow-sm">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
-            <Search className="h-5 w-5 text-brand-blue" />
-            Căutare sloturi alternative
-          </CardTitle>
-          <CardDescription className="text-gray-600 font-medium">
-            Selectați criteriile pentru a găsi o grupă alternativă de recuperare
-          </CardDescription>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <CardTitle className="flex items-center gap-2 text-gray-900 font-semibold text-xl">
+                <Search className="h-5 w-5 text-brand-blue" />
+                Căutare sloturi alternative
+              </CardTitle>
+              <CardDescription className="text-gray-600 font-medium">
+                Selectați criteriile pentru a găsi o grupă alternativă de recuperare
+              </CardDescription>
+            </div>
+            
+            <div className="shrink-0">
+              <AcademicStructureDialog />
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
