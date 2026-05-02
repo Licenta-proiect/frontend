@@ -42,19 +42,46 @@ export function MultiSelect({
   disabled,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
+  const [lastSelectedIndex, setLastSelectedIndex] = React.useState<number | null>(null);
 
   const handleUnselect = (itemValue: string) => {
-    if (disabled) return; 
+    if (disabled) return;
     onChange(selected.filter((val) => val !== itemValue));
   };
 
-  const handleSelect = (itemValue: string) => {
-    if (disabled) return; 
-    if (selected.includes(itemValue)) {
-      onChange(selected.filter((val) => val !== itemValue));
+  const handleSelect = (itemValue: string, currentIndex: number, isShiftPressed: boolean) => {
+    if (disabled) return;
+
+    let newSelected = [...selected];
+
+    if (isShiftPressed && lastSelectedIndex !== null) {
+      const start = Math.min(lastSelectedIndex, currentIndex);
+      const end = Math.max(lastSelectedIndex, currentIndex);
+      
+      const rangeOptions = options.slice(start, end + 1).map((opt) => opt.value);
+      
+      // Determine action based on the "anchor" item (the one previously clicked)
+      const lastValue = options[lastSelectedIndex].value;
+      const isRemoving = !selected.includes(lastValue);
+
+      if (isRemoving) {
+        // If the anchor was unselected, unselect the whole range
+        newSelected = newSelected.filter((val) => !rangeOptions.includes(val));
+      } else {
+        // If the anchor was selected, select the whole range
+        newSelected = Array.from(new Set([...newSelected, ...rangeOptions]));
+      }
     } else {
-      onChange([...selected, itemValue]);
+      // Standard Toggle
+      if (selected.includes(itemValue)) {
+        newSelected = selected.filter((val) => val !== itemValue);
+      } else {
+        newSelected = [...selected, itemValue];
+      }
     }
+
+    setLastSelectedIndex(currentIndex);
+    onChange(newSelected);
   };
 
   const handleClear = (e: React.MouseEvent) => {
@@ -62,20 +89,20 @@ export function MultiSelect({
     e.stopPropagation();
     if (disabled) return;
     onChange([]);
+    setLastSelectedIndex(null);
   };
 
   return (
-    // Dacă componenta este disabled, Popover nu ar trebui să se deschidă
     <Popover open={disabled ? false : open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          disabled={disabled} 
+          disabled={disabled}
           className={cn(
             "w-full justify-between min-h-10 h-auto border-gray-200 hover:bg-transparent active:scale-100 px-3 py-2 shadow-xs font-normal",
-            disabled && "opacity-50 cursor-not-allowed disabled:pointer-events-auto bg-gray-50", // Stil vizual pentru disabled
+            disabled && "opacity-50 cursor-not-allowed bg-gray-50",
             className
           )}
         >
@@ -91,15 +118,15 @@ export function MultiSelect({
                   >
                     {option?.label || value}
                     <span
-                      role="button" 
-                      tabIndex={disabled ? -1 : 0}  
+                      role="button"
+                      tabIndex={disabled ? -1 : 0}
                       className={cn(
                         "ml-1 rounded-full outline-none cursor-pointer inline-flex items-center justify-center hover:bg-blue-100",
                         disabled && "cursor-not-allowed pointer-events-none"
                       )}
                       onClick={(e) => {
                         e.preventDefault();
-                        e.stopPropagation(); 
+                        e.stopPropagation();
                         handleUnselect(value);
                       }}
                     >
@@ -112,12 +139,12 @@ export function MultiSelect({
               <span className="text-muted-foreground text-sm">{placeholder}</span>
             )}
           </div>
-          
+
           <div className="flex items-center gap-1 opacity-50 shrink-0 ml-2 self-center">
-            {selected.length > 0 && !disabled && ( // Ascunde butonul Clear dacă e disabled
+            {selected.length > 0 && !disabled && (
               <div
                 role="button"
-                className="p-0.5 hover:bg-gray-100 rounded-md cursor-pointer pointer-events-auto"
+                className="p-0.5 hover:bg-gray-100 rounded-md cursor-pointer"
                 onClick={handleClear}
               >
                 <X className="h-4 w-4 hover:text-red-500 transition-colors" />
@@ -127,9 +154,9 @@ export function MultiSelect({
           </div>
         </Button>
       </PopoverTrigger>
-      {!disabled && ( // Nu randa conținutul Popover-ului dacă e disabled
-        <PopoverContent 
-          className="w-(--radix-popover-trigger-width) p-0 border-gray-200 shadow-md" 
+      {!disabled && (
+        <PopoverContent
+          className="w-(--radix-popover-trigger-width) p-0 border-gray-200 shadow-md"
           align="start"
         >
           <Command>
@@ -137,15 +164,23 @@ export function MultiSelect({
             <CommandList className="max-h-64">
               <CommandEmpty>Nu am găsit rezultate.</CommandEmpty>
               <CommandGroup className="p-1">
-                {options.map((option) => {
+                {options.map((option, index) => {
                   const isSelected = selected.includes(option.value);
                   return (
                     <CommandItem
                       key={option.value}
-                      onSelect={() => handleSelect(option.value)}
-                      className="aria-selected:bg-gray-100 aria-selected:text-brand-blue"
+                      onPointerDown={(e) => {
+                        handleSelect(option.value, index, e.shiftKey);
+                      }}
+                      onSelect={() => {}}
+                      className="aria-selected:bg-gray-100 aria-selected:text-brand-blue cursor-pointer"
                     >
-                      <Check className={cn("mr-2 h-4 w-4 text-brand-blue", isSelected ? "opacity-100" : "opacity-0")} />
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4 text-brand-blue",
+                          isSelected ? "opacity-100" : "opacity-0"
+                        )}
+                      />
                       <span className="text-gray-900">{option.label}</span>
                     </CommandItem>
                   );
