@@ -19,7 +19,6 @@ interface CalendarEntry {
   semester: number;
   weekNumber: number;
   period: string;
-  notes: string | null;
   isCurrent: boolean;
 }
 
@@ -91,7 +90,6 @@ export function AcademicStructureDialog() {
                   <TableHead className="w-20 font-bold text-gray-700">Sem.</TableHead>
                   <TableHead className="w-20 font-bold text-gray-700 text-center">Săpt.</TableHead>
                   <TableHead className="font-bold text-gray-700">Perioadă</TableHead>
-                  <TableHead className="font-bold text-gray-700">Observații</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -113,9 +111,6 @@ export function AcademicStructureDialog() {
                     </TableCell>
                     <TableCell className={cn("text-sm", entry.isCurrent ? "font-bold text-brand-blue" : "text-gray-600")}>
                       {entry.period}
-                    </TableCell>
-                    <TableCell className="text-xs text-gray-500 italic">
-                      {entry.notes || "-"}
                     </TableCell>
                   </TableRow>
                 ))}
