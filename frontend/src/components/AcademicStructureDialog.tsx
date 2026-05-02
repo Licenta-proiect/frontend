@@ -66,12 +66,12 @@ export function AcademicStructureDialog() {
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-gray-900 font-bold text-xl flex items-center gap-2">
+          <DialogTitle className="text-gray-900 font-semibold text-xl flex items-center gap-2">
             <CalendarDays className="text-brand-blue" />
-            Structură An Universitar {data?.fullCalendar[0]?.academicYear}
+            Structură an universitar {data?.fullCalendar[0]?.academicYear}
           </DialogTitle>
           {data?.status && (
-            <p className="text-sm text-brand-blue font-semibold uppercase tracking-wider italic">
+            <p className="text-sm text-brand-blue font-semibold tracking-wider italic">
               Status curent: {data.status}
             </p>
           )}
@@ -87,8 +87,8 @@ export function AcademicStructureDialog() {
             <Table>
               <TableHeader className="bg-gray-50">
                 <TableRow>
-                  <TableHead className="w-20 font-bold text-gray-700">Sem.</TableHead>
-                  <TableHead className="w-20 font-bold text-gray-700 text-center">Săpt.</TableHead>
+                  <TableHead className="w-20 font-bold text-gray-700">Semestru</TableHead>
+                  <TableHead className="w-20 font-bold text-gray-700 text-center">Săptămâna</TableHead>
                   <TableHead className="font-bold text-gray-700">Perioadă</TableHead>
                 </TableRow>
               </TableHeader>
@@ -99,7 +99,7 @@ export function AcademicStructureDialog() {
                     className={cn(
                       "transition-colors",
                       entry.isCurrent 
-                        ? "bg-blue-50 hover:bg-blue-100 border-l-4 border-l-brand-blue" 
+                        ? "bg-blue-50 hover:bg-blue-100" 
                         : "hover:bg-gray-50"
                     )}
                   >
