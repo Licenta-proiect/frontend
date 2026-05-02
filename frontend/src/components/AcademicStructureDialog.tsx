@@ -64,8 +64,8 @@ export function AcademicStructureDialog() {
           Structură an
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-[95vw] sm:max-w-2xl h-auto max-h-[85vh] flex flex-col p-0 overflow-hidden rounded-lg">
+        <DialogHeader className="p-6 pb-2 border-b shrink-0">
           <DialogTitle className="text-gray-900 font-semibold text-xl flex items-center gap-2">
             <CalendarDays className="text-brand-blue" />
             Structură an universitar {data?.fullCalendar[0]?.academicYear}
@@ -77,51 +77,53 @@ export function AcademicStructureDialog() {
           )}
         </DialogHeader>
 
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-10">
-            <Loader2 className="h-8 w-8 animate-spin text-brand-blue" />
-            <p className="text-sm text-gray-500 mt-2 font-medium">Se încarcă structura...</p>
-          </div>
-        ) : (
-          <div className="border rounded-lg overflow-hidden border-gray-200 shadow-sm">
-            <Table>
-              <TableHeader className="bg-gray-50">
-                <TableRow>
-                  <TableHead className="w-20 font-bold text-gray-700">Semestrul</TableHead>
-                  <TableHead className="w-20 font-bold text-gray-700 text-center">Săptămâna</TableHead>
-                  <TableHead className="font-bold text-gray-700">Perioada</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data?.fullCalendar.map((entry, idx) => (
-                  <TableRow 
-                    key={idx}
-                    className={cn(
-                      "transition-colors",
-                      entry.isCurrent 
-                        ? "bg-blue-50 hover:bg-blue-100" 
-                        : "hover:bg-gray-50"
-                    )}
-                  >
-                    <TableCell className={cn("font-medium", entry.isCurrent && "text-brand-blue font-bold")}>
-                      {entry.semester}
-                    </TableCell>
-                    <TableCell className={cn("text-center font-medium", entry.isCurrent && "text-brand-blue font-bold")}>
-                      {entry.weekNumber}
-                    </TableCell>
-                    <TableCell className={cn("text-sm", entry.isCurrent ? "font-bold text-brand-blue" : "text-gray-600")}>
-                      {entry.period.split(';').map((segment, sIdx) => (
-                        <span key={sIdx} className="block">
-                          {segment.trim()}
-                        </span>
-                      ))}
-                    </TableCell>
+        <div className="flex-1 overflow-y-auto p-6 pt-4">
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-10">
+              <Loader2 className="h-8 w-8 animate-spin text-brand-blue" />
+              <p className="text-sm text-gray-500 mt-2 font-medium">Se încarcă structura...</p>
+            </div>
+          ) : (
+            <div className="border rounded-lg overflow-hidden border-gray-200 shadow-sm bg-white">
+              <Table>
+                <TableHeader className="bg-gray-50 sticky top-0 z-10 shadow-sm">
+                  <TableRow>
+                    <TableHead className="w-20 font-bold text-gray-700">Semestrul</TableHead>
+                    <TableHead className="w-20 font-bold text-gray-700 text-center">Săptămâna</TableHead>
+                    <TableHead className="font-bold text-gray-700">Perioada</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
+                </TableHeader>
+                <TableBody>
+                  {data?.fullCalendar.map((entry, idx) => (
+                    <TableRow 
+                      key={idx}
+                      className={cn(
+                        "transition-colors",
+                        entry.isCurrent 
+                          ? "bg-blue-50 hover:bg-blue-100" 
+                          : "hover:bg-gray-50"
+                      )}
+                    >
+                      <TableCell className={cn("font-medium", entry.isCurrent && "text-brand-blue font-bold")}>
+                        {entry.semester}
+                      </TableCell>
+                      <TableCell className={cn("text-center font-medium", entry.isCurrent && "text-brand-blue font-bold")}>
+                        {entry.weekNumber}
+                      </TableCell>
+                      <TableCell className={cn("text-sm", entry.isCurrent ? "font-bold text-brand-blue" : "text-gray-600")}>
+                        {entry.period.split(';').map((segment, sIdx) => (
+                          <span key={sIdx} className="block">
+                            {segment.trim()}
+                          </span>
+                        ))}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
