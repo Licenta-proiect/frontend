@@ -29,6 +29,8 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
   const [isAuthorized, setIsAuthorized] = useState(false);
   const isVerifying = useRef(false);
   const hasErrorShown = useRef(false);
+
+  const appName = process.env.NEXT_PUBLIC_APP_TITLE;
   
   /**
    * Handles the logout process by calling the backend /auth/logout
@@ -113,11 +115,11 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
 
   useEffect(() => {
     if (activeTabLabel) {
-      document.title = `${activeTabLabel} | SGRD`;
+      document.title = `${appName} | ${activeTabLabel}`;
     } else {
-      document.title = "Sistem de gestionare a recuperărilor didactice";
+      document.title = `${appName} | Acasă`;
     }
-  }, [activeTabLabel]);
+  });
 
   if (!isAuthorized) {
     return (
@@ -142,10 +144,10 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
               <SheetContent side="left" className="w-80 font-sans">
                 <SheetHeader>
                   <SheetTitle className="flex items-center gap-2 text-brand-blue font-bold">
-                    <Calendar className="h-6 w-6" /> Sistem de gestionare a recuperărilor didactice
+                    <Calendar className="h-6 w-6" /> {appName}
                   </SheetTitle>
                   <SheetDescription className="sr-only">
-                    Meniu de navigare pentru Sistemul de gestionare a recuperărilor.
+                    Meniu de navigare pentru {appName}.
                   </SheetDescription>
                 </SheetHeader>
                 <nav className="space-y-2 mt-6">
@@ -178,14 +180,8 @@ export default function DashboardLayout({ children, userRole, userName, userEmai
             <div className="flex items-center gap-2 shrink-0">
               <Calendar className="h-7 w-7 md:h-9 md:w-9 text-brand-blue shrink-0" />
               <div className="flex flex-col justify-center">
-                {/* Short Version: Visible on mobile, hidden from 'lg' up */}
-                <span className="text-xl font-bold text-black tracking-tight leading-none lg:hidden">
-                  SGRD
-                </span>
-                
-                {/* Long Version */}
-                <span className="hidden lg:block text-lg font-semibold text-black tracking-tight leading-none">
-                  Sistem de gestionare a recuperărilor didactice
+                <span className="text-xl font-bold text-black tracking-tight">
+                  {appName}
                 </span>
                 <span className="text-sm md:text-xs font-semibold text-brand-blue tracking-tight leading-none mt-1">
                   {activeTabLabel} 

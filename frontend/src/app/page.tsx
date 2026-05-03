@@ -13,6 +13,7 @@ import axios from "axios";
  */
 export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const appName = process.env.NEXT_PUBLIC_APP_TITLE;
 
   /**
    * Orchestrates the login flow.
@@ -60,11 +61,8 @@ export default function Home() {
         <div className="container mx-auto px-4 py-3 md:py-4 flex justify-between items-center">
           <div className="flex items-center gap-2 shrink-0">
             <Calendar className="h-7 w-7 md:h-8 md:w-8 text-brand-blue" />
-            <span className="text-xl md:text-2xl font-bold text-black tracking-tight md:hidden">
-              SGRD
-            </span>
-            <span className="hidden md:block text-xl md:text-xl font-semibold text-black tracking-tight">
-              Sistem de gestionare a recuperărilor didactice
+            <span className="text-xl font-bold text-black tracking-tight">
+              {appName}
             </span>
           </div>
           
@@ -94,7 +92,7 @@ export default function Home() {
           <div className="flex flex-col items-center space-y-8">
             <div className="space-y-4">
               <h1 className="text-3xl md:text-5xl font-black text-slate-900">
-                Sistem de gestionare a recuperărilor didactice 
+                Aplicație web pentru gestionarea recuperărilor didactice 
               </h1>
 
               <p className="text-base md:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed font-medium">
@@ -221,7 +219,7 @@ export default function Home() {
       <footer className="border-t bg-white py-10 mt-auto">
         <div className="container mx-auto px-4 text-center">
           <p className="text-slate-600 font-bold mb-1">
-            © 2026 SGRD - Facultatea de Inginerie Electrică și Știința Calculatoarelor
+            © 2026 {appName} - Aplicație web pentru gestionarea recuperărilor didactice
           </p>
           <p className="text-xs text-slate-400 mt-1 uppercase tracking-widest font-semibold">
             Universitatea Ștefan cel Mare din Suceava
