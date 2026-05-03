@@ -43,9 +43,20 @@ export function MultiSelect({
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [lastSelectedIndex, setLastSelectedIndex] = React.useState<number | null>(null);
-  // Ref to capture shiftKey at pointer-down time,
-  // since Command's onSelect does not expose the native event
+  // Ref to capture shiftKey regardless of whether input comes from mouse or keyboard
   const shiftPressedRef = React.useRef(false);
+
+  // Track Shift key state globally so Shift+Enter also works
+  React.useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => { shiftPressedRef.current = e.shiftKey; };
+    const onKeyUp   = (e: KeyboardEvent) => { shiftPressedRef.current = e.shiftKey; };
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup",   onKeyUp);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup",   onKeyUp);
+    };
+  }, []);
 
   const handleUnselect = (itemValue: string) => {
     if (disabled) return;
@@ -172,10 +183,6 @@ export function MultiSelect({
                   return (
                     <CommandItem
                       key={option.value}
-                      // Capture shiftKey before onSelect fires
-                      onPointerDown={(e) => {
-                        shiftPressedRef.current = e.shiftKey;
-                      }}
                       onSelect={() => handleSelect(option.value, index)}
                       className="aria-selected:bg-gray-100 aria-selected:text-brand-blue cursor-pointer"
                     >
