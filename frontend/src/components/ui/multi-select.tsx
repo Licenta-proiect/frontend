@@ -43,36 +43,38 @@ export function MultiSelect({
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [lastSelectedIndex, setLastSelectedIndex] = React.useState<number | null>(null);
+  // Ref to capture shiftKey at pointer-down time,
+  // since Command's onSelect does not expose the native event
+  const shiftPressedRef = React.useRef(false);
 
   const handleUnselect = (itemValue: string) => {
     if (disabled) return;
     onChange(selected.filter((val) => val !== itemValue));
   };
 
-  const handleSelect = (itemValue: string, currentIndex: number, isShiftPressed: boolean) => {
+  const handleSelect = (itemValue: string, currentIndex: number) => {
     if (disabled) return;
 
     let newSelected = [...selected];
 
-    if (isShiftPressed && lastSelectedIndex !== null) {
+    if (shiftPressedRef.current && lastSelectedIndex !== null) {
       const start = Math.min(lastSelectedIndex, currentIndex);
       const end = Math.max(lastSelectedIndex, currentIndex);
-      
-      const rangeOptions = options.slice(start, end + 1).map((opt) => opt.value);
-      
-      // Determine action based on the "anchor" item (the one previously clicked)
-      const lastValue = options[lastSelectedIndex].value;
-      const isRemoving = !selected.includes(lastValue);
+      const rangeValues = options.slice(start, end + 1).map((opt) => opt.value);
 
-      if (isRemoving) {
-        // If the anchor was unselected, unselect the whole range
-        newSelected = newSelected.filter((val) => !rangeOptions.includes(val));
+      // Range behaviour is driven by the anchor item's state
+      const anchorValue = options[lastSelectedIndex].value;
+      const anchorIsSelected = selected.includes(anchorValue);
+
+      if (anchorIsSelected) {
+        // Anchor was selected → select the whole range
+        newSelected = Array.from(new Set([...newSelected, ...rangeValues]));
       } else {
-        // If the anchor was selected, select the whole range
-        newSelected = Array.from(new Set([...newSelected, ...rangeOptions]));
+        // Anchor was deselected → deselect the whole range
+        newSelected = newSelected.filter((val) => !rangeValues.includes(val));
       }
     } else {
-      // Standard Toggle
+      // Simple toggle
       if (selected.includes(itemValue)) {
         newSelected = selected.filter((val) => val !== itemValue);
       } else {
@@ -102,7 +104,7 @@ export function MultiSelect({
           disabled={disabled}
           className={cn(
             "w-full justify-between min-h-10 h-auto border-gray-200 hover:bg-transparent active:scale-100 px-3 py-2 shadow-xs font-normal",
-            disabled && "opacity-50 cursor-not-allowed bg-gray-50",
+            disabled && "opacity-50 cursor-not-allowed disabled:pointer-events-auto bg-gray-50",
             className
           )}
         >
@@ -144,7 +146,7 @@ export function MultiSelect({
             {selected.length > 0 && !disabled && (
               <div
                 role="button"
-                className="p-0.5 hover:bg-gray-100 rounded-md cursor-pointer"
+                className="p-0.5 hover:bg-gray-100 rounded-md cursor-pointer pointer-events-auto"
                 onClick={handleClear}
               >
                 <X className="h-4 w-4 hover:text-red-500 transition-colors" />
@@ -154,6 +156,7 @@ export function MultiSelect({
           </div>
         </Button>
       </PopoverTrigger>
+
       {!disabled && (
         <PopoverContent
           className="w-(--radix-popover-trigger-width) p-0 border-gray-200 shadow-md"
@@ -169,10 +172,11 @@ export function MultiSelect({
                   return (
                     <CommandItem
                       key={option.value}
+                      // Capture shiftKey before onSelect fires
                       onPointerDown={(e) => {
-                        handleSelect(option.value, index, e.shiftKey);
+                        shiftPressedRef.current = e.shiftKey;
                       }}
-                      onSelect={() => {}}
+                      onSelect={() => handleSelect(option.value, index)}
                       className="aria-selected:bg-gray-100 aria-selected:text-brand-blue cursor-pointer"
                     >
                       <Check
