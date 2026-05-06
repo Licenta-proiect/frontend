@@ -42,19 +42,18 @@ export function MultiSelect({
   disabled,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
+  const [search, setSearch] = React.useState("");
   const [lastSelectedIndex, setLastSelectedIndex] = React.useState<number | null>(null);
-  // Ref to capture shiftKey regardless of whether input comes from mouse or keyboard
   const shiftPressedRef = React.useRef(false);
 
-  // Track Shift key state globally so Shift+Enter also works
   React.useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => { shiftPressedRef.current = e.shiftKey; };
-    const onKeyUp   = (e: KeyboardEvent) => { shiftPressedRef.current = e.shiftKey; };
+    const onKeyUp = (e: KeyboardEvent) => { shiftPressedRef.current = e.shiftKey; };
     window.addEventListener("keydown", onKeyDown);
-    window.addEventListener("keyup",   onKeyUp);
+    window.addEventListener("keyup", onKeyUp);
     return () => {
       window.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("keyup",   onKeyUp);
+      window.removeEventListener("keyup", onKeyUp);
     };
   }, []);
 
@@ -104,6 +103,13 @@ export function MultiSelect({
     onChange([]);
     setLastSelectedIndex(null);
   };
+
+  const filteredOptions = React.useMemo(() => {
+    if (!search) return options;
+    return options.filter((opt) =>
+      opt.label.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [options, search]);
 
   return (
     <Popover open={disabled ? false : open} onOpenChange={setOpen}>
@@ -173,17 +179,24 @@ export function MultiSelect({
           className="w-(--radix-popover-trigger-width) p-0 border-gray-200 shadow-md"
           align="start"
         >
-          <Command>
-            <CommandInput placeholder="Caută..." className="h-9" />
+          <Command shouldFilter={false}>
+            <CommandInput 
+              placeholder="Caută..." 
+              className="h-9" 
+              value={search}
+              onValueChange={setSearch}
+            />
             <CommandList className="max-h-64">
               <CommandEmpty>Nu am găsit rezultate.</CommandEmpty>
               <CommandGroup className="p-1">
-                {options.map((option, index) => {
+                {filteredOptions.map((option) => {
+                  const originalIndex = options.findIndex(o => o.value === option.value);
                   const isSelected = selected.includes(option.value);
+                  
                   return (
                     <CommandItem
                       key={option.value}
-                      onSelect={() => handleSelect(option.value, index)}
+                      onSelect={() => handleSelect(option.value, originalIndex)}
                       className="aria-selected:bg-gray-100 aria-selected:text-brand-blue cursor-pointer"
                     >
                       <Check
