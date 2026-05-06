@@ -112,7 +112,13 @@ export function MultiSelect({
   }, [options, search]);
 
   return (
-    <Popover open={disabled ? false : open} onOpenChange={setOpen}>
+    <Popover
+      open={disabled ? false : open}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen) setSearch("");
+      }}
+    >
       <PopoverTrigger asChild>
         <Button
           variant="outline"
