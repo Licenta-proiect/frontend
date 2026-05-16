@@ -66,7 +66,7 @@ export function StudentCalendarCard({ session }: StudentCalendarCardProps) {
               )}
             </div>
 
-            <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2 text-sm font-medium text-gray-700">
+            <div className="flex flex-col gap-3 text-sm font-medium text-gray-700">
               <div className="flex flex-wrap gap-x-5 gap-y-2">
                 {/* Time */}
                 <div className="flex items-center gap-1.5 shrink-0">
@@ -85,23 +85,28 @@ export function StudentCalendarCard({ session }: StudentCalendarCardProps) {
 
               {/* Additional Teachers (Same as Professor View) */}
               {session.additional_professors && session.additional_professors.length > 0 && (
-                <div className="flex items-start gap-1.5 w-full sm:w-auto pt-2 sm:pt-0">
-                <UserCheck className="h-4 w-4 text-brand-blue shrink-0 mt-0.5" />
-                <span className="text-gray-600 leading-tight">
-                    {session.additional_professors.join(", ")}
-                </span>
+                <div className="flex items-start gap-1.5 w-full border-t border-gray-50 pt-2">
+                  <UserCheck className="h-4 w-4 text-brand-blue shrink-0 mt-0.5" />
+                  <div className="flex flex-col">
+                    <span className="text-gray-600 leading-tight">
+                      {session.additional_professors.join(", ")}
+                    </span>
+                  </div>
                 </div>
-            )}
+              )}
 
               {/* Groups */}
-              <div className="flex items-start gap-1.5 w-full sm:w-auto pt-2 sm:pt-0">
+              <div className="flex items-start gap-1.5 w-full border-t border-gray-50 pt-2">
                 <Users className="h-4 w-4 text-brand-blue shrink-0 mt-0.5" />
-                <span className="leading-tight text-gray-600">
-                {session.participating_groups.length > 0 
-                    ? session.participating_groups.join(", ") 
-                    : "Toți studenții"}
-                </span>
+                <div className="flex flex-col">
+                  <span className="text-gray-600 leading-tight">
+                    {session.participating_groups.length > 0 
+                      ? session.participating_groups.join(", ") 
+                      : "Toți studenții"}
+                  </span>
+                </div>
               </div>
+
             </div>
           </div>
         </div>
