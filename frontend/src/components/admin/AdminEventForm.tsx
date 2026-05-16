@@ -50,9 +50,10 @@ export interface BackendDayResponse {
 
 interface AdminEventFormProps {
   onSearch: (filters: AdminFilters | null, results: BackendDayResponse[]) => void;
+  onReset: () => void;
 }
 
-export function AdminEventForm({ onSearch }: AdminEventFormProps) {
+export function AdminEventForm({ onSearch, onReset }: AdminEventFormProps) {
   const [rooms, setRooms] = useState<SelectOption[]>([]);
   const [professors, setProfessors] = useState<SelectOption[]>([]);
   const [subgroupOptions, setSubgroupOptions] = useState<SelectOption[]>([]);
@@ -168,6 +169,7 @@ export function AdminEventForm({ onSearch }: AdminEventFormProps) {
     };
 
   const handleReset = () => {
+    toast.dismiss(); 
     setEventName(""); 
     setSelectedRooms([]); 
     setSelectedSubgroupIds([]);
@@ -175,6 +177,7 @@ export function AdminEventForm({ onSearch }: AdminEventFormProps) {
     setDateRange({ from: undefined, to: undefined });
     setDuration("");
     setStudentCount("");
+    onReset();
   };
 
   const inputClasses = "min-h-10 w-full border-gray-200 text-sm placeholder:text-muted-foreground focus-visible:border-brand-blue/50 transition-all duration-200 shadow-xs";

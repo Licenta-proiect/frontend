@@ -130,6 +130,16 @@ export function AdminEvents() {
     }
   };
 
+  const handleResetAll = () => {
+    setResults([]);
+    setHasSearched(false);
+    setLastFilters(null);
+    setBookedSlots([]);
+    setFilterDate("all");
+    setFilterRoom("all");
+    setDisplayLimit(step);
+  };
+
   const resetLocalFilters = () => {
     setFilterDate("all");
     setFilterRoom("all");
@@ -138,7 +148,7 @@ export function AdminEvents() {
 
   return (
     <div className="space-y-6">
-      <AdminEventForm onSearch={handleSearchResponse} />
+      <AdminEventForm onSearch={handleSearchResponse} onReset={handleResetAll} />
 
       {hasSearched && (
         <Card className="border-gray-200 shadow-sm">
