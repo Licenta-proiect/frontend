@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, MapPin, Users, AlertCircle } from "lucide-react";
+import { Clock, MapPin, Users, AlertCircle, UserCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Reservation } from "./StudentCalendar";
 
@@ -12,6 +12,7 @@ interface StudentCalendarCardProps {
 
 export function StudentCalendarCard({ session }: StudentCalendarCardProps) {
   const isCanceled = session.status.toLowerCase() === "cancelled";
+  const isEvent = session.type.toLowerCase() === "event";
 
   const getStatusStyle = (status: string) => {
     switch (status.toLowerCase()) {
@@ -29,76 +30,93 @@ export function StudentCalendarCard({ session }: StudentCalendarCardProps) {
         isCanceled ? "opacity-85 grayscale-[0.2]" : "hover:border-brand-blue"
       )}
     >
-    <CardContent className="p-5 space-y-4">
+      <CardContent className="p-5 space-y-4">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-        <div className="space-y-3 flex-1">
+          <div className="space-y-3 flex-1">
             <div className="space-y-1">
-            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center justify-between gap-4">
                 <div className="font-semibold text-md text-gray-800 leading-none">
-                {session.subject}
+                  {session.subject}
                 </div>
                 
                 <div className="flex items-center gap-2 shrink-0">
-                <Badge 
+                  <Badge 
                     variant="outline" 
                     className={cn(getStatusStyle(session.status), "text-[10px] font-bold uppercase whitespace-nowrap")}
-                >
+                  >
                     {session.status.toLowerCase() === "reserved" ? "PROGRAMATĂ" : 
                     session.status.toLowerCase() === "completed" ? "FINALIZATĂ" : "ANULATĂ"}
-                </Badge>
-                <Badge 
+                  </Badge>
+                  <Badge 
                     variant="secondary" 
                     className="bg-gray-100 text-gray-700 border-gray-200 font-bold text-[10px] uppercase whitespace-nowrap"
-                >
-                    {session.type}
-                </Badge>
+                  >
+                    {isEvent ? "EVENIMENT" : session.type.toUpperCase()}
+                  </Badge>
                 </div>
-            </div>
+              </div>
 
-            <p className="text-sm font-semibold text-brand-blue">
-                {session.professor}
-            </p>
+              
+              {!isEvent && (
+                <>
+                    <p className="text-sm font-semibold text-brand-blue">
+                        {session.professor}
+                    </p>
+                </>
+              )}
             </div>
 
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium text-gray-700">
-            {/* Duration */}
-            <div className="flex items-center gap-1.5">
+              {/* Time */}
+              <div className="flex items-center gap-1.5">
                 <Clock className="h-4 w-4 text-brand-blue" />
                 <span>
-                {String(session.start_hour).padStart(2, '0')}:00 - {String(session.start_hour + session.duration).padStart(2, '0')}:00
+                  {String(session.start_hour).padStart(2, '0')}:00 - {String(session.start_hour + session.duration).padStart(2, '0')}:00
                 </span>
-            </div>
+              </div>
 
-            {/* Room */}
-            <div className="flex items-center gap-1.5">
+              {/* Room */}
+              <div className="flex items-center gap-1.5">
                 <MapPin className="h-4 w-4 text-brand-blue" />
                 <span>Sala {session.room}</span>
-            </div>
+              </div>
 
-            {/* Groups */}
-            <div className="flex items-start gap-1.5">
+              {/* Additional Teachers (Same as Professor View) */}
+              {session.additional_professors && session.additional_professors.length > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <UserCheck className="h-4 w-4 text-brand-blue shrink-0" />
+                  <span className="text-gray-600 leading-tight">
+                    {session.additional_professors.join(", ")}
+                  </span>
+                </div>
+              )}
+
+              {/* Groups */}
+              <div className="flex items-start gap-1.5">
                 <Users className="h-4 w-4 text-brand-blue shrink-0 mt-0.5" />
                 <span className="leading-tight">
-                {session.participating_groups.join(", ")}
+                  {session.participating_groups.length > 0 
+                    ? session.participating_groups.join(", ") 
+                    : "All Students / Faculty Wide"}
                 </span>
+              </div>
             </div>
-            </div>
-        </div>
+          </div>
         </div>
 
-        {/* Cancellation reason */}
+        {/* Cancellation Message */}
         {isCanceled && session.cancellation_reason && (
-        <div className="border-red-50">
+          <div className="border-red-50">
             <div className="text-xs p-3 rounded-lg bg-red-50/50 border border-red-100 flex items-start gap-2">
-            <AlertCircle className="h-3.5 w-3.5 text-brand-red shrink-0 mt-0.5" />
-            <div>
+              <AlertCircle className="h-3.5 w-3.5 text-brand-red shrink-0 mt-0.5" />
+              <div>
                 <span className="font-bold text-brand-red mr-2">Motiv anulare:</span>
                 <span className="text-gray-700 italic">&quot;{session.cancellation_reason}&quot;</span>
+              </div>
             </div>
-            </div>
-        </div>
+          </div>
         )}
-     </CardContent>
+      </CardContent>
     </Card>
   );
 }
