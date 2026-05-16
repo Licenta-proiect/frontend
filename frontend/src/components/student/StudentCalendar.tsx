@@ -192,7 +192,7 @@ export function StudentCalendar() {
                   selected={selectedDate}
                   onSelect={setSelectedDate}
                   locale={ro}
-                  className="rounded-md scale-90 md:scale-100 origin-top" 
+                  className="rounded-md" 
                   modifiers={{ hasEvent: eventDates }}
                   modifiersStyles={{
                     hasEvent: { 

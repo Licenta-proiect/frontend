@@ -68,7 +68,7 @@ export function StudentCalendarCard({ session }: StudentCalendarCardProps) {
                 <div className="grid grid-cols-2 gap-4">
                     {/* Time */}
                     <div className="flex items-center gap-1.5 shrink-0">
-                    <Clock className="h-4 w-4 text-brand-blue" />
+                    <Clock className="h-4 w-4 text-brand-blue shrink-0 mt-0.5" />
                     <span className="whitespace-nowrap">
                         {String(session.start_hour).padStart(2, '0')}:00 - {String(session.start_hour + session.duration).padStart(2, '0')}:00
                     </span>
@@ -76,7 +76,7 @@ export function StudentCalendarCard({ session }: StudentCalendarCardProps) {
 
                     {/* Room */}
                     <div className="flex items-center gap-1.5 shrink-0">
-                    <MapPin className="h-4 w-4 text-brand-blue" />
+                    <MapPin className="h-4 w-4 text-brand-blue shrink-0 mt-0.5" />
                     <span>Sala {session.room}</span>
                     </div>
                 </div>
