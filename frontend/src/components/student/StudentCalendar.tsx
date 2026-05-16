@@ -184,15 +184,15 @@ export function StudentCalendar() {
         </CardHeader>
 
         <CardContent>
-          <div className="grid lg:grid-cols-12 gap-8">
-            <div className="lg:col-span-5 flex flex-col items-center">
-              <div className="p-4 bg-white rounded-xl shadow-sm border w-full flex justify-center">
+          <div className="grid md:grid-cols-12 gap-6">
+            <div className="md:col-span-5 flex flex-col items-center">
+              <div className="p-2 md:p-4 bg-white rounded-xl shadow-sm border w-full flex justify-center">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
                   onSelect={setSelectedDate}
                   locale={ro}
-                  className="rounded-md"
+                  className="rounded-md scale-90 md:scale-100 origin-top" 
                   modifiers={{ hasEvent: eventDates }}
                   modifiersStyles={{
                     hasEvent: { 
@@ -216,7 +216,7 @@ export function StudentCalendar() {
               </div>
             </div>
 
-            <div className="lg:col-span-7 space-y-4">
+            <div className="md:col-span-7 space-y-4">
               <div className="flex items-center justify-between border-b pb-2">
                 <h3 className="font-bold text-md text-slate-900">
                   {selectedDate 
