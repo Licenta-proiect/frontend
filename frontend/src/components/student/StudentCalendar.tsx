@@ -22,6 +22,7 @@ export interface Reservation {
   id: number;
   professor: string;
   professor_email: string;
+  additional_professors?: string[]; 
   subject: string;
   type: string;
   room: string;
@@ -209,7 +210,7 @@ export function StudentCalendar() {
                   <Info className="h-5 w-5 text-blue-500 mt-0.5" />
                   <div className="text-sm text-blue-800">
                     <p className="font-semibold">Legendă</p>
-                    <p>Zilele marcate cu albastru indică prezența unor recuperări programate.</p>
+                    <p>Zilele marcate cu albastru indică prezența unor activități programate.</p>
                   </div>
                 </div>
               </div>
@@ -230,7 +231,7 @@ export function StudentCalendar() {
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-20">
                    <div className="animate-spin rounded-full h-8 w-8 border-primary border-b-2 mb-4"></div>
-                   <p className="text-slate-500">Se încarcă recuperările...</p>
+                   <p className="text-slate-500">Se încarcă activitățile...</p>
                 </div>
               ) : sessionsOnSelectedDate.length === 0 ? (
                 <div className="text-center py-20 bg-slate-50 rounded-xl border-2 border-dashed">
