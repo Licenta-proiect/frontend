@@ -34,29 +34,27 @@ export function StudentCalendarCard({ session }: StudentCalendarCardProps) {
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
           <div className="space-y-3 flex-1">
             <div className="space-y-1">
-              <div className="flex items-center justify-between gap-4">
-                <div className="font-semibold text-md text-gray-800 leading-none">
-                  {session.subject}
-                </div>
-                
-                <div className="flex items-center gap-2 shrink-0">
-                  <Badge 
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                    <Badge 
                     variant="outline" 
                     className={cn(getStatusStyle(session.status), "text-[10px] font-bold uppercase whitespace-nowrap")}
-                  >
+                    >
                     {session.status.toLowerCase() === "reserved" ? "PROGRAMATĂ" : 
                     session.status.toLowerCase() === "completed" ? "FINALIZATĂ" : "ANULATĂ"}
-                  </Badge>
-                  <Badge 
+                    </Badge>
+                    <Badge 
                     variant="secondary" 
                     className="bg-gray-100 text-gray-700 border-gray-200 font-bold text-[10px] uppercase whitespace-nowrap"
-                  >
+                    >
                     {isEvent ? "EVENIMENT" : session.type.toUpperCase()}
-                  </Badge>
+                    </Badge>
                 </div>
-              </div>
+                <div className="font-semibold text-md text-gray-800 leading-snug">
+                    {session.subject}
+                </div>
+                </div>
 
-              
               {!isEvent && (
                 <>
                     <p className="text-sm font-semibold text-brand-blue">
@@ -67,46 +65,45 @@ export function StudentCalendarCard({ session }: StudentCalendarCardProps) {
             </div>
 
             <div className="flex flex-col gap-3 text-sm font-medium text-gray-700">
-              <div className="flex flex-wrap gap-x-5 gap-y-2">
-                {/* Time */}
-                <div className="flex items-center gap-1.5 shrink-0">
+                <div className="grid grid-cols-2 gap-4">
+                    {/* Time */}
+                    <div className="flex items-center gap-1.5 shrink-0">
                     <Clock className="h-4 w-4 text-brand-blue" />
-                    <span>
+                    <span className="whitespace-nowrap">
                         {String(session.start_hour).padStart(2, '0')}:00 - {String(session.start_hour + session.duration).padStart(2, '0')}:00
                     </span>
-                </div>
+                    </div>
 
-                {/* Room */}
-                <div className="flex items-center gap-1.5 shrink-0">
+                    {/* Room */}
+                    <div className="flex items-center gap-1.5 shrink-0">
                     <MapPin className="h-4 w-4 text-brand-blue" />
                     <span>Sala {session.room}</span>
+                    </div>
                 </div>
-            </div>
 
-              {/* Additional Teachers (Same as Professor View) */}
-              {session.additional_professors && session.additional_professors.length > 0 && (
-                <div className="flex items-start gap-1.5 w-full border-t border-gray-50 pt-2">
-                  <UserCheck className="h-4 w-4 text-brand-blue shrink-0 mt-0.5" />
-                  <div className="flex flex-col">
-                    <span className="text-gray-600 leading-tight">
-                      {session.additional_professors.join(", ")}
+                {/* Additional Teachers (Same as Professor View) */}
+                {session.additional_professors && session.additional_professors.length > 0 && (
+                    <div className="flex items-start gap-1.5 w-full pt-1">
+                    <UserCheck className="h-4 w-4 text-brand-blue shrink-0 mt-0.5" />
+                    <div className="flex flex-col min-w-0">
+                        <span className="text-gray-600 leading-tight wrap-break-word">
+                        {session.additional_professors.join(", ")}
+                        </span>
+                    </div>
+                    </div>
+                )}
+
+                {/* Groups */}
+                <div className="flex items-start gap-1.5 w-full pt-1">
+                    <Users className="h-4 w-4 text-brand-blue shrink-0 mt-0.5" />
+                    <div className="flex flex-col min-w-0">
+                    <span className="text-gray-600 leading-tight wrap-break-word">
+                        {session.participating_groups.length > 0 
+                        ? session.participating_groups.join(", ") 
+                        : "Toți studenții"}
                     </span>
-                  </div>
+                    </div>
                 </div>
-              )}
-
-              {/* Groups */}
-              <div className="flex items-start gap-1.5 w-full border-t border-gray-50 pt-2">
-                <Users className="h-4 w-4 text-brand-blue shrink-0 mt-0.5" />
-                <div className="flex flex-col">
-                  <span className="text-gray-600 leading-tight">
-                    {session.participating_groups.length > 0 
-                      ? session.participating_groups.join(", ") 
-                      : "Toți studenții"}
-                  </span>
-                </div>
-              </div>
-
             </div>
           </div>
         </div>
