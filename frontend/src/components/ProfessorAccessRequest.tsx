@@ -113,7 +113,7 @@ export function ProfessorAccessRequest() {
         >
           <Bell className="h-4 w-4 md:h-5 md:w-5" />
           <span className="hidden sm:inline">Solicitare acces</span>
-          <span className="sm:hidden">Solicitare</span>
+          <span className="sm:hidden">Acces</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-[95vw] sm:max-w-md rounded-lg">
