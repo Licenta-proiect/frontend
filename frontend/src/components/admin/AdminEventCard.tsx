@@ -42,17 +42,17 @@ export function AdminEventCard({ session, onCancelClick }: AdminEventCardProps) 
           <div className="space-y-3 flex-1">
             <div className="space-y-1">
               {/* Status + Type */}
-              <div className="flex items-center justify-between gap-4">
-                <div className="font-semibold text-md text-gray-800 leading-none">
-                  {session.subject}
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <Badge variant="outline" className={cn(getStatusStyle(session.status), "text-[10px] uppercase")}>
                     {session.status === "reserved" ? "PROGRAMATĂ" : session.status === "completed" ? "FINALIZATĂ" : "ANULATĂ"}
                   </Badge>
                   <Badge variant="secondary" className="bg-gray-100 text-[10px] uppercase font-bold text-gray-600">
                     {isEvent ? "EVENIMENT" : session.type.toUpperCase()}
                   </Badge>
+                </div>
+                <div className="font-semibold text-md text-gray-800 leading-none wrap-break-word">
+                  {session.subject}
                 </div>
               </div>
               
@@ -95,7 +95,7 @@ export function AdminEventCard({ session, onCancelClick }: AdminEventCardProps) 
               {session.additional_professors && session.additional_professors.length > 0 && (
                 <div className="flex items-center gap-1.5">
                   <UserCheck className="h-4 w-4 text-brand-blue shrink-0" />
-                  <span className="text-gray-600 leading-tight">
+                  <span className="text-gray-600 leading-tight wrap-break-word">
                     {session.additional_professors.join(", ")}
                   </span>
                 </div>
@@ -105,7 +105,7 @@ export function AdminEventCard({ session, onCancelClick }: AdminEventCardProps) 
               {session.groups.length > 0 && (
                 <div className="flex items-start gap-1.5">
                   <Users className="h-4 w-4 text-brand-blue shrink-0 mt-0.5" />
-                  <span className="text-gray-600 leading-tight">{session.groups.join(", ")}</span>
+                  <span className="text-gray-600 leading-tight wrap-break-word">{session.groups.join(", ")}</span>
                 </div>
               )}
             </div>

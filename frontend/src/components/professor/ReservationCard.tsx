@@ -37,9 +37,8 @@ export function ReservationCard({ reservation, onCancel }: ReservationCardProps)
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
           <div className="space-y-3 flex-1">
             {/* Subject + Status badge + Activity type badge */}
-            <div className="flex items-center justify-between gap-4">
-                <div className="font-semibold text-md text-gray-900">{reservation.subject}</div>
-                <div className="flex items-center gap-2 shrink-0">
+            <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <Badge variant="outline" className={cn(getStatusColor(reservation.status), "text-[10px]")}>
                     {reservation.status === "reserved" ? "PROGRAMATĂ" : 
                     reservation.status === "completed" ? "FINALIZATĂ" : "ANULATĂ"}
@@ -48,7 +47,10 @@ export function ReservationCard({ reservation, onCancel }: ReservationCardProps)
                     {isEvent ? "EVENIMENT" : reservation.type.toUpperCase()}
                   </Badge>
                 </div>
-            </div>
+                <div className="font-semibold text-md text-gray-800 leading-none wrap-break-word">
+                  {reservation.subject}
+                </div>
+              </div>
             
             {/* Detail row */}
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium text-gray-700">
@@ -79,7 +81,7 @@ export function ReservationCard({ reservation, onCancel }: ReservationCardProps)
               {reservation.additional_professors && reservation.additional_professors.length > 0 && (
                 <div className="flex items-center gap-1.5">
                   <UserCheck className="h-4 w-4 text-brand-blue shrink-0" />
-                  <span className="text-gray-600 leading-tight">
+                  <span className="text-gray-600 leading-tight wrap-break-word">
                     {reservation.additional_professors.join(", ")}
                   </span>
                 </div>
@@ -88,7 +90,7 @@ export function ReservationCard({ reservation, onCancel }: ReservationCardProps)
               {/* Groups - Display icon only if there are subgroups */}
               {reservation.groups.length > 0 && (
                 <div className="flex items-center gap-1.5">
-                  <Users className="h-4 w-4 text-brand-blue shrink-0 mt-0.5" />
+                  <Users className="h-4 w-4 text-brand-blue shrink-0 mt-0.5 wrap-break-word" />
                   <span className="text-gray-600 leading-tight">{reservation.groups.join(", ")}</span>
                 </div>
               )}

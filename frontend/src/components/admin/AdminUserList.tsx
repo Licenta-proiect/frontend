@@ -99,7 +99,7 @@ export function AdminUserList({
                 <SelectContent>
                   <SelectItem value="all">Toate rolurile</SelectItem>
                   <SelectItem value="student">Student</SelectItem>
-                  <SelectItem value="profesor">Profesor</SelectItem>
+                  <SelectItem value="professor">Profesor</SelectItem>
                   <SelectItem value="admin">Administrator</SelectItem>
                 </SelectContent>
               </Select>
