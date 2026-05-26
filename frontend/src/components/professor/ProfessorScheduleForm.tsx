@@ -180,7 +180,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
 
         const groupsData = gResp.data.groups || [];
         const groupsOptions = groupsData.map((g: ApiGroup) => ({
-          label: `${g.specializationShortName} • an ${g.studyYear} • ${g.name}${g.subgroupIndex ? `${g.subgroupIndex}` : ""}`,
+          label: `${g.specializationShortName} an ${g.studyYear} ${g.name}${g.subgroupIndex ? `${g.subgroupIndex}` : ""}`,
           value: g.id.toString(),
         }));
 

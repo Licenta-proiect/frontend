@@ -90,7 +90,7 @@ export function AdminEventForm({ onSearch, onReset }: AdminEventFormProps) {
         })));
 
         const groupsMapped = groupsResp.data.map((g: SubgroupData) => ({
-          label: `${g.specializationShortName} • an ${g.studyYear} • ${g.name}${g.subgroupIndex ? `${g.subgroupIndex}` : ""}`,
+          label: `${g.specializationShortName} an ${g.studyYear} ${g.name}${g.subgroupIndex ? `${g.subgroupIndex}` : ""}`,
           value: g.id.toString() 
         }));
         setSubgroupOptions(groupsMapped);

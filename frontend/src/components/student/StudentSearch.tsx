@@ -259,7 +259,7 @@ export function StudentSearch() {
                         ? (() => {
                             const g = groups.find((g) => g.id.toString() === selectedGroupId);
                             return g 
-                              ? `${g.specializationShortName} • an ${g.studyYear} • ${g.name}${g.subgroupIndex}` 
+                              ? `${g.specializationShortName} an ${g.studyYear} ${g.name}${g.subgroupIndex}` 
                               : "Selectează grupa";
                           })()
                         : isLoadingGroups ? "Se încarcă..." : "Selectează grupa"}
@@ -288,7 +288,7 @@ export function StudentSearch() {
                                 selectedGroupId === g.id.toString() ? "opacity-100" : "opacity-0"
                               )}
                             />
-                            {g.specializationShortName} • an {g.studyYear} • {g.name}{g.subgroupIndex}
+                            {g.specializationShortName} an {g.studyYear} {g.name}{g.subgroupIndex}
                           </CommandItem>
                         ))}
                       </CommandGroup>
