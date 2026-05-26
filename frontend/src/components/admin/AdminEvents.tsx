@@ -115,7 +115,7 @@ export function AdminEvents() {
         reservationDate: slot.date,
         startHour: slot.start_time,
         duration: lastFilters.duration,
-        numberOfPeople: parseInt(lastFilters.studentCount),
+        numberOfPeople: Number.parseInt(lastFilters.studentCount),
         activityType: "event"
       };
 

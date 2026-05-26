@@ -94,12 +94,12 @@ export function ProfessorSchedule() {
           
           results.push({
             id: `${slot.room_id}-${week}-${dayData.date}-${slot.start_time}-${index}`,
-            week: parseInt(week),
+            week: Number.parseInt(week),
             date: dateObj,
             startTime: `${slot.start_time}:00`,
             endTime: `${slot.end_time}:00`,
             room: roomName,
-            capacity: parseInt(studentCount) || 0,
+            capacity: Number.parseInt(studentCount) || 0,
             availableGroups: allGroups
               ?.filter((g: SelectOption) => filters.selectedGroups?.includes(g.value))
               .map((g: SelectOption) => g.label) || []
@@ -144,16 +144,16 @@ export function ProfessorSchedule() {
       setIsBooking(slot.id);
       const response = await api.post("/reservations/confirm-reservation", {
         email: localStorage.getItem("userEmail"),
-        room_id: parseInt(slot.id.split('-')[0]),
-        group_ids: lastFilters.selectedGroups.map(id => parseInt(id)),
+        room_id: Number.parseInt(slot.id.split('-')[0]),
+        group_ids: lastFilters.selectedGroups.map(id => Number.parseInt(id)),
         subject: lastFilters.selectedSubject,
         activity_type: lastFilters.selectedType, 
         day: slot.date.getDay() === 0 ? 7 : slot.date.getDay(),
         week: slot.week,
-        start_hour: parseInt(slot.startTime.split(':')[0]),
-        duration: parseInt(slot.endTime.split(':')[0]) - parseInt(slot.startTime.split(':')[0]),
+        start_hour: Number.parseInt(slot.startTime.split(':')[0]),
+        duration: Number.parseInt(slot.endTime.split(':')[0]) - Number.parseInt(slot.startTime.split(':')[0]),
         reservation_date: slot.date.toISOString().split('T')[0],
-        number_of_people: parseInt(lastFilters.studentCount) || 0
+        number_of_people: Number.parseInt(lastFilters.studentCount) || 0
       });
 
       if (response.data.success) {

@@ -83,7 +83,7 @@ export function AdminRequests({ requests, onUpdate, isLoading }: AdminRequestsPr
   const formatDate = (dateStr: string) => {
     if (!dateStr) return "N/A";
     const date = new Date(dateStr);
-    return isNaN(date.getTime()) ? "Dată invalidă" : date.toLocaleString("ro-RO");
+    return Number.isNaN(date.getTime()) ? "Dată invalidă" : date.toLocaleString("ro-RO");
   };
 
   return (

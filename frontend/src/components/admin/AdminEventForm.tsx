@@ -119,8 +119,8 @@ export function AdminEventForm({ onSearch, onReset }: AdminEventFormProps) {
         professor_ids: selectedProfessors.map(Number),
         start_date: format(dateRange.from, "yyyy-MM-dd"),
         end_date: format(dateRange.to, "yyyy-MM-dd"),
-        duration: parseInt(duration),
-        number_of_people: studentCount ? parseInt(studentCount) : 0,
+        duration: Number.parseInt(duration),
+        number_of_people: studentCount ? Number.parseInt(studentCount) : 0,
         activity_type: "event"
       };
 
@@ -137,7 +137,7 @@ export function AdminEventForm({ onSearch, onReset }: AdminEventFormProps) {
           selectedRooms,
           selectedProfessors,
           allSubgroupIds: selectedSubgroupIds.map(Number),
-          duration: parseInt(duration),
+          duration: Number.parseInt(duration),
           studentCount: studentCount || "0"
         }, days);
       }
@@ -305,7 +305,7 @@ export function AdminEventForm({ onSearch, onReset }: AdminEventFormProps) {
               value={duration} 
               onChange={(e) => {
                 const val = e.target.value;
-                if (val === "" || (parseInt(val) >= 1 && parseInt(val) <= 24)) {
+                if (val === "" || (Number.parseInt(val) >= 1 && Number.parseInt(val) <= 24)) {
                   setDuration(val);
                 }
               }}

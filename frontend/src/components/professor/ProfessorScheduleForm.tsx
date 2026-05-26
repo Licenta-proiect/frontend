@@ -205,7 +205,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     setIsValidatingWeeks(true);
     try {
       const response = await api.post("/data/valid-weeks", { 
-        group_ids: groupIds.map(id => parseInt(id)) 
+        group_ids: groupIds.map(id => Number.parseInt(id)) 
       });
       
       const weeks = response.data.active_weeks || [];
@@ -215,7 +215,7 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
       }));
       
       setAllWeeks(options);
-      setSelectedWeeks(prev => prev.filter(w => weeks.includes(parseInt(w))));
+      setSelectedWeeks(prev => prev.filter(w => weeks.includes(Number.parseInt(w))));
     } catch (error) {
       console.error("Eroare la validarea săptămânilor:", error);
     } finally {
@@ -247,13 +247,13 @@ export function ProfessorScheduleForm({ onSearch }: ProfessorScheduleFormProps) 
     const searchPayload = {
       email: localStorage.getItem("userEmail"),
       subject: selectedSubject,
-      group_ids: selectedGroups.map(id => parseInt(id)),
-      room_ids: selectedRooms.map(id => parseInt(id)),
-      duration: duration ? parseInt(duration.split(" ")[0]) : null,
+      group_ids: selectedGroups.map(id => Number.parseInt(id)),
+      room_ids: selectedRooms.map(id => Number.parseInt(id)),
+      duration: duration ? Number.parseInt(duration.split(" ")[0]) : null,
       activity_type: selectedType,
-      number_of_people: studentCount ? parseInt(studentCount) : null,
+      number_of_people: studentCount ? Number.parseInt(studentCount) : null,
       day: selectedDay ? DAYS_MAP[selectedDay] : null,
-      weeks: selectedWeeks.map(w => parseInt(w))
+      weeks: selectedWeeks.map(w => Number.parseInt(w))
     };
 
     try {
