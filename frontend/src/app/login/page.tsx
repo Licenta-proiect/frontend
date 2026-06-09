@@ -7,7 +7,7 @@ import api from "@/services/api";
 import axios from "axios";
 import { toast } from "sonner";
 import Cookies from "js-cookie";
-import { ShieldCheck, Loader2, Timer, LogIn, Mail, KeyRound, ArrowLeft } from "lucide-react";
+import { ShieldCheck, Loader2, Timer, LogIn, Mail, ArrowLeft } from "lucide-react";
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -219,7 +219,7 @@ export default function LoginPage() {
                     placeholder="nume.prenume@usv.ro"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 h-12 border-slate-200 focus-visible:ring-brand-blue bg-white"
+                    className="pl-10 h-12 border-slate-200 bg-white"
                     disabled={isLoading || isOtpLoading}
                     required
                   />
@@ -244,7 +244,7 @@ export default function LoginPage() {
           </>
         ) : (
           <>
-            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto animate-pulse">
+            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
               <ShieldCheck className="text-brand-blue h-8 w-8" />
             </div>
 
@@ -256,14 +256,13 @@ export default function LoginPage() {
             <form onSubmit={handleVerifyOtp} className="space-y-6">
               <div className="space-y-4 text-left">
                 <div className="relative">
-                  <KeyRound className="absolute left-4 top-6 h-4 w-4 text-slate-400 z-10" />
                   <Input
                     type="text"
                     placeholder="000000"
                     maxLength={6}
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
-                    className="text-center text-xl font-mono h-16 tracking-[0.5em] border-slate-200 focus-visible:ring-brand-blue bg-white pl-10"
+                    className="text-center text-xl md:text-xl font-mono h-16 tracking-[0.5em] border-slate-200 focus:ring-brand-blue bg-white"
                     disabled={isLoading || isOtpLoading}
                     required
                   />
@@ -272,10 +271,10 @@ export default function LoginPage() {
                 <div className="flex justify-center">
                   <div className={`w-full flex items-center gap-2 text-sm font-medium px-6 py-2 rounded-lg border justify-center transition-all duration-300
                       ${countdown < 60 ? 
-                      'text-red-600 bg-red-50 border-red-100 animate-pulse' : 
-                      'text-brand-blue bg-blue-50 border-blue-100'}`}>
+                      'text-red-600 bg-red-50 border-red-100' : 
+                      'text-blue-600 bg-blue-50 border-blue-100'}`}>
                     <Timer className="h-4 w-4" />
-                    <span>Expiră în: {formatCountdown(countdown)}</span>
+                    <span>{formatCountdown(countdown)}</span>
                   </div>
                 </div>
               </div>
