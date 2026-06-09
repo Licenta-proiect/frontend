@@ -60,7 +60,7 @@ export default function Home() {
               onClick={() => router.push("/login")}
               className="h-12 md:h-12 px-8 md:px-12 bg-brand-blue hover:bg-brand-blue-dark text-base font-bold transition-all active:scale-95 text-white shadow-md shadow-blue-200/50"
             >
-              Accesează platforma
+              Intră în platformă
             </Button>
             
           </div>
