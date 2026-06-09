@@ -8,6 +8,7 @@ import api from "@/services/api";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "sonner";
+import Cookies from "js-cookie";
 
 /**
  * Landing Page Component
@@ -75,7 +76,7 @@ export default function Home() {
   /**
    * Phase 1: Request Magic Code via Email
    */
-  const handleSendOtp = async (e: React.FormEvent): Promise<void> => {
+  const handleSendOtp = async (e: React.SyntheticEvent): Promise<void> => {
     e.preventDefault();
     if (!email.trim()) {
       toast.error("Vă rugăm să introduceți o adresă de e-mail.");
@@ -100,7 +101,7 @@ export default function Home() {
         const errorMsg = error.response?.data?.detail || "Eroare la solicitarea codului.";
         
         if (error.response?.status === 403) {
-          toast.error(`Acces interzis: ${errorMsg}`, { duration: 7000});
+          toast.error(`Acces interzis: ${errorMsg}`, { duration: 7000 });
           return;
         }
 
@@ -116,7 +117,7 @@ export default function Home() {
   /**
    * Phase 2: Verify Magic Code and establish session credentials
    */
-  const handleVerifyOtp = async (e: React.FormEvent): Promise<void> => {
+  const handleVerifyOtp = async (e: React.SyntheticEvent): Promise<void> => {
     e.preventDefault();
     if (!otpCode.trim() || otpCode.length < 6) {
       toast.error("Vă rugăm să introduceți codul complet din 6 cifre.");
@@ -138,9 +139,10 @@ export default function Home() {
       const data = response.data;
 
       // Set session context across cookies and localStorage natively without internal route middleware drops
-      document.cookie = `access_token=${data.access_token}; path=/; max-age=86400; SameSite=Lax`;
-      document.cookie = `user_role=${data.user.role}; path=/; max-age=86400; SameSite=Lax`;
-      
+      Cookies.set("access_token", data.access_token, { expires: 7 });
+      Cookies.set("user_role", data.user.role, { expires: 7 });
+
+      localStorage.setItem("access_token", data.access_token);
       localStorage.setItem("userRole", data.user.role);
       localStorage.setItem("userEmail", data.user.email);
       localStorage.setItem("userFirstName", data.user.first_name);
@@ -148,7 +150,7 @@ export default function Home() {
 
       toast.success(`Bine ai venit, ${data.user.first_name || "Utilizator"}!`);
       
-      // Native window layout relocation sequence to sync proxy checks perfectly
+      // Native window relocation block ensuring middleware checks process cleanly
       setTimeout(() => {
         if (data.user.role === "ADMIN") {
           window.location.href = "/admin";
@@ -164,7 +166,7 @@ export default function Home() {
         const errorMsg = error.response?.data?.detail || "Cod incorect sau expirat.";
         
         if (error.response?.status === 403) {
-          toast.error(`Acces interzis: ${errorMsg}`, { duration: 7000});
+          toast.error(`Acces interzis: ${errorMsg}`, { duration: 7000 });
           return;
         }
 
