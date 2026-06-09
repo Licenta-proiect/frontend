@@ -1,190 +1,17 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Calendar, LogIn, Mail, CheckCircle2, Sparkles, Loader2, KeyRound, ArrowLeft, ShieldCheck, Timer } from "lucide-react"; 
+import { Calendar, LogIn, CheckCircle2, Sparkles, Mail } from "lucide-react"; 
 import { ProfessorAccessRequest } from "@/components/ProfessorAccessRequest";
-import { Input } from "@/components/ui/input"; 
-import api from "@/services/api"; 
-import { useState, useEffect } from "react";
-import axios from "axios";
-import { toast } from "sonner";
-import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
 /**
  * Landing Page Component
  * Handles user introduction to the platform and dual-method authentication.
  */
 export default function Home() {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isOtpLoading, setIsOtpLoading] = useState<boolean>(false);
+  const router = useRouter();
   const appName = process.env.NEXT_PUBLIC_APP_TITLE;
-
-  // --- PASSWORDLESS AUTHENTICATION STATES ---
-  const [email, setEmail] = useState<string>("");
-  const [otpCode, setOtpCode] = useState<string>("");
-  const [authStep, setAuthStep] = useState<"email" | "code">("email");
-  const [countdown, setCountdown] = useState<number>(300); // 5-minute TOTP window
-
-  // --- OTP TIMER EFFECT ---
-  useEffect(() => {
-    if (authStep !== "code" || countdown <= 0) return;
-    const timer = setInterval(() => {
-      setCountdown((prev) => prev - 1);
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [authStep, countdown]);
-
-  /**
-   * Orchestrates the Google login flow.
-   * First checks if the system is in maintenance mode via the interceptor-enabled API instance.
-   * If available, redirects to the Google OAuth provider.
-   */
-  const handleGoogleLogin = async (): Promise<void> => {
-    setIsLoading(true);
-    try {
-      // 1. Perform a status check
-      // If the backend returns a 503, the Axios interceptor handles the redirect.
-      const response = await api.get("/admin/sync/status");
-
-      // 2. Double-check the payload flag (as a fail-safe)
-      if (response.data.is_updating) {
-        window.location.href = "/maintenance";
-        return;
-      }
-
-      // 3. Only if the system is NOT updating, allow the browser to leave the app
-      const backendUrl = process.env.NEXT_PUBLIC_API_URL;
-      window.location.href = `${backendUrl}/login`;
-      
-    } catch (error: unknown) {
-      // Handle the error using Type Guards to avoid 'any'
-      if (axios.isAxiosError(error)) {
-        // If the error is 503, the interceptor handles navigation, 
-        // so we only reset loading for other types of failures.
-        if (error.response?.status !== 503) {
-          setIsLoading(false);
-        }
-      } else {
-        // Fallback for non-Axios errors
-        setIsLoading(false);
-      }
-    }
-  };
-
-  // --- PASSWORDLESS AUTHENTICATION METHODS ---
-
-  /**
-   * Phase 1: Request Magic Code via Email
-   */
-  const handleSendOtp = async (e: React.SyntheticEvent): Promise<void> => {
-    e.preventDefault();
-    if (!email.trim()) {
-      toast.error("Vă rugăm să introduceți o adresă de e-mail.");
-      return;
-    }
-
-    setIsOtpLoading(true);
-    try {
-      const statusRes = await api.get("/admin/sync/status");
-      if (statusRes.data.is_updating) {
-        window.location.href = "/maintenance";
-        return;
-      }
-
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/passwordless/request`, { email: email.toLowerCase().trim() });
-
-      toast.success("Codul de verificare a fost trimis cu succes pe e-mail!");
-      setAuthStep("code");
-      setCountdown(300); 
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const errorMsg = error.response?.data?.detail || "Eroare la solicitarea codului.";
-        
-        if (error.response?.status === 403) {
-          toast.error(`Acces interzis: ${errorMsg}`, { duration: 7000 });
-          return;
-        }
-
-        if (error.response?.status !== 503) toast.error(errorMsg);
-      } else {
-        toast.error("Eroare neprevăzută la trimiterea e-mailului.");
-      }
-    } finally {
-      setIsOtpLoading(false);
-    }
-  };
-
-  /**
-   * Phase 2: Verify Magic Code and establish session credentials
-   */
-  const handleVerifyOtp = async (e: React.SyntheticEvent): Promise<void> => {
-    e.preventDefault();
-    if (!otpCode.trim() || otpCode.length < 6) {
-      toast.error("Vă rugăm să introduceți codul complet din 6 cifre.");
-      return;
-    }
-
-    if (countdown === 0) {
-      toast.error("Codul a expirat. Vă rugăm să solicitați un cod nou.");
-      return;
-    }
-
-    setIsOtpLoading(true);
-    try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/passwordless/verify`, { 
-        email: email.toLowerCase().trim(), 
-        code: otpCode.trim() 
-      });
-
-      const data = response.data;
-
-      // Set session context across cookies and localStorage natively without internal route middleware drops
-      Cookies.set("access_token", data.access_token, { expires: 7 });
-      Cookies.set("user_role", data.user.role, { expires: 7 });
-
-      localStorage.setItem("access_token", data.access_token);
-      localStorage.setItem("userRole", data.user.role);
-      localStorage.setItem("userEmail", data.user.email);
-      localStorage.setItem("userFirstName", data.user.first_name);
-      localStorage.setItem("userLastName", data.user.last_name);
-
-      toast.success(`Bine ai venit, ${data.user.first_name || "Utilizator"}!`);
-      
-      // Native window relocation block ensuring middleware checks process cleanly
-      setTimeout(() => {
-        if (data.user.role === "ADMIN") {
-          window.location.href = "/admin";
-        } else if (data.user.role === "PROFESSOR") {
-          window.location.href = "/profesor";
-        } else {
-          window.location.href = "/student";
-        }
-      }, 300);
-      
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const errorMsg = error.response?.data?.detail || "Cod incorect sau expirat.";
-        
-        if (error.response?.status === 403) {
-          toast.error(`Acces interzis: ${errorMsg}`, { duration: 7000 });
-          return;
-        }
-
-        toast.error(errorMsg);
-      } else {
-        toast.error("Eroare neprevăzută la validarea codului.");
-      }
-    } finally {
-      setIsOtpLoading(false);
-    }
-  };
-
-  const formatCountdown = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
-  };
-
   const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@usv.ro";
 
   return (
@@ -202,18 +29,13 @@ export default function Home() {
           <div className="flex gap-2 md:gap-4 items-center">
             <ProfessorAccessRequest />
             <Button 
-              onClick={handleGoogleLogin} 
-              disabled={isLoading || isOtpLoading}
+              onClick={() => router.push("/login")} 
               size="sm"
               className="bg-brand-blue hover:bg-brand-blue-dark active:scale-95 md:h-11 md:px-6 gap-2 text-xs md:text-base px-3 text-white font-medium transition-all shadow-sm"
             >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <LogIn className="h-4 w-4 md:h-5 md:w-5" />
-              )}
-              <span className="hidden xs:inline">Autentificare Google</span>
-              <span className="xs:hidden">Autentificare</span>
+              <LogIn className="h-4 w-4 md:h-5 md:w-5" />
+              <span className="hidden xs:inline">Autentificare</span>
+              <span className="xs:hidden">Intră</span>
             </Button>
           </div>
         </div>
@@ -233,143 +55,14 @@ export default function Home() {
               </p>
             </div>
 
-            {/* --- CORE AUTHENTICATION HOUSING PANEL --- */}
-            <div className="w-full max-w-md bg-white border border-slate-200 p-8 rounded-2xl shadow-xl shadow-blue-100/40 text-center mt-4 space-y-6">
-              
-              {authStep === "email" ? (
-                <>
-                  <div className="bg-blue-50 w-14 h-14 rounded-full flex items-center justify-center mx-auto">
-                    <LogIn className="text-brand-blue h-6 w-6" />
-                  </div>
-
-                  <div className="space-y-1">
-                    <h3 className="text-xl font-bold text-slate-900">Acces platformă</h3>
-                    <p className="text-slate-500 text-xs">Alegeți modalitatea de conectare securizată</p>
-                  </div>
-
-                  {/* Method A: Unified SSO Integration */}
-                  <Button
-                    size="lg"
-                    onClick={handleGoogleLogin}
-                    disabled={isLoading || isOtpLoading}
-                    className="w-full bg-brand-blue hover:bg-brand-blue-dark h-14 text-base font-semibold transition-all active:scale-95 text-white rounded-lg"
-                  >
-                    {isLoading ? (
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    ) : (
-                      <LogIn className="mr-2 h-5 w-5" />
-                    )}
-                    Conectare cu Google
-                  </Button>
-
-                  {/* Graphical Visual Form Separator */}
-                  <div className="relative flex py-1 items-center">
-                    <div className="grow border-t border-slate-200"></div>
-                    <span className="shrink mx-4 text-[10px] text-slate-400 uppercase font-bold tracking-widest">sau fără parolă</span>
-                    <div className="grow border-t border-slate-200"></div>
-                  </div>
-
-                  <form onSubmit={handleSendOtp} className="space-y-4 text-left">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-600 px-0.5">
-                        Email
-                      </label>
-                      <div className="relative">
-                        <Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
-                        <Input
-                          type="email"
-                          placeholder="nume.prenume@usv.ro"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="pl-10 h-11 border-slate-200 rounded-lg bg-white"
-                          disabled={isLoading || isOtpLoading}
-                          required
-                        />
-                      </div>
-                    </div>
-                    <Button 
-                      type="submit" 
-                      variant="outline" 
-                      className="w-full h-12 font-semibold border-slate-200 hover:bg-slate-50 text-slate-700 transition-colors rounded-lg" 
-                      disabled={isLoading || isOtpLoading}
-                    >
-                      {isOtpLoading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Se trimite codul...
-                        </>
-                      ) : (
-                        "Trimite codul de conectare"
-                      )}
-                    </Button>
-                  </form>
-                </>
-              ) : (
-                <>
-                  <div className="bg-blue-50 w-14 h-14 rounded-full flex items-center justify-center mx-auto animate-pulse">
-                    <ShieldCheck className="text-brand-blue h-7 w-7" />
-                  </div>
-
-                  <div className="space-y-1">
-                    <h3 className="text-xl font-bold text-slate-900">Verificare securitate</h3>
-                    <p className="text-slate-500 text-xs">Codul unic a fost transmis pe adresa de email.</p>
-                  </div>
-
-                  <form onSubmit={handleVerifyOtp} className="space-y-5">
-                    <div className="space-y-4 text-left">
-                      <div className="relative">
-                        <Input
-                          type="text"
-                          placeholder="000000"
-                          maxLength={6}
-                          value={otpCode}
-                          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
-                          className="text-center text-xl font-mono h-16 tracking-[0.5em] border-slate-200 bg-white pl-10 rounded-lg"
-                          disabled={isLoading || isOtpLoading}
-                          required
-                        />
-                      </div>
-                      
-                      <div className="flex justify-center">
-                        <div className={`w-full flex items-center gap-2 text-xs font-semibold px-4 py-2.5 rounded-lg border justify-center transition-all duration-300
-                            ${countdown < 60 ? 
-                            'text-red-600 bg-red-50 border-red-100 animate-pulse' : 
-                            'text-brand-blue bg-blue-50 border-blue-100'}`}>
-                          <Timer className="h-4 w-4" />
-                          <span>Expiră în: {formatCountdown(countdown)}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2.5 pt-1">
-                      <Button 
-                        type="button" 
-                        variant="ghost" 
-                        className="w-1/3 h-12 text-xs text-slate-500 font-semibold rounded-lg hover:bg-slate-50" 
-                        onClick={() => setAuthStep("email")}
-                        disabled={isOtpLoading}
-                      >
-                        <ArrowLeft className="mr-1 h-3 w-3" /> Înapoi
-                      </Button>
-                      <Button 
-                        type="submit" 
-                        className="w-2/3 h-12 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold transition-all rounded-lg" 
-                        disabled={isLoading || isOtpLoading || countdown === 0}
-                      >
-                        {isOtpLoading ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Verificare...
-                          </>
-                        ) : (
-                          "Verifică și intră"
-                        )}
-                      </Button>
-                    </div>
-                  </form>
-                </>
-              )}
-            </div>
+            <Button
+              size="lg"
+              onClick={() => router.push("/login")}
+              className="h-12 md:h-12 px-8 md:px-12 bg-brand-blue hover:bg-brand-blue-dark text-base font-bold transition-all active:scale-95 text-white shadow-md shadow-blue-200/50"
+            >
+              Accesează platforma
+            </Button>
+            
           </div>
         </section>
 

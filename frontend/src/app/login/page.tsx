@@ -53,6 +53,8 @@ export default function LoginPage() {
     }
   };
 
+  // --- PASSWORDLESS AUTHENTICATION METHOD ---
+
   /**
    * Phase 1: Request Magic Code via Email
    */
@@ -81,10 +83,12 @@ export default function LoginPage() {
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         const errorMsg = error.response?.data?.detail || "Eroare la solicitarea codului.";
+        
         if (error.response?.status === 403) {
           toast.error(`Acces interzis: ${errorMsg}`, { duration: 7000 });
           return;
         }
+
         if (error.response?.status !== 503) toast.error(errorMsg);
       } else {
         toast.error("Eroare neprevăzută la trimiterea e-mailului.");
@@ -118,6 +122,7 @@ export default function LoginPage() {
 
       const data = response.data;
 
+      // Set session context across cookies and localStorage natively without internal route middleware drops
       Cookies.set("access_token", data.access_token, { expires: 7 });
       Cookies.set("user_role", data.user.role, { expires: 7 });
 
@@ -129,6 +134,7 @@ export default function LoginPage() {
 
       toast.success(`Bine ai venit, ${data.user.first_name || "Utilizator"}!`);
       
+      // Native window relocation block ensuring middleware checks process cleanly
       setTimeout(() => {
         if (data.user.role === "ADMIN") {
           window.location.href = "/admin";
@@ -142,10 +148,12 @@ export default function LoginPage() {
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         const errorMsg = error.response?.data?.detail || "Cod incorect sau expirat.";
+        
         if (error.response?.status === 403) {
           toast.error(`Acces interzis: ${errorMsg}`, { duration: 7000 });
           return;
         }
+        
         toast.error(errorMsg);
       } else {
         toast.error("Eroare neprevăzută la validarea codului.");
