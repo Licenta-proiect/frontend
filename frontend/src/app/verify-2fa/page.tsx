@@ -73,7 +73,9 @@ function Verify2FAContent() {
     return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
-  const handleVerification = async () => {
+  const handleVerification = async (e: React.SyntheticEvent) => {
+    e.preventDefault(); // Prevents the browser from executing a hard reload on submission
+
     if (otpCode.length < 6) {
       toast.error("Introduceți codul complet de 6 cifre");
       return;
@@ -136,34 +138,38 @@ function Verify2FAContent() {
           <p className="text-slate-500 text-sm">Codul a fost trimis pe email.</p>
         </div>
 
-        <div className="space-y-4">
-          <Input 
-            value={otpCode} 
-            onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))} 
-            placeholder="000000" 
-            disabled={remainingAttempts <= 0 || timeLeft === 0}
-            className="text-center text-xl md:text-xl font-mono h-16 tracking-[0.5em] border-slate-200 focus:ring-brand-blue bg-white"
+        <form onSubmit={handleVerification} className="space-y-6">
+          <div className="space-y-4">
+            <Input 
+              type="text"
+              value={otpCode} 
+              onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))} 
+              placeholder="000000" 
+              disabled={remainingAttempts <= 0 || timeLeft === 0 || isPending}
+              className="text-center text-xl md:text-xl font-mono h-16 tracking-[0.5em] border-slate-200 focus:ring-brand-blue bg-white"
+              required
             />
-          
-          <div className="flex justify-center">
-            <div className={`w-full flex items-center gap-2 text-sm font-medium px-6 py-2 rounded-lg border justify-center 
-                ${timeLeft !== null && timeLeft < 60 ? 
-                'text-red-600 bg-red-50 border-red-100' : 
-                'text-blue-600 bg-blue-50 border-blue-100'}`}>
-              <Timer className="h-4 w-4" />
-              <span>{timeLeft !== null ? formatTime(timeLeft) : "--:--"}</span>
+            
+            <div className="flex justify-center">
+              <div className={`w-full flex items-center gap-2 text-sm font-medium px-6 py-2 rounded-lg border justify-center 
+                   ${timeLeft !== null && timeLeft < 60 ? 
+                  'text-red-600 bg-red-50 border-red-100' : 
+                  'text-blue-600 bg-blue-50 border-blue-100'}`}>
+                <Timer className="h-4 w-4" />
+                <span>{timeLeft !== null ? formatTime(timeLeft) : "--:--"}</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <Button 
-          onClick={handleVerification} 
-          disabled={isPending || remainingAttempts <= 0 || timeLeft === 0}
-          className="w-full bg-brand-blue hover:bg-brand-blue-dark h-14 text-lg font-semibold"
-        >
-          {isPending ? <Loader2 className="animate-spin mr-2" /> : null}
-          {timeLeft === 0 ? "Cod expirat" : "Verifică și conectează-te"}
-        </Button>
+          <Button 
+            type="submit" 
+            disabled={isPending || remainingAttempts <= 0 || timeLeft === 0}
+            className="w-full bg-brand-blue hover:bg-brand-blue-dark h-14 text-lg font-semibold"
+          >
+            {isPending ? <Loader2 className="animate-spin mr-2" /> : null}
+            {timeLeft === 0 ? "Cod expirat" : "Verifică și conectează-te"}
+          </Button>
+        </form>
       </div>
     </div>
   );
