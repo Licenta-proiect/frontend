@@ -230,8 +230,8 @@ export default function Home() {
 
       <main className="grow flex flex-col items-center">
         {/* HERO SECTION */}
-        <section className="container mx-auto px-4 pt-6 pb-4 md:pt-12 md:pb-6 max-w-4xl text-center">
-          <div className="flex flex-col items-center space-y-6">
+        <section className="container mx-auto px-4 pt-6 pb-4 md:pt-16 md:pb-8 max-w-4xl text-center">
+          <div className="flex flex-col items-center space-y-8">
             <div className="space-y-4">
               <h1 className="text-3xl md:text-5xl font-black text-slate-900">
                 Aplicație web pentru gestionarea recuperărilor didactice 
@@ -244,9 +244,8 @@ export default function Home() {
 
             {/* --- CORE AUTHENTICATION HOUSING PANEL --- */}
             <div className="w-full max-w-md bg-white border border-slate-200 p-6 md:p-8 rounded-2xl shadow-xl shadow-blue-100/40 text-left mt-4 space-y-4">
-              <h3 className="text-lg font-bold text-slate-800 text-center">Acces securizat în platformă</h3>
               
-              {/* Method A: Unified SSO Integration */}
+              {/* Method A: Unified SSO Integration - Google Sign in */}
               <Button
                 size="lg"
                 onClick={handleGoogleLogin}
@@ -273,7 +272,7 @@ export default function Home() {
                 <form onSubmit={handleSendOtp} className="space-y-3">
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-slate-600">
-                      E-mail instituțional USV
+                      Email
                     </label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
@@ -282,7 +281,7 @@ export default function Home() {
                         placeholder="nume.prenume@usv.ro / @student.usv.ro"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="pl-9 h-10 border-slate-200 focus-visible:ring-brand-blue"
+                        className="pl-9 h-10 border-slate-200"
                         disabled={isLoading || isOtpLoading}
                         required
                       />
