@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import api from "@/services/api"; 
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 /**
@@ -15,13 +14,12 @@ import { toast } from "sonner";
  * Handles user introduction to the platform and dual-method authentication.
  */
 export default function Home() {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOtpLoading, setIsOtpLoading] = useState<boolean>(false);
   const appName = process.env.NEXT_PUBLIC_APP_TITLE;
 
   // --- PASSWORDLESS AUTHENTICATION STATES ---
-  const [email, setEmail] = useState<string>((""));
+  const [email, setEmail] = useState<string>("");
   const [otpCode, setOtpCode] = useState<string>("");
   const [authStep, setAuthStep] = useState<"email" | "code">("email");
   const [countdown, setCountdown] = useState<number>(300); // 5-minute TOTP window
@@ -92,7 +90,6 @@ export default function Home() {
         return;
       }
 
-      // We call the request endpoint through standard Axios to check if domain or schedule is active
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/passwordless/request`, { email: email.toLowerCase().trim() });
 
       toast.success("Codul de verificare a fost trimis cu succes pe e-mail!");
@@ -102,12 +99,8 @@ export default function Home() {
       if (axios.isAxiosError(error)) {
         const errorMsg = error.response?.data?.detail || "Eroare la solicitarea codului.";
         
-        // REDIRECT IF EMAIL LACKS ACCESS PRIVILEGES (403 Forbidden)
         if (error.response?.status === 403) {
-          toast.error("Acces neautorizat. Redirecționare...");
-          setTimeout(() => {
-            router.push(`/auth-error?message=${encodeURIComponent(errorMsg)}`);
-          }, 1200);
+          toast.error(`Acces interzis: ${errorMsg}`, { duration: 7000});
           return;
         }
 
@@ -137,45 +130,41 @@ export default function Home() {
 
     setIsOtpLoading(true);
     try {
-      // CALLS THE REPAIRED NEXT.JS INTERNAL HANDLER ROUTE (Bypassing api.ts interceptor loop)
-      const response = await axios.post("/api/auth/passwordless", { 
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/passwordless/verify`, { 
         email: email.toLowerCase().trim(), 
         code: otpCode.trim() 
       });
 
       const data = response.data;
 
-      if (data.success) {
-        // Populate system contexts using local parameters mapped in application layouts
-        localStorage.setItem("userEmail", data.user.email);
-        localStorage.setItem("userRole", data.user.role);
-        localStorage.setItem("userFirstName", data.user.first_name);
-        localStorage.setItem("userLastName", data.user.last_name);
+      // Set session context across cookies and localStorage natively without internal route middleware drops
+      document.cookie = `access_token=${data.access_token}; path=/; max-age=86400; SameSite=Lax`;
+      document.cookie = `user_role=${data.user.role}; path=/; max-age=86400; SameSite=Lax`;
+      
+      localStorage.setItem("userRole", data.user.role);
+      localStorage.setItem("userEmail", data.user.email);
+      localStorage.setItem("userFirstName", data.user.first_name);
+      localStorage.setItem("userLastName", data.user.last_name);
 
-        toast.success(`Bine ai venit, ${data.user.first_name || "Utilizator"}!`);
-        
-        // Native window relocation block ensuring middleware checks process cleanly
-        setTimeout(() => {
-          if (data.user.role === "ADMIN") {
-            window.location.href = "/admin";
-          } else if (data.user.role === "PROFESSOR") {
-            window.location.href = "/profesor";
-          } else {
-            window.location.href = "/student";
-          }
-        }, 300);
-      }
+      toast.success(`Bine ai venit, ${data.user.first_name || "Utilizator"}!`);
+      
+      // Native window layout relocation sequence to sync proxy checks perfectly
+      setTimeout(() => {
+        if (data.user.role === "ADMIN") {
+          window.location.href = "/admin";
+        } else if (data.user.role === "PROFESSOR") {
+          window.location.href = "/profesor";
+        } else {
+          window.location.href = "/student";
+        }
+      }, 300);
       
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         const errorMsg = error.response?.data?.detail || "Cod incorect sau expirat.";
         
-        // REDIRECT UNAUTHORIZED LOGINS DIRECTLY TO AUTH-ERROR SYSTEM PAGE (403 Forbidden)
         if (error.response?.status === 403) {
-          toast.error("Acces interzis. Redirecționare...");
-          setTimeout(() => {
-            router.push(`/auth-error?message=${encodeURIComponent(errorMsg)}`);
-          }, 1200);
+          toast.error(`Acces interzis: ${errorMsg}`, { duration: 7000});
           return;
         }
 
@@ -244,13 +233,13 @@ export default function Home() {
 
             {/* --- CORE AUTHENTICATION HOUSING PANEL --- */}
             <div className="w-full max-w-md bg-white border border-slate-200 p-6 md:p-8 rounded-2xl shadow-xl shadow-blue-100/40 text-left mt-4 space-y-4">
-              
-              {/* Method A: Unified SSO Integration - Google Sign in */}
+
+              {/* Method A: Unified SSO Integration */}
               <Button
                 size="lg"
                 onClick={handleGoogleLogin}
                 disabled={isLoading || isOtpLoading}
-                className="w-full bg-brand-blue hover:bg-brand-blue-dark h-12 text-base font-bold transition-all active:scale-95 text-white"
+                className="w-full bg-brand-blue hover:bg-brand-blue-dark h-12 text-base font-semibold transition-all active:scale-95 text-white"
               >
                 {isLoading ? (
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -278,7 +267,7 @@ export default function Home() {
                       <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                       <Input
                         type="email"
-                        placeholder="nume.prenume@usv.ro / @student.usv.ro"
+                        placeholder="nume.prenume@usv.ro"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="pl-9 h-10 border-slate-200"
@@ -299,7 +288,7 @@ export default function Home() {
                         Se trimite codul...
                       </>
                     ) : (
-                      "Solicită cod magic pe e-mail"
+                      "Trimite codul de conectare"
                     )}
                   </Button>
                 </form>
