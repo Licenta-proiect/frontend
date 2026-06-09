@@ -134,7 +134,9 @@ export default function LoginPage() {
 
       toast.success(`Bine ai venit, ${data.user.first_name || "Utilizator"}!`);
       
-      // Native window relocation block ensuring middleware checks process cleanly
+      setEmail("");
+      setOtpCode("");
+
       setTimeout(() => {
         if (data.user.role === "ADMIN") {
           window.location.href = "/admin";
@@ -146,6 +148,8 @@ export default function LoginPage() {
       }, 300);
       
     } catch (error: unknown) {
+      setOtpCode("");
+      
       if (axios.isAxiosError(error)) {
         const errorMsg = error.response?.data?.detail || "Cod incorect sau expirat.";
         
@@ -153,7 +157,7 @@ export default function LoginPage() {
           toast.error(`Acces interzis: ${errorMsg}`, { duration: 7000 });
           return;
         }
-        
+
         toast.error(errorMsg);
       } else {
         toast.error("Eroare neprevăzută la validarea codului.");
@@ -189,7 +193,7 @@ export default function LoginPage() {
               size="lg"
               onClick={handleGoogleLogin}
               disabled={isLoading || isOtpLoading}
-              className="w-full bg-brand-blue hover:bg-brand-blue-dark h-14 text-lg font-semibold transition-all active:scale-95 text-white"
+              className="w-full bg-brand-blue hover:bg-brand-blue-dark h-14 text-lg font-semibold transition-all active:scale-95 text-white rounded-lg"
             >
               {isLoading ? (
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -228,7 +232,7 @@ export default function LoginPage() {
               <Button 
                 type="submit" 
                 variant="outline" 
-                className="w-full h-14 text-lg font-semibold border-slate-200 hover:bg-slate-50 text-slate-700 transition-colors" 
+                className="w-full h-14 text-lg font-semibold border-slate-200 hover:bg-slate-50 text-slate-700 transition-colors rounded-lg" 
                 disabled={isLoading || isOtpLoading}
               >
                 {isOtpLoading ? (
@@ -284,14 +288,17 @@ export default function LoginPage() {
                   type="button" 
                   variant="ghost" 
                   className="w-1/3 h-14 text-sm text-slate-500 font-semibold rounded-lg hover:bg-slate-50" 
-                  onClick={() => setAuthStep("email")}
+                  onClick={() => {
+                    setAuthStep("email");
+                    setOtpCode(""); 
+                  }}
                   disabled={isOtpLoading}
                 >
                   <ArrowLeft className="mr-1 h-3 w-3" /> Înapoi
                 </Button>
                 <Button 
                   type="submit" 
-                  className="w-2/3 h-14 bg-brand-blue hover:bg-brand-blue-dark text-white font-semibold transition-all" 
+                  className="w-2/3 h-14 bg-brand-blue hover:bg-brand-blue-dark text-white font-semibold transition-all rounded-lg" 
                   disabled={isLoading || isOtpLoading || countdown === 0}
                 >
                   {isOtpLoading ? (
