@@ -34,8 +34,8 @@ export default function Home() {
               className="bg-brand-blue hover:bg-brand-blue-dark active:scale-95 md:h-11 md:px-6 gap-2 text-xs md:text-base px-3 text-white font-medium transition-all shadow-sm"
             >
               <LogIn className="h-4 w-4 md:h-5 md:w-5" />
-              <span className="hidden xs:inline">Autentificare</span>
-              <span className="xs:hidden">Intră</span>
+              <span className="hidden sm:inline">Autentificare</span>
+              <span className="sm:hidden">Intră</span>
             </Button>
           </div>
         </div>
