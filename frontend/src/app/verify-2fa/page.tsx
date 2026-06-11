@@ -101,7 +101,7 @@ function Verify2FAContent() {
       localStorage.setItem("userFirstName", firstName);
       localStorage.setItem("userLastName", lastName);
 
-      toast.success("Autentificare reușită!");
+      toast.success(`Bine ai venit, ${firstName || "Utilizator"}!`);
       const destination = role === "ADMIN" ? "/admin" : "/profesor";
       setTimeout(() => router.push(destination), 2000);
 
