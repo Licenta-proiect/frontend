@@ -55,7 +55,7 @@ export function AdminEvents() {
 
   // Extract unique dates for the filter dropdown
   const uniqueDates = useMemo(() => {
-    const dates = Array.from(new Set(results.map(s => s.date))).sort();
+    const dates = Array.from(new Set(results.map(s => s.date))).sort((a, b) => a.localeCompare(b));
     return dates.map(d => ({
       value: d,
       label: format(parseISO(d), "d MMMM yyyy", { locale: ro })
@@ -64,7 +64,7 @@ export function AdminEvents() {
 
   // Extract unique room names for the filter dropdown
   const uniqueRooms = useMemo(() => 
-    Array.from(new Set(results.map(s => s.room_name))).sort(), 
+    Array.from(new Set(results.map(s => s.room_name))).sort((a, b) => a.localeCompare(b)), 
   [results]);
 
   const handleSearchResponse = (filters: AdminFilters | null, days: BackendDayResponse[]) => {

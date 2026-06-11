@@ -63,7 +63,7 @@ export function ProfessorSchedule() {
 
   // Extract unique filter options from raw results
   const uniqueRooms = useMemo(() => 
-    Array.from(new Set(availableSlots.map(s => s.room))).sort(), 
+    Array.from(new Set(availableSlots.map(s => s.room))).sort((a, b) => a.localeCompare(b)), 
   [availableSlots]);
 
   const uniqueWeeks = useMemo(() => 

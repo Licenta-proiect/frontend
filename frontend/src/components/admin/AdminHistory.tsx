@@ -86,7 +86,7 @@ export function AdminHistory() {
 
   const activityTypes = useMemo(() => {
     const types = new Set(reservations.map(r => toSentenceCase(r.type === 'event' ? 'eveniment' : r.type)));
-    return Array.from(types).sort();
+    return Array.from(types).sort((a, b) => a.localeCompare(b));
   }, [reservations]);
 
  const allFilteredRecords = useMemo(() => {

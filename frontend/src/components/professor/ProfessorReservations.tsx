@@ -108,7 +108,7 @@ export function ProfessorReservations() {
         return toSentenceCase(typeName);
       })
     );
-    return Array.from(types).sort();
+    return Array.from(types).sort((a, b) => a.localeCompare(b));
   }, [reservations]);
 
   const filtered = useMemo(() => {
