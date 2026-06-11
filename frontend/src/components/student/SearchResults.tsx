@@ -44,7 +44,7 @@ export function SearchResults({ results, selectedSubject, selectedType }: Search
     return results
       .filter((result) => {
         const matchDay = filterDay === "all" || result.day === filterDay;
-        const matchWeek = filterWeek === "all" || result.weeks_list.includes(parseInt(filterWeek));
+        const matchWeek = filterWeek === "all" || result.weeks_list.includes(Number.parseInt(filterWeek));
         return matchDay && matchWeek;
       })
       .sort((a, b) => {

@@ -173,7 +173,7 @@ export function StudentSearch() {
 
     try {
       const response = await api.post("/subgroups/search-alternatives", {
-        selectedGroupId: parseInt(selectedGroupId),
+        selectedGroupId: Number.parseInt(selectedGroupId),
         selectedSubject,
         selectedType,
         attendsCourse
